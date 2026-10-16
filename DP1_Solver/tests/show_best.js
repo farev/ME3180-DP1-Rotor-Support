@@ -1,0 +1,14 @@
+global.window = undefined;
+const D = require('../dp1-solver.js'), SR = require('../dp1-search.js'), C = require('../dp1-catalog.js');
+const fs = require('fs'); const pre = eval(fs.readFileSync(__dirname + '/../dp1-results.js', 'utf8').replace('window.DP1_PRECOMP =', '(') .replace(/;\s*$/, ')'));
+const i = +(process.argv[2] || 0), sp = pre.rows[i].spec;
+const opts = Object.assign({}, D.DEFAULT_OPTS, pre.opts);
+const beams = SR.beamOptions(C), plates = SR.plateOptions(C, opts), pins = SR.pinOptions(C, opts);
+const beam = beams.find(b => b.item.pn === sp.beam && b.orient === sp.orient), pl = plates.find(p => p.item.pn === sp.plate && p.mode === sp.mode && Math.abs(p.b - sp.b) < 0.05), pin = pins.find(p => p.pn === sp.pin);
+const ev = D.evaluate(SR.makeDesign({ beam, pl, pin, a: sp.a }), opts);
+console.log(JSON.stringify(sp), 'cost', ev.cost.total.toFixed(2), 'ok', ev.ok);
+console.log('R', ['Ox_f','Ox_r','Oy','Oz','F_f','F_r'].map(k => k + '=' + ev.R[k].toFixed(0)).join(' '));
+for (const c of ev.checks) console.log((c.ok ? ' ok ' : 'FAIL') + ' ' + c.group.padEnd(10) + c.name.slice(0, 80).padEnd(80) + ' ' + (c.fs == null ? `${c.demand.toFixed(2)} <= ${c.capacity.toFixed(2)}` : 'FS ' + c.fs.toFixed(2)));
+for (const k of ev.defl.comps) console.log(k.key.padEnd(11), k.d.map(v => v.toFixed(4)).join(', '));
+console.log('|u|', ev.defl.mag.toFixed(4), 'slop', ev.slop.atMin.z.toFixed(2), '-', ev.slop.atMax.z.toFixed(2), 'mm; washers', ev.cost.washerCount, ev.cost.washerPerJoint, 'grips(in)', Object.values(ev.dv.grips).map(v => (v / 25.4).toFixed(3)));
+console.log('pin M (Nm) O,A,B', [ev.joints.O.Mmax, ev.joints.A.Mmax, ev.joints.B.Mmax].map(v => (v / 1000).toFixed(1)), 'V', [ev.joints.O.Vmax, ev.joints.A.Vmax, ev.joints.B.Vmax].map(v => v.toFixed(0)));

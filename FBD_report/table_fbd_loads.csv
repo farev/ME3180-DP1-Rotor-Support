@@ -1,0 +1,16 @@
+#,Load,Symbol,Acts at,x (mm),y (mm),z (mm),Fx (N),Fy (N),Fz (N),Mx (N mm),My (N mm),Mz (N mm)
+1,Rotor assembly weight,W_r,Rotor CG,-1200,-(h/2 + 350),0,0,-150,0,0,0,0
+2,Water drag,D,Center of pressure,-1200,-(h/2 + 500),0,0,0,560,0,0,0
+3,Water torque on rotor,tau_w,Rotor shaft (couple),-1200,any,0,0,0,0,0,19 633,0
+4,"Chain, tight span, on rotor sprocket",T_c1,"Rotor sprocket, tangent pt",-1190.0,-(h/2 + 50),-120.9,161.3,0,13.3,0,0,0
+5,"Chain, tight span, on generator sprocket",T_c2,"Gen. sprocket, tangent pt",-193.8,-(h/2 + 50),-38.5,-161.3,0,-13.3,0,0,0
+6,Generator + sprocket weight,W_g,Generator shaft axis,-197.0,any,0,0,-120,0,0,0,0
+7,Beam self-weight,W_b,Beam centroid,-625,0,0,0,-W_b,0,0,0,0
+8,"Front plate, half weight",W_p/2,"Pin A, front",-a,0,+z_p,0,-W_p/2,0,0,0,0
+9,"Rear plate, half weight",W_p/2,"Pin A, rear",-a,0,-z_p,0,-W_p/2,0,0,0,0
+10,"Pin O, front side (bracket on beam)",O_f,"Pin O, +z side",0,0,+z_b,"O_f,x","O_f,y",O_z,0,0,0
+11,"Pin O, rear side (bracket on beam)",O_r,"Pin O, -z side",0,0,-z_b,"O_r,x","O_r,y",0,0,0,0
+12,Front plate on beam (two-force),P_f,"Pin A, +z side",-a,0,+z_p,P_f cos(alpha),P_f sin(alpha),0,0,0,0
+13,Rear plate on beam (two-force),P_r,"Pin A, -z side",-a,0,-z_p,P_r cos(alpha),P_r sin(alpha),0,0,0,0
+
+,Definitions,z_b = w/2 + 6.35; z_p = w/2 + t_p/2; cos(alpha) = a/sqrt(a^2+500^2); sin(alpha) = 500/sqrt(a^2+500^2)

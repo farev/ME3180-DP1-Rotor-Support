@@ -1,0 +1,16 @@
+# Publish only code, figures and the interactive tools
+/*
+!/.gitignore
+!/README.md
+!/FBD_report/
+!/DP1_Solver/
+!/dp1_model.py
+!/dp1_fe_check.py
+!/RotorBeamFBD.html
+!/RotorSupportFBDLab.html
+!/RotorSupportExplorer.html
+
+**/__pycache__/
+*.bak
+*_6061plates.*
+.DS_Store

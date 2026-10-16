@@ -1,0 +1,185 @@
+<meta charset="utf-8">
+<title>Rotor Support Solver</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: an engineering calculation package. Sticky sheet index on the left, the answer first, then the solver,
+   then one "sheet" per rubric part (A-F), each showing equations with numbers, tables and to-scale figures. */
+:root {
+  --paper: #f2f5ef;      /* computation-pad green-grey page */
+  --sheet: #fbfcf9;      /* sheet / card surface */
+  --ink: #16211a;        /* primary ink */
+  --ink-2: #48574d;      /* secondary ink */
+  --muted: #7a887e;      /* axis / captions */
+  --rule: #d5dfd0;       /* hairlines, grid */
+  --grid: rgba(60, 110, 70, 0.07);
+  --accent: #1d5ca6;     /* drafting blue: interactive + selection */
+  --accent-wash: rgba(29, 92, 166, 0.08);
+  --pass: #0b7a3b; --pass-wash: rgba(11, 122, 59, 0.10);
+  --fail: #c0342b; --fail-wash: rgba(192, 52, 43, 0.10);
+  --warn: #a8670c; --warn-wash: rgba(168, 103, 12, 0.12);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f1511; --sheet: #161e18; --ink: #e6eee8; --ink-2: #b2c1b6; --muted: #7d8d81; --rule: #2a362e;
+    --grid: rgba(140, 200, 150, 0.05); --accent: #6ea8ec; --accent-wash: rgba(110, 168, 236, 0.12);
+    --pass: #3cc077; --pass-wash: rgba(60, 192, 119, 0.14); --fail: #f06a5f; --fail-wash: rgba(240, 106, 95, 0.14);
+    --warn: #e0a347; --warn-wash: rgba(224, 163, 71, 0.15);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0f1511; --sheet: #161e18; --ink: #e6eee8; --ink-2: #b2c1b6; --muted: #7d8d81; --rule: #2a362e;
+  --grid: rgba(140, 200, 150, 0.05); --accent: #6ea8ec; --accent-wash: rgba(110, 168, 236, 0.12);
+  --pass: #3cc077; --pass-wash: rgba(60, 192, 119, 0.14); --fail: #f06a5f; --fail-wash: rgba(240, 106, 95, 0.14);
+  --warn: #e0a347; --warn-wash: rgba(224, 163, 71, 0.15);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: 2.1rem; font-weight: 700; letter-spacing: 0.005em; }
+h2 { font-size: 1.55rem; font-weight: 700; }
+h3 { font-size: 1.15rem; font-weight: 600; margin-top: 0.4rem; }
+h4 { font-size: 0.95rem; font-weight: 600; }
+p { margin: 0; max-width: 72ch; }
+a { color: var(--accent); }
+code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+.label { font-family: var(--font-display); font-weight: 600; font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 28px; max-width: 1360px; margin: 0 auto; padding-inline: 20px; padding-block: 24px 80px; }
+nav.index { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); align-self: start; display: grid; gap: 2px; font-size: 0.88rem; }
+nav.index a { display: grid; grid-template-columns: 2.2em 1fr; padding: 5px 8px; border-radius: 4px; color: var(--ink-2); text-decoration: none; }
+nav.index a:hover, nav.index a:focus-visible { background: var(--accent-wash); color: var(--ink); outline: none; }
+nav.index a b { font-family: var(--font-display); color: var(--muted); font-weight: 600; }
+nav.index .navhead { margin: 0 0 8px 8px; }
+main { display: grid; gap: 28px; min-width: 0; }
+header.top { display: grid; gap: 10px; }
+header.top .meta { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--ink-2); font-size: 0.9rem; }
+.sheet { background: var(--sheet); border: 1px solid var(--rule); border-radius: var(--r); padding: 22px 24px 26px; display: grid; gap: 18px; min-width: 0; }
+.sheethead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; border-bottom: 1.5px solid var(--ink); padding-bottom: 8px; }
+.sheethead .sheetno { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 20px; }
+.stack { display: grid; gap: 10px; min-width: 0; }
+.note { color: var(--ink-2); font-size: 0.9rem; }
+.small { font-size: 0.84rem; }
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 1px 8px; border-radius: 999px; font-family: var(--font-display); font-weight: 600; font-size: 0.78rem; letter-spacing: 0.04em; white-space: nowrap; }
+.chip.pass { background: var(--pass-wash); color: var(--pass); }
+.chip.fail { background: var(--fail-wash); color: var(--fail); }
+.chip.warn { background: var(--warn-wash); color: var(--warn); }
+.chip.info { background: var(--accent-wash); color: var(--accent); }
+.tablewrap { overflow-x: auto; min-width: 0; border: 1px solid var(--rule); border-radius: 4px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+th, td { padding: 6px 10px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); }
+th { font-family: var(--font-display); font-weight: 600; font-size: 0.76rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); background: var(--paper); position: sticky; top: 0; }
+td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+tbody tr.sel { background: var(--accent-wash); }
+tbody tr.clickable { cursor: pointer; }
+tbody tr.clickable:hover { background: var(--accent-wash); }
+.eq { font-family: var(--font-mono); font-size: 0.84rem; background: var(--paper); border-left: 3px solid var(--accent); padding: 10px 14px; border-radius: 0 4px 4px 0; overflow-x: auto; white-space: pre; line-height: 1.7; }
+.eq .c { color: var(--muted); }
+.answer { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 22px; }
+.hero { font-family: var(--font-display); font-size: 3.3rem; font-weight: 700; line-height: 1; font-variant-numeric: normal; }
+.parts { display: grid; gap: 0; }
+.part { display: grid; grid-template-columns: 6.5em minmax(0, 1fr) auto; gap: 4px 12px; padding: 9px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.part:last-child { border-bottom: none; }
+.part .what { font-family: var(--font-display); font-weight: 600; color: var(--ink-2); }
+.part .pn { font-family: var(--font-mono); font-weight: 600; color: var(--accent); }
+.part .price { font-family: var(--font-mono); text-align: right; }
+.meter { display: grid; gap: 4px; }
+.meter .track { height: 8px; background: var(--rule); border-radius: 4px; overflow: hidden; position: relative; }
+.meter .fill { height: 100%; border-radius: 4px; background: var(--pass); }
+.meter .fill.hot { background: var(--warn); }
+.meter .row { display: flex; justify-content: space-between; gap: 10px; font-size: 0.86rem; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: end; }
+.ctl { display: grid; gap: 3px; font-size: 0.84rem; }
+.ctl input[type="number"], .ctl select { font: inherit; font-family: var(--font-mono); padding: 4px 6px; border: 1px solid var(--rule); border-radius: 4px; background: var(--sheet); color: var(--ink); width: 7.5em; }
+.ctl.check { display: flex; align-items: center; gap: 6px; }
+button { font-family: var(--font-display); font-weight: 600; font-size: 0.95rem; letter-spacing: 0.02em; border: 1px solid var(--accent); background: var(--accent); color: var(--sheet); padding: 7px 16px; border-radius: 5px; cursor: pointer; }
+button.ghost { background: transparent; color: var(--accent); }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button[disabled] { opacity: 0.55; cursor: progress; }
+.progress { height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; }
+.progress > div { height: 100%; width: 0; background: var(--accent); transition: width 0.2s; }
+figure { margin: 0; display: grid; gap: 6px; min-width: 0; }
+figcaption { font-size: 0.82rem; color: var(--muted); }
+.fig { overflow-x: auto; border: 1px solid var(--rule); border-radius: 4px; background: var(--sheet); }
+.fig svg { display: block; }
+svg text { font-family: var(--font-body); fill: var(--ink-2); }
+svg .t-mono { font-family: var(--font-mono); }
+svg .t-ink { fill: var(--ink); }
+svg .t-muted { fill: var(--muted); }
+.chart { position: relative; }
+.tip { position: absolute; pointer-events: none; background: var(--sheet); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 9px; font-size: 0.8rem; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12); white-space: nowrap; z-index: 3; }
+.tip b { font-family: var(--font-mono); color: var(--ink); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.8rem; color: var(--ink-2); }
+.legend span::before { content: ""; display: inline-block; width: 14px; height: 2px; vertical-align: middle; margin-right: 5px; background: var(--k); }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 14px; font-size: 0.88rem; }
+.kv dt { color: var(--ink-2); }
+.kv dd { margin: 0; font-family: var(--font-mono); font-size: 0.84rem; }
+details summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; color: var(--accent); }
+.refs li { margin-bottom: 4px; font-size: 0.86rem; }
+.callout { border: 1px solid var(--rule); border-left: 4px solid var(--warn); background: var(--warn-wash); padding: 10px 14px; border-radius: 0 4px 4px 0; font-size: 0.9rem; }
+.callout.info { border-left-color: var(--accent); background: var(--accent-wash); }
+@media (max-width: 960px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  nav.index { position: static; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .answer, .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); }
+  .hero { font-size: 2.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="shell">
+  <nav class="index" aria-label="Sheet index">
+    <div class="label navhead">Calc package</div>
+    <a href="#answer"><b>›</b>Answer</a>
+    <a href="#compliance"><b>✓</b>Requirements</a>
+    <a href="#solver"><b>⌕</b>Solver</a>
+    <a href="#partA"><b>A</b>Power &amp; loads</a>
+    <a href="#partB"><b>B</b>Reactions &amp; pins</a>
+    <a href="#partC"><b>C</b>Support beam</a>
+    <a href="#partD"><b>D</b>Diagonals &amp; deflection</a>
+    <a href="#partE"><b>E</b>Drawing &amp; BOM</a>
+    <a href="#partF"><b>F</b>Economy</a>
+    <a href="#assumptions"><b>§</b>Assumptions</a>
+    <a href="#refs"><b>¶</b>References</a>
+  </nav>
+  <main id="app">
+    <header class="top">
+      <div class="label">ME3180 · Design Problem 1 · PicoPower microhydro rotor support</div>
+      <h1>Rotor Support Solver</h1>
+      <p class="note">Searches every McMaster-Carr beam, plate-stock and pin combination for the cheapest support that meets all 13 requirements, then shows the full calculation for the design you pick. Every number below is computed live in this page from the same model.</p>
+      <div class="meta" id="meta"></div>
+    </header>
+    <section class="sheet" id="answer"></section>
+    <section class="sheet" id="compliance"></section>
+    <section class="sheet" id="solver"></section>
+    <section class="sheet" id="partA"></section>
+    <section class="sheet" id="partB"></section>
+    <section class="sheet" id="partC"></section>
+    <section class="sheet" id="partD"></section>
+    <section class="sheet" id="partE"></section>
+    <section class="sheet" id="partF"></section>
+    <section class="sheet" id="assumptions"></section>
+    <section class="sheet" id="refs"></section>
+  </main>
+</div>
+<script charset="utf-8" src="dp1-solver.js"></script>
+<script charset="utf-8" src="dp1-search.js"></script>
+<script charset="utf-8" src="dp1-catalog.js"></script>
+<script charset="utf-8" src="dp1-results.js"></script>
+<script charset="utf-8" src="app.js"></script>

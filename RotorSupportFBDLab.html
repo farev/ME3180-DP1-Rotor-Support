@@ -1,0 +1,830 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rotor Support FBD Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a drafting-table page. Compact control strip on top, three orthographic views on the left, the statics walkthrough on the right; stacks on phones. */
+:root {
+  --bg: #f4f6f3; --surface: #fcfdfb; --surface-2: #eef1ec; --fg: #171b19; --fg-2: #4e5753; --muted: #7d8681;
+  --line: #d9ded8; --line-2: #c4cbc4; --accent: #1f6f8b; --accent-ink: #ffffff; --accent-soft: #dcebf1;
+  --good: #0ca30c; --good-ink: #006300; --warn: #fab219; --warn-ink: #7a5200; --bad: #d03b3b; --bad-ink: #a52424;
+  --c-weight: #2a78d6; --c-water: #1baf7a; --c-chain: #eda100; --c-plate: #eb6834; --c-pin: #e87ba4; --c-bearing: #4a3aa7;
+  --font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121513; --surface: #1a1e1b; --surface-2: #222723; --fg: #eef1ec; --fg-2: #b9c1bb; --muted: #8b948e;
+  --line: #2d332f; --line-2: #3b433d; --accent: #5fb3cf; --accent-ink: #0b1b21; --accent-soft: #18323b;
+  --good: #0ca30c; --good-ink: #5fd35f; --warn: #fab219; --warn-ink: #ffd36a; --bad: #e35d5d; --bad-ink: #ff8a8a;
+  --c-weight: #3987e5; --c-water: #199e70; --c-chain: #c98500; --c-plate: #d95926; --c-pin: #d55181; --c-bearing: #9085e9; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #121513; --surface: #1a1e1b; --surface-2: #222723; --fg: #eef1ec; --fg-2: #b9c1bb; --muted: #8b948e;
+  --line: #2d332f; --line-2: #3b433d; --accent: #5fb3cf; --accent-ink: #0b1b21; --accent-soft: #18323b;
+  --good: #0ca30c; --good-ink: #5fd35f; --warn: #fab219; --warn-ink: #ffd36a; --bad: #e35d5d; --bad-ink: #ff8a8a;
+  --c-weight: #3987e5; --c-water: #199e70; --c-chain: #c98500; --c-plate: #d95926; --c-pin: #d55181; --c-bearing: #9085e9; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 14px; line-height: 1.45; margin: 0; padding-block: 0 48px; padding-inline: 16px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; text-wrap: balance; margin: 0; }
+h1 { font-size: 26px; } h2 { font-size: 17px; } h3 { font-size: 14.5px; }
+p { margin: 0; }
+a { color: var(--accent); }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1600px; margin: 0 auto; }
+header.top { padding-block: 18px 10px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: flex-end; }
+header.top .sub { color: var(--fg-2); max-width: 70ch; }
+.eyebrow { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.controls { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 3; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin-block: 12px; display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: flex-end; }
+label.field { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--fg-2); min-width: 0; }
+label.field > span { white-space: nowrap; }
+input[type=number], select { font: inherit; font-size: 13px; color: var(--fg); background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 6px; padding: 4px 7px; max-width: 100%; }
+input[type=number] { width: 84px; }
+input[type=range] { width: 200px; accent-color: var(--accent); }
+.toggles { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12.5px; color: var(--fg-2); align-items: center; }
+.toggles label { display: inline-flex; gap: 5px; align-items: center; cursor: pointer; }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: var(--c); }
+button { font: inherit; font-size: 13px; font-weight: 500; border-radius: 6px; border: 1px solid var(--line-2); background: var(--surface-2); color: var(--fg); padding: 5px 10px; cursor: pointer; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+button:disabled { opacity: 0.5; cursor: default; }
+input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+.below { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 16px; }
+.viewsgrid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 760px) { .viewsgrid { grid-template-columns: minmax(0, 1fr); } }
+.layout > * { min-width: 0; }
+@media (max-width: 900px) { .controls { position: static; } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.card h2 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+figure { margin: 0; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+figure svg { width: 100%; height: auto; display: block; max-width: 100%; }
+figcaption { font-size: 12px; color: var(--muted); }
+.pill { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 1px 8px; font-size: 11.5px; font-weight: 500; line-height: 1.6; white-space: nowrap; }
+.pill.info { color: var(--accent); background: var(--accent-soft); }
+.pill.ok { color: var(--good-ink); background: color-mix(in srgb, var(--good) 14%, transparent); }
+.pill.bad { color: var(--bad-ink); background: color-mix(in srgb, var(--bad) 14%, transparent); }
+.steps { display: flex; flex-direction: column; gap: 4px; }
+.stepbtn { text-align: left; display: flex; gap: 10px; align-items: baseline; border: 1px solid transparent; background: transparent; padding: 6px 8px; border-radius: 6px; font-weight: 400; }
+.stepbtn b { font-family: var(--font-mono); color: var(--muted); font-weight: 500; min-width: 1.4em; }
+.stepbtn[aria-current="true"] { background: var(--accent-soft); border-color: var(--accent); }
+.stepbody { border-top: 1px solid var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; }
+.stepbody p, .stepbody li { max-width: 72ch; color: var(--fg); }
+.stepbody ul, .stepbody ol { margin: 0; padding-left: 20px; }
+.eq { font-family: var(--font-mono); font-size: 12.5px; background: var(--surface-2); border-radius: 6px; padding: 6px 10px; overflow-x: auto; white-space: pre; line-height: 1.6; }
+.tablewrap { overflow-x: auto; max-width: 100%; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+th, td { text-align: left; padding: 4px 7px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 500; color: var(--fg-2); font-size: 12px; white-space: nowrap; }
+td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.total td { font-weight: 600; border-top: 1px solid var(--line-2); }
+tr[data-id] { cursor: default; }
+tr[data-id].hl td { background: var(--accent-soft); }
+.note { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--accent-soft); border-radius: 0 6px 6px 0; font-size: 13px; }
+.note.warn { border-left-color: var(--warn); background: color-mix(in srgb, var(--warn) 14%, transparent); }
+/* SVG load highlighting */
+svg .ld { transition: opacity 0.15s ease; }
+svg.has-hl .ld:not(.hl) { opacity: 0.25; }
+svg .ld.hl text { font-weight: 600; }
+.kbd { font-family: var(--font-mono); font-size: 12px; background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 4px; padding: 0 5px; }
+.nav { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+</style></head><body>
+
+<div class="wrap">
+<header class="top">
+  <div>
+    <div class="eyebrow">ME 3180 · Design Problem 1 · statics of the support beam</div>
+    <h1>Rotor Support FBD Lab</h1>
+    <p class="sub">Three orthographic free-body views of the PicoPower support beam that redraw as you move the diagonal or change the beam, with a step-by-step account of where every force and moment comes from and how the six equilibrium equations give the pin loads.</p>
+  </div>
+</header>
+
+<div class="controls" aria-label="Geometry and display">
+  <label class="field"><span>Diagonal pin A at a = <b id="aVal" class="mono"></b> mm from O</span><input type="range" id="a" min="150" max="800" step="10" value="500"></label>
+  <label class="field"><span>Beam height h (in)</span><input type="number" id="h" value="4" step="0.5" min="1"></label>
+  <label class="field"><span>Beam width w (in)</span><input type="number" id="w" value="4" step="0.5" min="4"></label>
+  <label class="field"><span>Plate thickness (in)</span><input type="number" id="td" value="0.25" step="0.125" min="0.125"></label>
+  <label class="field"><span>Generator x (mm)</span><select id="xGen"><option value="-197">−197 (39.49 in from rotor)</option><option value="-50">−50 (alternate reading)</option></select></label>
+  <label class="field"><span>Chain force line</span><select id="chain"><option value="exact">exact tangent (collinear pair)</option><option value="x">parallel to x (approximation)</option></select></label>
+  <label class="field"><span>Free body</span><select id="system"><option value="system">beam + rotor + generator + chain</option><option value="beam">beam alone (bearing loads)</option><option value="rotor">rotor assembly alone</option><option value="plate">one diagonal plate</option></select></label>
+  <div class="toggles" id="toggles"></div>
+  <label class="toggles"><input type="checkbox" id="labels" checked> show magnitudes</label>
+</div>
+
+<div class="layout">
+  <section class="card" id="views"></section>
+</div>
+<div class="below">
+  <aside class="card" id="walk"></aside>
+  <section class="card" id="tables"></section>
+</div>
+</div>
+<script>
+// DP1 rotor-support model. Geometry in mm, forces in N, moments in N*m, stress in MPa.
+// Frame (Figure 2): origin at beam pin O on the neutral axis, +x toward the fixed structure,
+// +y up, +z toward the viewer ("Front").
+const DP1 = (() => {
+  const IN = 25.4;
+  const G_ACC = 9.80665;
+
+  const MATERIALS = {
+    ss304: { name: '304/304L stainless', E: 193e3, G: 75e3, Sy: 215, Su: 505, rho: 8000, note: 'annealed; McMaster lists 30-33 ksi yield for A554 tube' },
+    ss316: { name: '316/316L stainless', E: 193e3, G: 75e3, Sy: 205, Su: 515, rho: 8000, note: 'annealed' },
+    al6061: { name: '6061-T6 aluminum', E: 68.9e3, G: 26e3, Sy: 241, Su: 290, rho: 2700, note: 'T6/T6511; McMaster lists 35 ksi yield' },
+    al6063: { name: '6063-T52 aluminum', E: 68.9e3, G: 26e3, Sy: 145, Su: 186, rho: 2700, note: 'T52 architectural' },
+    al2024: { name: '2024-T351 aluminum', E: 73.1e3, G: 28e3, Sy: 324, Su: 469, rho: 2780, note: 'not corrosion resistant without cladding' },
+  };
+  const PIN_MATERIALS = {
+    ss188: { name: '18-8 stainless (annealed-strength basis)', Sy: 207, Su: 517 },
+    ss316: { name: '316 stainless', Sy: 205, Su: 515 },
+    ss174: { name: '17-4 PH stainless (H900)', Sy: 1170, Su: 1310 },
+    ss188cw: { name: '18-8 stainless, cold-worked bar', Sy: 310, Su: 620 },
+  };
+
+  // ---------- section properties ----------
+  // tube: outer w (z-width) x h (y-height), wall t, sharp-corner idealization
+  function tubeProps(w, h, t) {
+    const wi = w - 2 * t, hi = h - 2 * t;
+    const A = w * h - wi * hi;
+    const Iz = (w * h ** 3 - wi * hi ** 3) / 12;      // bending about z (vertical loads)
+    const Iy = (h * w ** 3 - hi * wi ** 3) / 12;      // bending about y (horizontal loads)
+    const Am = (w - t) * (h - t);                     // midline enclosed area
+    const pm = 2 * ((w - t) + (h - t));
+    const J = 4 * Am * Am * t / pm;                   // Bredt-Batho (= Roark hollow rectangle for uniform t)
+    const tauPerT = 1 / (2 * Am * t);                 // tau = T * tauPerT  (T in N*mm)
+    return { kind: 'tube', A, Iz, Iy, J, Am, tauPerT, w, h, t };
+  }
+  // solid rectangle, Roark/Timoshenko coefficients vs a/b (a = long side)
+  const ALPHA = [[1, .208], [1.2, .219], [1.5, .231], [2, .246], [2.5, .258], [3, .267], [4, .282], [5, .291], [6, .299], [10, .312], [1e9, .333]];
+  const BETA = [[1, .141], [1.2, .166], [1.5, .196], [2, .229], [2.5, .249], [3, .263], [4, .281], [5, .291], [6, .299], [10, .312], [1e9, .333]];
+  function interp(tab, r) {
+    for (let i = 1; i < tab.length; i++) if (r <= tab[i][0]) { const [r0, v0] = tab[i - 1], [r1, v1] = tab[i]; return v0 + (v1 - v0) * (r - r0) / (r1 - r0); }
+    return tab[tab.length - 1][1];
+  }
+  function solidProps(w, h) {
+    const a = Math.max(w, h), b = Math.min(w, h), r = a / b;
+    const A = w * h, Iz = w * h ** 3 / 12, Iy = h * w ** 3 / 12;
+    const J = interp(BETA, r) * a * b ** 3;
+    const tauPerT = 1 / (interp(ALPHA, r) * a * b * b);
+    return { kind: 'solid', A, Iz, Iy, J, tauPerT, w, h, t: null };
+  }
+
+  // ---------- main solve ----------
+  function solve(p) {
+    const o = {};
+    // --- geometry ---
+    const a = p.a, xR = -1200, xGen = p.xGen;
+    const h = p.h, w = p.w;
+    const beam = p.beamKind === 'solid' ? solidProps(w, h) : tubeProps(w, h, p.t);
+    const matB = p.matBeam, matD = p.matDiag, matP = p.matPin;
+    const d = p.dPin, tb = p.tBracket;
+    const dh = d + (p.holeClear === undefined ? 0.4 : p.holeClear);   // hole diameter (requirement 9 is written on the hole)
+    const td = p.td, bd = p.bd;
+    const Lext = Math.max(p.overhang === undefined ? 50 : p.overhang, 0);   // beam extension past pin O (Figure 2 bottom view: 50 mm; edge rule needs >= 2 x hole dia)
+    const xL = -1300, xRend = Lext;
+    const Lbeam = xRend - xL;
+    const yChain = -(h / 2 + 50), yCG = -(h / 2 + 350), yCOP = -(h / 2 + 500);
+    const zD = (w + td) / 2;                      // diagonal plate mid-plane
+    const zB = (w + tb) / 2;                      // bracket mid-plane at O
+    const Ld = Math.hypot(a, 500);
+    const ex = a / Ld, ey = 500 / Ld;             // unit vector A -> B
+    const alpha = Math.atan2(500, a);
+    // --- power ---
+    const rho = 1000, v = 2.5, Aswept = 0.5 * 0.5;
+    const Pf = 0.5 * rho * Aswept * v ** 3;
+    const Pm = 0.30 * Pf, Pe = 0.82 * Pm;
+    const omega = 285 * 2 * Math.PI / 60;
+    const tau = Pm / omega;                       // N*m
+    const R1 = 9.554 * IN / 2, R2 = 3.038 * IN / 2;  // mm
+    const T = tau / (R1 / 1000);                  // N
+    o.power = { Pf, Pm, Pe, omega, tau, T, R1, R2, genRPM: 285 * 60 / 19, tauGen: T * R2 / 1000 };
+    // --- chain tight-side geometry (tight side at -z for +y rotor rotation, generator at larger x) ---
+    const D = xGen - xR;
+    const th = p.chainExact ? Math.asin((R1 - R2) / D) : 0;
+    const dvec = [Math.cos(th), 0, Math.sin(th)];
+    const nvec = [Math.sin(th), 0, -Math.cos(th)];
+    const P1 = [xR + R1 * nvec[0], yChain, R1 * nvec[2]];
+    const P2 = [xGen + R2 * nvec[0], yChain, R2 * nvec[2]];
+    const F1 = dvec.map(c => T * c);              // on rotor sprocket
+    const F2 = dvec.map(c => -T * c);             // on generator sprocket
+    // --- weights ---
+    const wBeam = beam.A * 1e-6 * matB.rho * G_ACC;        // N per m
+    const Wbeam = wBeam * Lbeam / 1000;
+    const xBeamCG = (xL + xRend) / 2;
+    const Lcut = Ld + 4 * dh;
+    const Wdiag1 = bd * td * 1e-6 * matD.rho * G_ACC * Lcut / 1000;   // one plate
+    // --- external load table (forces N, moments N*m, positions mm) ---
+    const loads = [
+      { name: 'Rotor assembly weight', r: [xR, yCG, 0], F: [0, -150, 0], M: [0, 0, 0], ext: true },
+      { name: 'Water drag on rotor (at COP)', r: [xR, yCOP, 0], F: [0, 0, 560], M: [0, 0, 0], ext: true },
+      { name: 'Water torque on rotor (couple)', r: [xR, yCG, 0], F: [0, 0, 0], M: [0, tau, 0], ext: true },
+      { name: 'Chain tension on rotor sprocket (tight side)', r: P1, F: F1, M: [0, 0, 0], ext: true, chain: true },
+      { name: 'Chain tension on generator sprocket (tight side)', r: P2, F: F2, M: [0, 0, 0], ext: true, chain: true },
+      { name: 'Generator + sprocket weight', r: [xGen, h / 2 + 60, 0], F: [0, -120, 0], M: [0, 0, 0], ext: true },
+      { name: 'Support beam self-weight (resultant)', r: [xBeamCG, 0, 0], F: [0, -Wbeam, 0], M: [0, 0, 0], ext: true, distributed: { x0: xL, x1: xRend, wPerMm: Wbeam / Lbeam } },
+      { name: 'Diagonal self-weight carried at A (half of each plate)', r: [-a, 0, 0], F: [0, -Wdiag1, 0], M: [0, 0, 0], ext: true },
+    ];
+    // sums about O
+    const cross = (r, F) => [r[1] * F[2] - r[2] * F[1], r[2] * F[0] - r[0] * F[2], r[0] * F[1] - r[1] * F[0]];
+    const Fsum = [0, 0, 0], Msum = [0, 0, 0];
+    for (const L of loads) {
+      for (let i = 0; i < 3; i++) Fsum[i] += L.F[i];
+      const m = cross(L.r, L.F);                  // N*mm
+      for (let i = 0; i < 3; i++) Msum[i] += m[i] / 1000 + L.M[i];
+    }
+    o.sumExt = { F: Fsum, M: Msum };
+    // --- reactions (6 unknowns) ---
+    const Fdiff = Msum[0] / (zD / 1000 * ey);     // F_f - F_r  (from Mx: Msum_x - zD*ey*(Ff-Fr) = 0)
+    const Fsumd = Msum[2] / (a / 1000 * ey);      // F_f + F_r  (from Mz: Msum_z - a*ey*(Ff+Fr) = 0)
+    const Ff = (Fsumd + Fdiff) / 2, Fr = (Fsumd - Fdiff) / 2;
+    const Oxdiff = -(Msum[1] + zD / 1000 * ex * Fdiff) / (zB / 1000);   // O_xf - O_xr
+    const Oxsum = -Fsumd * ex - Fsum[0];
+    const Oxf = (Oxsum + Oxdiff) / 2, Oxr = (Oxsum - Oxdiff) / 2;
+    const Oy = -Fsumd * ey - Fsum[1];
+    const Oz = -Fsum[2];
+    const Af = [Ff * ex, Ff * ey, 0], Ar = [Fr * ex, Fr * ey, 0];
+    o.reactions = {
+      diag: { Ff, Fr, Ld, alpha, ex, ey },
+      O_front: [Oxf, Oy / 2, Oz], O_rear: [Oxr, Oy / 2, 0], O_total: [Oxsum, Oy, Oz],   // +z drag pushes the beam against the FRONT bracket face
+      A_front: Af, A_rear: Ar,                    // force diagonal applies to the beam
+      B_front: Af.map(c => -c), B_rear: Ar.map(c => -c),  // force diagonal applies to fixed bracket (equal & opposite to force at A on diagonal... = +Af on bracket? see note)
+      Oxdiff, Fdiff, Fsumd,
+    };
+    // Force the diagonal exerts on the bracket at B: the diagonal is in tension Ff, pulling B toward A, i.e. -e*Ff.
+    o.reactions.B_front = [-Ff * ex, -Ff * ey, 0];
+    o.reactions.B_rear = [-Fr * ex, -Fr * ey, 0];
+    // equilibrium residual check
+    {
+      const allF = [...loads.map(L => ({ r: L.r, F: L.F, M: L.M })),
+        { r: [0, 0, zB], F: o.reactions.O_front, M: [0, 0, 0] }, { r: [0, 0, -zB], F: o.reactions.O_rear, M: [0, 0, 0] },
+        { r: [-a, 0, zD], F: Af, M: [0, 0, 0] }, { r: [-a, 0, -zD], F: Ar, M: [0, 0, 0] }];
+      const rF = [0, 0, 0], rM = [0, 0, 0];
+      for (const L of allF) { for (let i = 0; i < 3; i++) rF[i] += L.F[i]; const m = cross(L.r, L.F); for (let i = 0; i < 3; i++) rM[i] += m[i] / 1000 + L.M[i]; }
+      o.residual = { F: rF, M: rM };
+    }
+    // --- internal loads along the beam (section cut, left segment) ---
+    const pointLoads = loads.filter(L => !L.distributed).map(L => ({ x: L.r[0], r: L.r, F: L.F, M: L.M }));
+    pointLoads.push({ x: -a, r: [-a, 0, zD], F: Af, M: [0, 0, 0] }, { x: -a, r: [-a, 0, -zD], F: Ar, M: [0, 0, 0] });
+    pointLoads.push({ x: 0, r: [0, 0, zB], F: o.reactions.O_front, M: [0, 0, 0] }, { x: 0, r: [0, 0, -zB], F: o.reactions.O_rear, M: [0, 0, 0] });
+    const wq = Wbeam / Lbeam;                     // N/mm distributed
+    const step = p.gridStep || 5;
+    const xs = [];
+    for (let x = xL; x <= xRend + 1e-9; x += step) xs.push(+x.toFixed(6));
+    // add exact cut points on both sides of each point load for clean diagrams
+    const eps = 1e-3;
+    for (const L of pointLoads) { xs.push(L.x - eps, L.x + eps); }
+    xs.sort((u, q) => u - q);
+    const N = [], Vy = [], Vz = [], Tx = [], My = [], Mz = [];
+    for (const x of xs) {
+      const SF = [0, 0, 0], SM = [0, 0, 0];
+      for (const L of pointLoads) if (L.x < x) {
+        for (let i = 0; i < 3; i++) SF[i] += L.F[i];
+        const rr = [L.r[0] - x, L.r[1], L.r[2]];
+        const m = cross(rr, L.F);
+        for (let i = 0; i < 3; i++) SM[i] += m[i] / 1000 + L.M[i];
+      }
+      // distributed self-weight on [xL, x]: resultant -wq*len at lever (-len/2) from the cut
+      const len = Math.max(0, Math.min(x, xRend) - xL);
+      SF[1] += -wq * len;
+      SM[2] += (-(len / 2)) * (-wq * len) / 1000;   // r x F, z-component, N*m
+      N.push(-SF[0]); Vy.push(-SF[1]); Vz.push(-SF[2]);
+      Tx.push(-SM[0]); My.push(-SM[1]); Mz.push(-SM[2]);
+    }
+    o.diagrams = { x: xs, N, Vy, Vz, Tx, My, Mz };
+    const peak = (arr) => { let i = 0; for (let k = 1; k < arr.length; k++) if (Math.abs(arr[k]) > Math.abs(arr[i])) i = k; return { value: arr[i], x: xs[i] }; };
+    o.peaks = { N: peak(N), Vy: peak(Vy), Vz: peak(Vz), Tx: peak(Tx), My: peak(My), Mz: peak(Mz) };
+    // --- beam stresses along x (von Mises at worst corner) ---
+    const Sy = matB.Sy;
+    const holeAt = (x) => (Math.abs(x) < dh / 2 + 1e-6) || (Math.abs(x + a) < dh / 2 + 1e-6);
+    const sig = [], vm = [], detail = [];
+    let worst = { vm: 0, i: 0 };
+    for (let i = 0; i < xs.length; i++) {
+      const x = xs[i];
+      let A = beam.A, Iy = beam.Iy, Iz = beam.Iz;
+      if (p.netSection && holeAt(x)) {
+        if (beam.kind === 'tube') { A -= 2 * dh * beam.t; Iy -= 2 * dh * beam.t * ((w - beam.t) / 2) ** 2; }
+        else { A -= dh * w; Iy -= dh * w ** 3 / 12; }
+      }
+      const Nmm = N[i], Mzmm = Mz[i] * 1000, Mymm = My[i] * 1000, Tmm = Tx[i] * 1000;
+      let smax = 0, corner = null;
+      for (const cy of [-h / 2, h / 2]) for (const cz of [-w / 2, w / 2]) {
+        const s = Nmm / A - Mzmm * cy / Iz + Mymm * cz / Iy;
+        if (Math.abs(s) > Math.abs(smax)) { smax = s; corner = [cy, cz]; }
+      }
+      const tauT = Math.abs(Tmm) * beam.tauPerT;
+      const tauV = beam.kind === 'tube' ? Math.abs(Vy[i]) / (2 * h * beam.t) + Math.abs(Vz[i]) / (2 * w * beam.t) : 1.5 * Math.hypot(Vy[i], Vz[i]) / A;
+      const tauTot = tauT + tauV;
+      const s_vm = Math.sqrt(smax * smax + 3 * tauTot * tauTot);
+      sig.push(smax); vm.push(s_vm); detail.push({ x, sigma: smax, tauT, tauV, vm: s_vm, corner, A, Iy, Iz });
+      if (s_vm > worst.vm) worst = { vm: s_vm, i };
+    }
+    o.beamStress = { sigma: sig, vm, worst: detail[worst.i], FS: Sy / worst.vm, Sy, detail };
+    // --- deflection ---
+    const Ad = bd * td, Id_weak = bd * td ** 3 / 12, Id_strong = td * bd ** 3 / 12;
+    const EdA = matD.E * Ad;                      // N (E MPa * mm^2)
+    const df = Ff * Ld / EdA, dr = Fr * Ld / EdA;   // mm elongation
+    const thZ = (df + dr) / (2 * a * ey), thX = (df - dr) / (2 * zD * ey);
+    const rig = [-thZ * yCG, -1200 * thZ, thX * yCG];
+    // elastic beam on rigid supports: integrate curvature on grid (trapezoid)
+    const EI_z = matB.E * beam.Iz, EI_y = matB.E * beam.Iy, GJ = matB.G * beam.J;  // N*mm^2
+    const n = xs.length;
+    const kz = Mz.map(m => m * 1000 / EI_z), ky = My.map(m => -m * 1000 / EI_y);
+    const integ = (f) => { const F = [0]; for (let i = 1; i < n; i++) F.push(F[i - 1] + 0.5 * (f[i] + f[i - 1]) * (xs[i] - xs[i - 1])); return F; };
+    const at = (arr, x) => { let i = 0; while (i < n - 1 && xs[i + 1] <= x) i++; if (i >= n - 1) return arr[n - 1]; const t0 = (x - xs[i]) / (xs[i + 1] - xs[i] || 1); return arr[i] + t0 * (arr[i + 1] - arr[i]); };
+    // v: v''=kz ; v(0)=0, v(-a)=0
+    const s1 = integ(kz), v1 = integ(s1);       // particular with v'(xL)=0,v(xL)=0
+    // v = v1 + C1*(x-xL) + C2 ; conditions
+    const vA = at(v1, -a), vO = at(v1, 0);
+    const C1 = -(vO - vA) / (0 - (-a)), C2 = -(vO + C1 * (0 - xL));
+    const vv = v1.map((val, i) => val + C1 * (xs[i] - xL) + C2);
+    const vs = s1.map(val => val + C1);
+    // w: w''=ky ; w(0)=0, w'(0)=0
+    const sw1 = integ(ky), w1 = integ(sw1);
+    const D1 = -at(sw1, 0), D2 = -(at(w1, 0) + D1 * (0 - xL));
+    const ww = w1.map((val, i) => val + D1 * (xs[i] - xL) + D2);
+    const ws = sw1.map(val => val + D1);
+    // twist: phi' = Tx/GJ ; phi(-a)=0
+    const kphi = Tx.map(t0 => t0 * 1000 / GJ);
+    const ph1 = integ(kphi);
+    const phi = ph1.map(val => val - at(ph1, -a));
+    const vR = at(vv, xR), vsR = at(vs, xR), wR = at(ww, xR), phiR = at(phi, xR);
+    // kinematic coupling: the beam's rotation about y at A (slope of the xz bending curve) moves the front/rear
+    // attachment points in opposite x directions; the inclined plates convert that into a rotation about x of the whole beam.
+    const thYA = -at(ws, -a);
+    const thXc = thYA * ex / ey;            // theta_x,A = [(df-dr)/(2 zD) + theta_yA cos(alpha)] / sin(alpha); second term here
+    const el = [-vsR * yCG, vR, wR + phiR * yCG];
+    const comps = [
+      { name: 'Rigid rotation about z from mean diagonal strain', short: 'rigid θz (plate strain)', d: [-thZ * yCG, -1200 * thZ, 0] },
+      { name: 'Rigid rotation about x from differential diagonal strain', short: 'rigid θx (plate strain)', d: [0, 0, thX * yCG] },
+      { name: 'Beam bending in the vertical (xy) plane', short: 'beam bending xy', d: [-vsR * yCG, vR, 0] },
+      { name: 'Beam bending in the horizontal (xz) plane', short: 'beam bending xz', d: [0, 0, wR] },
+      { name: 'Beam twist between rotor and pin A', short: 'beam twist', d: [0, 0, phiR * yCG] },
+      { name: 'Coupling: beam slope about y at A re-aligns the inclined plates', short: 'plate re-alignment', d: [0, 0, thXc * yCG] },
+    ];
+    const tot = [0, 1, 2].map(i => comps.reduce((s, c) => s + c.d[i], 0));
+    o.deflection = { comps, total: tot, mag: Math.hypot(...tot), thZ, thX, thYA, thXc, df, dr, phiR, v: vv, w: ww, phi, limit: 0.7 };
+    // --- diagonal checks ---
+    const Fmax = Math.max(Math.abs(Ff), Math.abs(Fr));
+    const Fc = Math.min(Ff, Fr);                    // most compressive
+    const Syd = matD.Sy;
+    const Anet = (bd - dh) * td;
+    const sigT = Math.max(Ff, Fr, 0) / Anet;
+    const rg = Math.sqrt(Id_weak / Ad), lam = Ld / rg, lamT = Math.PI * Math.sqrt(2 * matD.E / Syd);
+    let Pcr, buckMode;
+    if (lam >= lamT) { Pcr = Math.PI ** 2 * matD.E * Id_weak / Ld ** 2; buckMode = 'Euler'; }
+    else { Pcr = Ad * (Syd - (Syd * lam / (2 * Math.PI)) ** 2 / matD.E); buckMode = 'Johnson'; }
+    const bearD = Fmax / (d * td);
+    const tearD = Fmax / (2 * (2 * dh - dh / 2) * td);  // edge distance 2 x hole dia -> two shear planes of 1.5 dh each
+    const wDiag = Ad * 1e-6 * matD.rho * G_ACC / 1000; // N per mm
+    const MselfD = wDiag * Math.cos(alpha) * Ld ** 2 / 8 / 1000; // N*m, bending from self weight (component normal to the strut)
+    const defSelfD = 5 * wDiag * Math.cos(alpha) * Ld ** 4 / (384 * matD.E * Id_strong);
+    o.diag = {
+      Ff, Fr, Ld, Lcut, stockNeed: 2 * Lcut + 3, alpha, Ad, Id_weak, Anet,
+      sigT, FS_tension: sigT > 0 ? Syd / sigT : Infinity,
+      bearD, FS_bearing: Syd / bearD,
+      tearD, FS_tearout: 0.577 * Syd / tearD,
+      Pcr, buckMode, lam, lamT, FS_buckling: Fc < 0 ? Pcr / -Fc : Infinity,
+      sigC: Fc < 0 ? -Fc / Ad : 0,
+      MselfD, defSelfD, Wdiag1, df, dr,
+      edgeOK: bd >= 4 * dh,
+    };
+    // --- pin checks ---
+    const sides = [
+      { name: 'O front', F: o.reactions.O_front, tOuter: tb, outerMat: 'bracket' },
+      { name: 'O rear', F: o.reactions.O_rear, tOuter: tb, outerMat: 'bracket' },
+      { name: 'A front', F: Af, tOuter: td, outerMat: 'diag' },
+      { name: 'A rear', F: Ar, tOuter: td, outerMat: 'diag' },
+      { name: 'B front', F: o.reactions.B_front, tOuter: td, outerMat: 'diag' },
+      { name: 'B rear', F: o.reactions.B_rear, tOuter: td, outerMat: 'diag' },
+    ].map(s => ({ ...s, mag: Math.hypot(s.F[0], s.F[1]), magXY: Math.hypot(s.F[0], s.F[1]), Fz: s.F[2] }));
+    const Fside = Math.max(...sides.map(s => s.magXY));
+    const worstSide = sides.find(s => s.magXY === Fside);
+    const Ashear = Math.PI * d * d / 4;
+    const tauPin = Fside / Ashear;
+    const SyP = matP.Sy;
+    // wall reactions at O and A (pin as a beam between outer plates and tube walls)
+    const zw = beam.kind === 'tube' ? (w - beam.t) / 2 : w / 4;
+    const wallLoads = (Ffr, Frr, zOuter) => {
+      const sum = [0, 1].map(i => Ffr[i] + Frr[i]), dif = [0, 1].map(i => Ffr[i] - Frr[i]);
+      const Wf = [0, 1].map(i => (sum[i] + dif[i] * zOuter / zw) / 2), Wr = [0, 1].map(i => (sum[i] - dif[i] * zOuter / zw) / 2);
+      return { Wf: Math.hypot(...Wf), Wr: Math.hypot(...Wr) };
+    };
+    const wO = wallLoads(o.reactions.O_front, o.reactions.O_rear, zB), wA = wallLoads(Af, Ar, zD);
+    const Wwall = Math.max(wO.Wf, wO.Wr, wA.Wf, wA.Wr);
+    const bearWall = beam.kind === 'tube' ? Wwall / (d * beam.t) : Math.max(Math.hypot(...o.reactions.O_total.slice(0, 2)), Math.hypot(Af[0] + Ar[0], Af[1] + Ar[1])) / (d * w);
+    const FOside = Math.max(sides[0].magXY, sides[1].magXY), FAside = Math.max(sides[2].magXY, sides[3].magXY);
+    const bearBracket = FOside / (d * tb);
+    const SyBracket = 241;  // 35 ksi aluminum bracket
+    const tw = beam.kind === 'tube' ? beam.t : 0;
+    const bruhn = p.leverModel === 'bruhn';
+    // Shigley 8-12 form: M = F x (grip/2) with point loads at ply mid-thickness; Bruhn/Niu uniform-bearing arm: t_outer/2 + t_inner/4
+    const leverO = bruhn ? tb / 2 + tw / 4 : (tb + tw) / 2, leverA = bruhn ? td / 2 + tw / 4 : (td + tw) / 2, leverB = bruhn ? td / 2 + tb / 4 : (tb + td) / 2;
+    const leverO2 = tb / 2 + tw / 4, leverA2 = td / 2 + tw / 4, leverB2 = td / 2 + tb / 4;
+    const Mpin = Math.max(FOside * leverO, FAside * leverA, FAside * leverB);   // N*mm
+    const MpinBruhn = Math.max(FOside * leverO2, FAside * leverA2, FAside * leverB2);
+    const MpinShigley = Math.max(FOside * (tb + tw) / 2, FAside * (td + tw) / 2, FAside * (tb + td) / 2);
+    const sigPinBend = 32 * Mpin / (Math.PI * d ** 3);
+    const FS_bend_shigley = SyP / (32 * MpinShigley / (Math.PI * d ** 3)), FS_bend_bruhn = SyP / (32 * MpinBruhn / (Math.PI * d ** 3));
+    o.pin = {
+      sides, Fside, worstSide: worstSide.name, tauPin, FS_shear: 0.577 * SyP / tauPin,
+      bearWall, FS_bearWall: Sy / bearWall, Wwall, wO, wA,
+      bearBracket, FS_bearBracket: SyBracket / bearBracket,
+      bearDiag: bearD, FS_bearDiag: Syd / bearD,
+      Mpin, sigPinBend, FS_pinBend: SyP / sigPinBend, leverO, leverA, leverB, FS_bend_shigley, FS_bend_bruhn, leverModel: bruhn ? 'Bruhn/Niu uniform bearing' : 'Shigley half-thickness',
+      edgeBeamOK: h >= 4 * dh, Lext, gripO: w + 2 * tb, gripA: w + 2 * td, dh,
+    };
+    // --- requirement summary ---
+    const FSt = p.FStarget || 2, FSb = p.FSbuckTarget || 2;
+    o.checks = [
+      { name: 'Beam combined stress (von Mises) FS', value: o.beamStress.FS, need: FSt, ok: o.beamStress.FS >= FSt, fmt: 'fs' },
+      { name: 'Rotor CG deflection (mm)', value: o.deflection.mag, need: 0.7, ok: o.deflection.mag <= 0.7, fmt: 'mm', lessIsBetter: true },
+      { name: 'Diagonal tension (net section) FS', value: o.diag.FS_tension, need: FSt, ok: o.diag.FS_tension >= FSt, fmt: 'fs' },
+      { name: 'Diagonal buckling FS (' + buckMode + ')', value: o.diag.FS_buckling, need: FSb, ok: o.diag.FS_buckling >= FSb, fmt: 'fs' },
+      { name: 'Diagonal hole bearing FS', value: o.diag.FS_bearing, need: FSt, ok: o.diag.FS_bearing >= FSt, fmt: 'fs' },
+      { name: 'Diagonal tear-out FS', value: o.diag.FS_tearout, need: FSt, ok: o.diag.FS_tearout >= FSt, fmt: 'fs' },
+      { name: 'Pin double-shear FS', value: o.pin.FS_shear, need: FSt, ok: o.pin.FS_shear >= FSt, fmt: 'fs' },
+      { name: 'Pin bearing on beam wall FS', value: o.pin.FS_bearWall, need: FSt, ok: o.pin.FS_bearWall >= FSt, fmt: 'fs' },
+      { name: 'Pin bearing on Al bracket FS', value: o.pin.FS_bearBracket, need: FSt, ok: o.pin.FS_bearBracket >= FSt, fmt: 'fs' },
+      { name: 'Pin bending FS (advanced)', value: o.pin.FS_pinBend, need: FSt, ok: o.pin.FS_pinBend >= FSt, fmt: 'fs', advanced: true },
+      { name: 'Beam width >= 4 in', value: w / IN, need: 4, ok: w >= 4 * IN - 1e-6, fmt: 'in' },
+      { name: 'Hole edge distance >= 2 x hole dia (beam height >= 4 dh)', value: h / dh, need: 4, ok: h >= 4 * dh, fmt: 'x' },
+      { name: 'Hole edge distance >= 2 x hole dia (plate width >= 4 dh)', value: bd / dh, need: 4, ok: bd >= 4 * dh, fmt: 'x' },
+      { name: 'Diagonal attach within 800 mm of pin O', value: a, need: 800, ok: a <= 800 && a > 0, fmt: 'mm', lessIsBetter: true },
+      { name: 'Beam overhang past pin O >= 2 x hole dia', value: Lext / dh, need: 2, ok: Lext >= 2 * dh - 1e-9, fmt: 'x' },
+    ];
+    o.allOK = o.checks.filter(c => !c.advanced).every(c => c.ok);
+    o.geom = { a, xGen, h, w, t: beam.t, beam, Lbeam, xL, xRend, yChain, yCG, yCOP, zD, zB, Ld, Lcut, alpha, P1, P2, dvec, Wbeam, wBeam, d, dh, td, bd, tb, chainTheta: th };
+    o.loads = loads;
+    return o;
+  }
+
+  return { MATERIALS, PIN_MATERIALS, tubeProps, solidProps, solve, IN };
+})();
+if (typeof module !== 'undefined') module.exports = DP1;
+
+// ---------- FBD Lab ----------
+const IN = DP1.IN;
+const $ = (s, root = document) => root.querySelector(s);
+const el = (tag, attrs = {}, ...kids) => {
+  const n = tag.startsWith('svg:') ? document.createElementNS('http://www.w3.org/2000/svg', tag.slice(4)) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) { if (k === 'html') n.innerHTML = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v === true ? '' : v); }
+  for (const k of kids.flat()) if (k !== null && k !== undefined && k !== false) n.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return n;
+};
+const fmt = (v, n = 1) => Number.isFinite(v) ? v.toLocaleString(undefined, { minimumFractionDigits: n, maximumFractionDigits: n }) : '—';
+const sg = (v, n = 1) => (v > 0 ? '+' : '') + fmt(v, n);
+
+const S = { a: 500, h: 4, w: 4, td: 0.25, xGen: -197, chain: 'exact', system: 'system', labels: true, step: 0, vis: { weight: true, water: true, chain: true, pin: true, plate: true, bearing: true } };
+try { const s = localStorage.getItem('dp1-fbd'); if (s) Object.assign(S, JSON.parse(s)); } catch (e) { }
+function save() { try { localStorage.setItem('dp1-fbd', JSON.stringify(S)); } catch (e) { } }
+
+const FAMILY = { weight: { name: 'weights', color: 'var(--c-weight)' }, water: { name: 'water loads', color: 'var(--c-water)' }, chain: { name: 'chain forces', color: 'var(--c-chain)' }, plate: { name: 'diagonal plates', color: 'var(--c-plate)' }, pin: { name: 'pin O reactions', color: 'var(--c-pin)' }, bearing: { name: 'shaft-box bearing loads', color: 'var(--c-bearing)' } };
+
+let R = null, P = null, LOADS = [], HOVER = null;
+function compute() {
+  P = { a: S.a, xGen: +S.xGen, overhang: 50, holeClear: 0.4, chainExact: S.chain === 'exact', beamKind: 'tube', w: S.w * IN, h: S.h * IN, t: 0.25 * IN,
+    matBeam: DP1.MATERIALS.ss304, matDiag: DP1.MATERIALS.ss304, matPin: DP1.PIN_MATERIALS.ss188, dPin: 0.5 * IN, tBracket: 0.5 * IN, td: S.td * IN, bd: 2 * IN, netSection: true, gridStep: 10 };
+  R = DP1.solve(P);
+  const g = R.geom, rx = R.reactions, L = R.loads;
+  const cross = (r, F) => [r[1] * F[2] - r[2] * F[1], r[2] * F[0] - r[0] * F[2], r[0] * F[1] - r[1] * F[0]];
+  const mk = (id, fam, name, r, F, M, extra = {}) => ({ id, fam, name, r, F, M: M || [0, 0, 0], color: FAMILY[fam].color, ...extra });
+  const sys = [
+    mk('Wr', 'weight', 'Rotor assembly weight at CG', L[0].r, L[0].F, null, { why: 'Given: 150 N, centered on the rotation axis 350 mm below the beam bottom face.' }),
+    mk('Fd', 'water', 'Water drag at COP', L[1].r, L[1].F, null, { why: 'Given: 560 N in +z at the center of pressure, 500 mm below the beam bottom face. Out of the side-view page.' }),
+    mk('Tw', 'water', 'Water torque on rotor', L[2].r, [0, 0, 0], L[2].M, { why: 'The water drives the rotor at 285 rpm with P_mech = 586 W, so it applies a couple τ = P/ω = 19.6 N·m about +y. It is external to the system.' }),
+    mk('C1', 'chain', 'Chain tension on rotor sprocket', L[3].r, L[3].F, null, { internal: true, why: 'Tight-side tension T = τ/r_pitch = 162 N, pulling the rotor sprocket toward the generator along the tangent line on the −z (rear) side.' }),
+    mk('C2', 'chain', 'Chain tension on generator sprocket', L[4].r, L[4].F, null, { internal: true, why: 'Same tension pulling the generator sprocket toward the rotor along the same line. Equal, opposite and collinear with C1: a null system on this free body.' }),
+    mk('Wg', 'weight', 'Generator + sprocket weight', L[5].r, L[5].F, null, { why: 'Given: 120 N on the generator shaft axis at x_gen.' }),
+    mk('Wb', 'weight', 'Beam self-weight (resultant)', L[6].r, L[6].F, null, { why: `Section area × density × length: ${fmt(g.Wbeam, 0)} N for the ${fmt(g.Lbeam, 0)} mm beam, acting at its midpoint.` }),
+    mk('Wd', 'weight', 'Half of both plate weights at A', L[7].r, L[7].F, null, { why: 'Each plate hands half its weight to pin A and half to pin B. Small, but it is a load on the beam.' }),
+    mk('Of', 'pin', 'Front bracket on beam (pin O, +z side)', [0, 0, g.zB], rx.O_front, null, { unknown: true, why: 'Unknowns Ox_front and Oy (shared with the rear) plus Oz: the drag pushes the beam against the front bracket face.' }),
+    mk('Or', 'pin', 'Rear bracket on beam (pin O, −z side)', [0, 0, -g.zB], rx.O_rear, null, { unknown: true, why: 'Unknown Ox_rear; Oy equal to the front share because requirement 10 says pin O carries no moment about x.' }),
+    mk('Af', 'plate', 'Front plate on beam at A', [-g.a, 0, g.zD], rx.A_front, null, { unknown: true, why: 'A two-force member: the force lies along the A–B line. Unknown magnitude F_front (tension positive).' }),
+    mk('Ar', 'plate', 'Rear plate on beam at A', [-g.a, 0, -g.zD], rx.A_rear, null, { unknown: true, why: 'Same line of action as the front plate, unknown magnitude F_rear. The two differ: their difference is what reacts the torsion.' }),
+  ];
+  for (const l of sys) { const m = cross(l.r, l.F); l.Mo = [0, 1, 2].map(i => m[i] / 1000 + l.M[i]); }
+  // beam-alone loads: bearing resultant at the shaft box axis point
+  const xR = -1200;
+  const Fb = [0, 1, 2].map(i => L[0].F[i] + L[1].F[i] + L[3].F[i]);
+  const Mb = [0, 1, 2].map(i => (cross([L[0].r[0] - xR, L[0].r[1], L[0].r[2]], L[0].F)[i] + cross([L[1].r[0] - xR, L[1].r[1], L[1].r[2]], L[1].F)[i] + cross([L[3].r[0] - xR, L[3].r[1], L[3].r[2]], L[3].F)[i]) / 1000 + L[2].M[i]);
+  const beam = [
+    mk('Bf', 'bearing', 'Shaft box on beam: force', [xR, 0, 0], Fb, null, { why: 'The rotor assembly hands the beam the sum of its weight, the drag and the chain pull through the two bearings.' }),
+    mk('Bm', 'bearing', 'Shaft box on beam: moments', [xR, 0, 0], [0, 0, 0], Mb, { why: 'Moving those forces to the beam axis leaves moments about x (drag × lever) and z (chain × lever). About y the chain moment and the water torque cancel, so the bearings pass no y-moment.' }),
+    mk('C2', 'chain', 'Chain tension on generator sprocket', L[4].r, L[4].F, null, { why: 'Applied through the generator shaft, bearings and housing to the beam, at the sprocket tangent point.' }),
+    sys[5], sys[6], sys[7], sys[8], sys[9], sys[10], sys[11],
+  ];
+  for (const l of beam) { const m = cross(l.r, l.F); l.Mo = [0, 1, 2].map(i => m[i] / 1000 + l.M[i]); }
+  // rotor assembly alone
+  const Rb = Fb.map(v => -v), Rm = Mb.map(v => -v);
+  const rotor = [sys[0], sys[1], sys[2], sys[3],
+    mk('Rf', 'bearing', 'Bearings on rotor shaft: force', [xR, 0, 0], Rb, null, { unknown: true, why: 'Reaction of the shaft box on the shaft.' }),
+    mk('Rm', 'bearing', 'Bearings on rotor shaft: moments', [xR, 0, 0], [0, 0, 0], Rm, { unknown: true, why: 'Two bearings a distance apart can react moments about x and z. About y a bearing is free, so this component must be zero: that is what fixes the chain tension.' })];
+  for (const l of rotor) { const m = cross(l.r, l.F); l.Mo = [0, 1, 2].map(i => m[i] / 1000 + l.M[i]); }
+  const Ff = rx.diag.Ff;
+  const plate = [
+    mk('Pa', 'plate', 'Beam on front plate at A', [-g.a, 0, g.zD], rx.A_front.map(v => -v), null, { why: 'Equal and opposite to the force the plate applies to the beam.' }),
+    mk('Pb', 'plate', 'Bracket on front plate at B', [0, 500, g.zD], rx.B_front.map(v => -v), null, { why: 'Collinear with the force at A: that is what makes a two-force member.' }),
+    mk('Pw', 'weight', 'Plate weight', [-g.a / 2, 250, g.zD], [0, -R.diag.Wdiag1, 0], null, { why: 'Small (about 19 N) and ignored in the two-force idealization; it bends the plate by about 1 N·m.' }),
+  ];
+  LOADS = { system: sys, beam, rotor, plate }[S.system];
+  R.sysLoads = sys; R.beamLoads = beam; R.rotorLoads = rotor; R.bearing = { F: Fb, M: Mb };
+}
+
+// ---------- drawing helpers ----------
+function arrowDef(svg) { svg._labels = []; }
+function group(svg, load) { const g = el('svg:g', { class: 'ld', 'data-id': load.id, style: `color:${load.color}` }); g._svg = svg; g.addEventListener('mouseenter', () => setHover(load.id)); g.addEventListener('mouseleave', () => setHover(null)); svg.append(g); return g; }
+function svgOf(g) { let n = g; while (n && n.tagName !== 'svg') n = n.parentNode; return n; }
+// label with collision avoidance: estimated text box, pushed down until it clears earlier labels and stays inside the drawing
+function putLabel(g, x, y, text, anchor = 'start', cls = 'currentColor') {
+  if (!text) return;
+  const svg = svgOf(g); const W = +svg.getAttribute('viewBox').split(' ')[2], H = +svg.getAttribute('viewBox').split(' ')[3];
+  const w = 7 * text.length + 4, h = 13;
+  let x0 = anchor === 'end' ? x - w : anchor === 'middle' ? x - w / 2 : x;
+  if (x0 + w > W - 4) { x0 = W - 4 - w; } if (x0 < 4) x0 = 4;
+  let y0 = y - 10;
+  const hits = (b) => (svg._labels || []).some(o => !(b.x + b.w < o.x || o.x + o.w < b.x || b.y + b.h < o.y || o.y + o.h < b.y));
+  let tries = 0; while (hits({ x: x0, y: y0, w, h }) && tries < 12) { y0 += 13; tries++; }
+  if (y0 + h > H - 4) y0 = H - 4 - h;
+  svg._labels.push({ x: x0, y: y0, w, h });
+  g.append(el('svg:text', { x: x0, y: y0 + 10, 'font-size': 12, fill: cls, 'font-family': 'var(--font-mono)' }, text));
+}
+function head(g, x, y, ang, size = 9) { g.append(el('svg:path', { d: `M${x},${y} L${x - size * Math.cos(ang - 0.42)},${y - size * Math.sin(ang - 0.42)} L${x - size * Math.cos(ang + 0.42)},${y - size * Math.sin(ang + 0.42)}Z`, fill: 'currentColor' })); }
+function arrow(g, x1, y1, x2, y2, label, off = [6, -6], w = 2.2, dash = null) {
+  const ang = Math.atan2(y2 - y1, x2 - x1);
+  g.append(el('svg:line', { x1, y1, x2: x2 - 4 * Math.cos(ang), y2: y2 - 4 * Math.sin(ang), stroke: 'currentColor', 'stroke-width': w, 'stroke-dasharray': dash }));
+  head(g, x2, y2, ang);
+  if (label) putLabel(g, x2 + off[0], y2 + off[1], label, off[0] < 0 ? 'end' : 'start');
+}
+function dir2(F, map) { const v = map(F); const m = Math.hypot(v[0], v[1]); return m < 1e-9 ? null : [v[0] / m, v[1] / m, m]; }
+function forceArrow(g, px, py, F, map, label, len = 64, dash = null) {
+  const d = dir2(F, map); if (!d) return false;
+  const tx = px + d[0] * len, ty = py + d[1] * len;
+  arrow(g, px - d[0] * 5, py - d[1] * 5, tx, ty, null, [0, 0], 2.2, dash);
+  if (label) putLabel(g, tx + (d[0] >= -0.2 ? 7 : -7), ty + (d[1] > 0.3 ? 14 : d[1] < -0.3 ? -4 : 4), label, d[0] >= -0.2 ? 'start' : 'end');
+  return true;
+}
+function outOfPlane(g, px, py, toward, label) {
+  g.append(el('svg:circle', { cx: px, cy: py, r: 7, fill: 'var(--surface)', stroke: 'currentColor', 'stroke-width': 2 }));
+  if (toward) g.append(el('svg:circle', { cx: px, cy: py, r: 2.2, fill: 'currentColor' }));
+  else { g.append(el('svg:line', { x1: px - 4, y1: py - 4, x2: px + 4, y2: py + 4, stroke: 'currentColor', 'stroke-width': 2 })); g.append(el('svg:line', { x1: px - 4, y1: py + 4, x2: px + 4, y2: py - 4, stroke: 'currentColor', 'stroke-width': 2 })); }
+  if (label) putLabel(g, px + 11, py + 4, label);
+}
+function momentInPlane(g, px, py, ccw, label, r = 16) {
+  const a0 = ccw ? 0.9 : -0.9, a1 = ccw ? -3.4 : 3.4;
+  const x0 = px + r * Math.cos(a0), y0 = py - r * Math.sin(a0), x1 = px + r * Math.cos(a1), y1 = py - r * Math.sin(a1);
+  g.append(el('svg:path', { d: `M${x0},${y0} A${r},${r} 0 1 ${ccw ? 0 : 1} ${x1},${y1}`, fill: 'none', stroke: 'currentColor', 'stroke-width': 2.2 }));
+  const tang = ccw ? (a1 - Math.PI / 2) : (a1 + Math.PI / 2);
+  head(g, x1, y1, -tang);
+  if (label) putLabel(g, px + r + 6, py - r + 6, label);
+}
+function momentAboutVertical(g, px, py, positive, label) {
+  const rx = 22, ry = 7;
+  const d = positive ? `M${px - rx},${py} A${rx},${ry} 0 0 0 ${px + rx},${py}` : `M${px + rx},${py} A${rx},${ry} 0 0 1 ${px - rx},${py}`;
+  g.append(el('svg:path', { d, fill: 'none', stroke: 'currentColor', 'stroke-width': 2.2 }));
+  head(g, positive ? px + rx : px - rx, py, positive ? -Math.PI / 2 - 0.9 : -Math.PI / 2 + 0.9, 8);
+  g.append(el('svg:line', { x1: px, y1: py - 26, x2: px, y2: py + 26, stroke: 'currentColor', 'stroke-width': 1, 'stroke-dasharray': '3 3' }));
+  if (label) putLabel(g, px + rx + 6, py + 4, label);
+}
+function momentAboutHorizontal(g, px, py, positive, label) {
+  const rx = 7, ry = 22;
+  const d = positive ? `M${px},${py + ry} A${rx},${ry} 0 0 0 ${px},${py - ry}` : `M${px},${py - ry} A${rx},${ry} 0 0 0 ${px},${py + ry}`;
+  g.append(el('svg:path', { d, fill: 'none', stroke: 'currentColor', 'stroke-width': 2.2 }));
+  head(g, px, positive ? py - ry : py + ry, positive ? -0.9 : 0.9, 8);
+  g.append(el('svg:line', { x1: px - 26, y1: py, x2: px + 26, y2: py, stroke: 'currentColor', 'stroke-width': 1, 'stroke-dasharray': '3 3' }));
+  if (label) putLabel(g, px + 10, py - ry - 2, label);
+}
+const lbl = (v, unit = 'N') => S.labels ? `${fmt(v, 0)} ${unit}` : '';
+const txt = (svg, x, y, s, o = {}) => svg.append(el('svg:text', Object.assign({ x, y, 'font-size': 12, fill: 'var(--muted)' }, o), s));
+
+// ---------- views ----------
+function sideView() {
+  const g = R.geom, W = 900, H = 620, s = 0.46, ox = 660, oy = 270;
+  const X = x => ox + x * s, Y = y => oy - y * s;
+  const svg = el('svg:svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Side view free-body diagram in the x-y plane' }); arrowDef(svg);
+  // fixed structure, rotor, shaft box, generator
+  svg.append(el('svg:rect', { x: X(60), y: Y(640), width: 26, height: 1300 * s, fill: 'var(--surface-2)', stroke: 'var(--line-2)' }));
+  svg.append(el('svg:rect', { x: X(-1450), y: Y(g.yCG + 100), width: 500 * s, height: 500 * s, fill: 'none', stroke: 'var(--line-2)', 'stroke-dasharray': '3 3' }));
+  svg.append(el('svg:line', { x1: X(-1200), x2: X(-1200), y1: Y(g.h / 2 + 200), y2: Y(g.yCG - 150), stroke: 'var(--line-2)' }));
+  svg.append(el('svg:rect', { x: X(-1300), y: Y(g.h / 2 + 200), width: 200 * s, height: 200 * s, fill: 'var(--surface-2)', stroke: 'var(--line-2)' }));
+  txt(svg, X(-1200), Y(g.h / 2 + 100), 'shaft box', { 'text-anchor': 'middle' });
+  svg.append(el('svg:rect', { x: X(g.xGen - 60), y: Y(g.h / 2 + 160), width: 120 * s, height: 160 * s, fill: 'var(--surface-2)', stroke: 'var(--line-2)' }));
+  txt(svg, X(g.xGen), Y(g.h / 2 + 175), 'generator', { 'text-anchor': 'middle' });
+  // sprockets (edge-on) + chain line
+  svg.append(el('svg:line', { x1: X(-1200 - R.power.R1), x2: X(-1200 + R.power.R1), y1: Y(g.yChain), y2: Y(g.yChain), stroke: 'var(--fg-2)', 'stroke-width': 3 }));
+  svg.append(el('svg:line', { x1: X(g.xGen - R.power.R2), x2: X(g.xGen + R.power.R2), y1: Y(g.yChain), y2: Y(g.yChain), stroke: 'var(--fg-2)', 'stroke-width': 3 }));
+  svg.append(el('svg:line', { x1: X(-1200), x2: X(g.xGen), y1: Y(g.yChain), y2: Y(g.yChain), stroke: 'var(--line-2)', 'stroke-dasharray': '2 2' }));
+  // beam, plate, pins
+  const beamFill = S.system === 'plate' ? 'none' : 'var(--accent-soft)';
+  svg.append(el('svg:rect', { x: X(g.xL), y: Y(g.h / 2), width: g.Lbeam * s, height: g.h * s, fill: beamFill, stroke: 'var(--accent)', 'stroke-dasharray': S.system === 'rotor' ? '4 3' : null }));
+  svg.append(el('svg:line', { x1: X(-g.a), y1: Y(0), x2: X(0), y2: Y(500), stroke: 'var(--c-plate)', 'stroke-width': Math.max(6, g.td * s * 4), 'stroke-linecap': 'round', opacity: S.system === 'plate' ? 0.9 : 0.55 }));
+  for (const [x, y, n] of [[0, 0, 'O'], [-g.a, 0, 'A'], [0, 500, 'B']]) { svg.append(el('svg:circle', { cx: X(x), cy: Y(y), r: 4, fill: 'var(--surface)', stroke: 'var(--fg)', 'stroke-width': 1.5 })); svg.append(el('svg:text', { x: X(x) + 7, y: Y(y) - 7, 'font-size': 12, 'font-weight': 600, fill: 'var(--fg)' }, n)); }
+  // axes
+  const ax = el('svg:g', { style: 'color: var(--fg-2)' }); svg.append(ax);
+  arrow(ax, X(-520), Y(-440), X(-420), Y(-440), 'x', [4, 4], 1.5); arrow(ax, X(-520), Y(-440), X(-520), Y(-340), 'y', [-10, -2], 1.5);
+  txt(svg, X(-520) + 6, Y(-440) + 14, 'z out of the page, toward you (Front)');
+  // dimension notes
+  txt(svg, X(-1200) + 4, Y(g.yCG) + 4, 'CG'); txt(svg, X(-1200) + 4, Y(g.yCOP) + 4, 'COP');
+  svg.append(el('svg:circle', { cx: X(-1200), cy: Y(g.yCG), r: 3, fill: 'var(--fg-2)' })); svg.append(el('svg:circle', { cx: X(-1200), cy: Y(g.yCOP), r: 3, fill: 'none', stroke: 'var(--fg-2)' }));
+  // loads
+  const map = F => [F[0], -F[1]];
+  for (const L of LOADS) {
+    if (!S.vis[L.fam]) continue;
+    const gg = group(svg, L);
+    const px = X(L.r[0]), py = Y(L.r[1]);
+    const mag = Math.hypot(L.F[0], L.F[1], L.F[2]);
+    if (L.id === 'Fd') { outOfPlane(gg, px, py, true, lbl(560) + ' drag, out of page (+z)'); continue; }
+    if (L.id === 'Tw') { momentAboutVertical(gg, X(-1200), Y(g.h / 2 + 330), true, lbl(L.M[1], 'N·m') + ' water torque about +y'); continue; }
+    if (L.id === 'Bm' || L.id === 'Rm') {
+      const M = L.M; const base = L.id === 'Bm' ? Y(0) : Y(g.yCG + 60);
+      if (Math.abs(M[0]) > 0.5) momentAboutHorizontal(gg, px - 40, base, M[0] > 0, lbl(M[0], 'N·m') + ' Mx');
+      if (Math.abs(M[2]) > 0.5) momentInPlane(gg, px + 40, base + (L.id === 'Bm' ? 0 : 0), M[2] > 0, lbl(M[2], 'N·m') + ' Mz');
+      if (Math.abs(M[1]) > 0.5) momentAboutVertical(gg, px, base - 60, M[1] > 0, lbl(M[1], 'N·m') + ' My'); else txt(svg, px + 8, base - 56, 'My = 0 through bearings', { fill: 'var(--c-bearing)' });
+      continue;
+    }
+    if (L.id === 'Of' || L.id === 'Or') { const dy = L.id === 'Of' ? -8 : 8; const nm = L.id === 'Of' ? 'O front' : 'O rear'; forceArrow(gg, px, py + dy, [L.F[0], L.F[1], 0], map, null); putLabel(gg, X(100), Y(g.h / 2 + 60) + (L.id === 'Of' ? 0 : 13), S.labels ? `${nm}: (${fmt(L.F[0], 0)}, ${fmt(L.F[1], 0)}, ${fmt(L.F[2], 0)}) N` : nm); continue; }
+    if (L.id === 'Af' || L.id === 'Ar' || L.id === 'Pa' || L.id === 'Pb') { const dy = (L.id === 'Af' || L.id === 'Pa') ? -6 : 6; const nm = L.id === 'Af' ? 'front plate' : L.id === 'Ar' ? 'rear plate' : L.id === 'Pa' ? 'beam on plate' : 'bracket on plate'; const F = L.id === 'Ar' ? R.reactions.diag.Fr : R.reactions.diag.Ff; forceArrow(gg, px, py + dy, L.F, map, null); putLabel(gg, X(-g.a) - 10, Y(g.h / 2 + 40) + (L.id === 'Af' || L.id === 'Pa' ? 0 : 13), S.labels ? `${nm}: ${fmt(Math.abs(F), 0)} N ${F < 0 ? 'C' : 'T'}` : nm, 'end'); continue; }
+    if (L.internal) { const d = dir2(L.F, map); if (d) { forceArrow(gg, px, py, L.F, map, null, 50, '5 3'); putLabel(gg, px + (d[0] > 0 ? 8 : -8), py + 16, lbl(mag) + (L.id === 'C1' ? ' chain (internal)' : ' chain'), d[0] > 0 ? 'start' : 'end'); } continue; }
+    if (L.id === 'Wg') { forceArrow(gg, px, py, L.F, map, null, 40); putLabel(gg, px + 8, py + 50, lbl(mag)); continue; }
+    if (L.id === 'Wr') { forceArrow(gg, px, py, L.F, map, null, 34); putLabel(gg, px - 8, py + 24, lbl(mag) + ' rotor weight', 'end'); continue; }
+    forceArrow(gg, px, py, L.F, map, lbl(mag) + (L.fam === 'bearing' ? ' resultant' : ''));
+  }
+  txt(svg, 10, H - 8, 'Geometry to scale (mm); arrow lengths are not to scale. Hover an arrow to highlight it in every view and in the table.');
+  return el('figure', {}, svg, el('figcaption', {}, 'Side view (x–y). Shows vertical loads, the in-plane components of the pin and plate forces, and the torque about y. The drag and the front/rear split are invisible here.'));
+}
+function bottomView() {
+  const g = R.geom, W = 900, H = 260, s = 0.46, ox = 660, oz = 130;
+  const X = x => ox + x * s, Z = z => oz - z * s;
+  const svg = el('svg:svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Bottom view free-body diagram in the x-z plane' }); arrowDef(svg);
+  svg.append(el('svg:rect', { x: X(60), y: Z(160), width: 26, height: 320 * s, fill: 'var(--surface-2)', stroke: 'var(--line-2)' }));
+  svg.append(el('svg:rect', { x: X(g.xL), y: Z(g.w / 2), width: g.Lbeam * s, height: g.w * s, fill: 'var(--accent-soft)', stroke: 'var(--accent)' }));
+  for (const z of [g.zD, -g.zD]) svg.append(el('svg:line', { x1: X(-g.a), x2: X(0), y1: Z(z), y2: Z(z), stroke: 'var(--c-plate)', 'stroke-width': Math.max(2, g.td * s), opacity: 0.8 }));
+  for (const z of [g.zB, -g.zB]) svg.append(el('svg:line', { x1: X(-40), x2: X(50), y1: Z(z), y2: Z(z), stroke: 'var(--line-2)', 'stroke-width': 12.7 * s }));
+  svg.append(el('svg:circle', { cx: X(-1200), cy: Z(0), r: R.power.R1 * s, fill: 'none', stroke: 'var(--fg-2)' }));
+  svg.append(el('svg:circle', { cx: X(g.xGen), cy: Z(0), r: R.power.R2 * s, fill: 'none', stroke: 'var(--fg-2)' }));
+  svg.append(el('svg:line', { x1: X(g.P1[0]), y1: Z(g.P1[2]), x2: X(g.P2[0]), y2: Z(g.P2[2]), stroke: 'var(--c-chain)', 'stroke-width': 2 }));
+  svg.append(el('svg:line', { x1: X(g.P1[0]), y1: Z(-g.P1[2]), x2: X(g.P2[0]), y2: Z(-g.P2[2]), stroke: 'var(--c-chain)', 'stroke-width': 1, 'stroke-dasharray': '3 3' }));
+  txt(svg, X(-700), Z(g.P1[2]) + 14, 'tight side (rear): T = ' + fmt(R.power.T, 0) + ' N', { fill: 'var(--fg)', 'font-family': 'var(--font-mono)' });
+  txt(svg, X(-700), Z(-g.P1[2]) - 6, 'slack side: 0 N (no preload)');
+  txt(svg, X(-1200), Z(0) - R.power.R1 * s - 6, 'rotor turns +y (CCW from above)', { 'text-anchor': 'middle' });
+  const ax = el('svg:g', { style: 'color: var(--fg-2)' }); svg.append(ax);
+  arrow(ax, X(-500), Z(-150), X(-400), Z(-150), 'x', [4, 4], 1.5); arrow(ax, X(-500), Z(-150), X(-500), Z(-90), 'z (Front)', [-52, -2], 1.5);
+  txt(svg, X(60) - 6, Z(80), 'O', { 'font-weight': 600, fill: 'var(--fg)' }); txt(svg, X(-g.a) - 4, Z(80), 'A', { 'font-weight': 600, fill: 'var(--fg)' });
+  const map = F => [F[0], -F[2]];
+  for (const L of LOADS) {
+    if (!S.vis[L.fam]) continue;
+    const gg = group(svg, L);
+    const px = X(L.r[0]), pz = Z(L.r[2]);
+    if (L.fam === 'weight') { outOfPlane(gg, px, pz, false, lbl(-L.F[1]) + ' (−y)'); continue; }
+    if (L.id === 'Tw') { momentInPlane(gg, px + 44, pz, false, lbl(L.M[1], 'N·m') + ' about +y'); continue; }
+    if (L.id === 'Bm' || L.id === 'Rm') { const M = L.M; if (Math.abs(M[1]) > 0.5) momentInPlane(gg, px + 36, pz, M[1] < 0, lbl(M[1], 'N·m') + ' My'); else txt(svg, px + 30, pz - 10, 'My = 0 (bearings)', { fill: 'var(--c-bearing)' }); if (Math.abs(M[0]) > 0.5) momentAboutHorizontal(gg, px - 40, pz, M[0] > 0, lbl(M[0], 'N·m') + ' Mx'); continue; }
+    if (L.id === 'Of' || L.id === 'Or') { forceArrow(gg, px, pz, [L.F[0], 0, 0], map, null); putLabel(gg, X(100), Z(0) + (L.id === 'Of' ? -46 : 56), S.labels ? `O ${L.id === 'Of' ? 'front' : 'rear'} x: ${fmt(L.F[0], 0)} N` : L.id === 'Of' ? 'O front' : 'O rear'); if (L.id === 'Of' && L.F[2]) { const g2 = group(svg, L); arrow(g2, px, pz - 2, px, pz - 2 - 40 * Math.sign(L.F[2]), null); putLabel(g2, X(100), Z(0) - 30, lbl(L.F[2]) + ' z on front face'); } continue; }
+    if (L.id === 'Af' || L.id === 'Ar') { forceArrow(gg, px, pz, [L.F[0], 0, 0], map, null); putLabel(gg, X(-g.a) + (L.F[0] > 0 ? 10 : -10), Z(L.r[2]) + (L.id === 'Af' ? -22 : 28), S.labels ? `${L.id === 'Af' ? 'front' : 'rear'} plate x: ${fmt(L.F[0], 0)} N` : '', L.F[0] > 0 ? 'start' : 'end'); continue; }
+    if (L.internal || L.fam === 'chain') { forceArrow(gg, px, pz, L.F, map, null, 50, L.internal ? '5 3' : null); putLabel(gg, px + (L.F[0] > 0 ? 56 : -56), pz + (L.F[0] > 0 ? 18 : -10), lbl(Math.hypot(...L.F)) + ' chain', L.F[0] > 0 ? 'start' : 'end'); continue; }
+    forceArrow(gg, px, pz, L.F, map, lbl(Math.hypot(...L.F)));
+  }
+  function py2(p, d) { return p + d; }
+  return el('figure', {}, svg, el('figcaption', {}, 'Bottom view (x–z), as in Figure 2 with the Front (+z) up the page. Shows the drag, the chain line, the front/rear split of the pin and plate x-forces, and the moments about y.'));
+}
+function endView() {
+  const g = R.geom, W = 460, H = 640, s = 0.5, oz = 230, oy = 270;
+  const Zc = z => oz + z * s, Y = y => oy - y * s;
+  const svg = el('svg:svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'End view free-body diagram in the y-z plane, looking from the rotor end toward the fixed structure' }); arrowDef(svg);
+  // plates (project as vertical strips from y=0 up to 500 at ±zD), brackets at ±zB, beam section, rotor below
+  for (const z of [g.zD, -g.zD]) svg.append(el('svg:rect', { x: Zc(z) - g.td * s / 2, y: Y(500), width: Math.max(2, g.td * s), height: 500 * s, fill: 'var(--c-plate)', opacity: 0.55 }));
+  for (const z of [g.zB, -g.zB]) svg.append(el('svg:rect', { x: Zc(z) - 12.7 * s / 2, y: Y(g.h / 2 + 30), width: 12.7 * s, height: (g.h + 60) * s, fill: 'var(--surface-2)', stroke: 'var(--line-2)' }));
+  svg.append(el('svg:rect', { x: Zc(-g.w / 2), y: Y(g.h / 2), width: g.w * s, height: g.h * s, fill: 'var(--accent-soft)', stroke: 'var(--accent)' }));
+  svg.append(el('svg:rect', { x: Zc(-g.w / 2) + 6, y: Y(g.h / 2) + 6, width: g.w * s - 12, height: g.h * s - 12, fill: 'none', stroke: 'var(--accent)', 'stroke-dasharray': '3 3' }));
+  svg.append(el('svg:rect', { x: Zc(-250), y: Y(g.yCG + 100), width: 500 * s, height: 500 * s, fill: 'none', stroke: 'var(--line-2)', 'stroke-dasharray': '3 3' }));
+  svg.append(el('svg:line', { x1: Zc(0), x2: Zc(0), y1: Y(-g.h / 2), y2: Y(g.yCG - 150), stroke: 'var(--line-2)' }));
+  svg.append(el('svg:circle', { cx: Zc(0), cy: Y(g.yCG), r: 3, fill: 'var(--fg-2)' })); txt(svg, Zc(0) + 8, Y(g.yCG) + 4, 'CG');
+  svg.append(el('svg:circle', { cx: Zc(0), cy: Y(g.yCOP), r: 3, fill: 'none', stroke: 'var(--fg-2)' })); txt(svg, Zc(0) + 8, Y(g.yCOP) + 4, 'COP');
+  svg.append(el('svg:circle', { cx: Zc(0), cy: Y(0), r: 4, fill: 'var(--surface)', stroke: 'var(--fg)', 'stroke-width': 1.5 })); txt(svg, Zc(0) + 8, Y(0) - 8, 'pin axis (z)', { fill: 'var(--fg)' });
+  txt(svg, Zc(g.zD) + 4, Y(490), 'front plate'); txt(svg, Zc(-g.zD) - 4, Y(490), 'rear plate', { 'text-anchor': 'end' });
+  txt(svg, Zc(g.zB) + 4, Y(-g.h / 2 - 18), 'front bracket'); txt(svg, Zc(-g.zB) - 4, Y(-g.h / 2 - 18), 'rear bracket', { 'text-anchor': 'end' });
+  const ax = el('svg:g', { style: 'color: var(--fg-2)' }); svg.append(ax);
+  arrow(ax, Zc(-200), Y(-560), Zc(-120), Y(-560), 'z (Front)', [4, 4], 1.5); arrow(ax, Zc(-200), Y(-560), Zc(-200), Y(-480), 'y', [-10, -2], 1.5);
+  txt(svg, Zc(-200), Y(-600), 'x toward you (looking from the rotor end)');
+  const map = F => [F[2], -F[1]];
+  for (const L of LOADS) {
+    if (!S.vis[L.fam]) continue;
+    const gg = group(svg, L);
+    const pz = Zc(L.r[2]), py = Y(L.r[1]);
+    if (L.id === 'Fd') { forceArrow(gg, pz, py, L.F, map, lbl(560) + ' drag (+z)'); const g2 = group(svg, L); momentInPlane(g2, Zc(0) + 150, Y(-g.h / 2 - 90), false, null, 18); putLabel(g2, Zc(0) + 60, Y(-g.h / 2 - 185), lbl(-560 * (g.h / 2 + 500) / 1000, 'N·m') + ' about x (drag × lever)'); continue; }
+    if (L.id === 'Tw') { momentAboutVertical(gg, pz, Y(g.h / 2 + 330), true, lbl(L.M[1], 'N·m') + ' about +y'); continue; }
+    if (L.fam === 'weight') { if (L.id === 'Wr') { forceArrow(gg, pz, py, L.F, map, null); putLabel(gg, pz - 10, py + 40, lbl(-L.F[1]) + ' rotor', 'end'); } else { const off = L.id === 'Wg' ? 56 : L.id === 'Wd' ? 28 : 0; arrow(gg, Zc(0), Y(g.h / 2) - 30 - off, Zc(0), Y(g.h / 2) - 4 - off, null); putLabel(gg, Zc(0) - 12, Y(g.h / 2) - 14 - off, lbl(-L.F[1]) + (L.id === 'Wb' ? ' beam' : L.id === 'Wg' ? ' generator' : ' plates'), 'end'); } continue; }
+    if (L.id === 'Bm' || L.id === 'Rm') { const M = L.M; if (Math.abs(M[0]) > 0.5) { momentInPlane(gg, Zc(0) + 150, Y(-g.h / 2 - 90), M[0] > 0, null, 18); putLabel(gg, Zc(0) + 60, Y(-g.h / 2 - 185), lbl(M[0], 'N·m') + ' Mx'); } continue; }
+    if (L.id === 'Bf' || L.id === 'Rf') { forceArrow(gg, pz, py, [0, L.F[1], L.F[2]], map, lbl(Math.hypot(L.F[1], L.F[2])) + ' (y,z part)'); continue; }
+    if (L.id === 'Of' || L.id === 'Or') { const zz = L.id === 'Of' ? Zc(g.zB) + 16 : Zc(-g.zB) - 16; forceArrow(gg, zz, Y(0), [0, L.F[1], 0], map, null, 40); putLabel(gg, L.id === 'Of' ? zz + 6 : zz - 6, Y(g.h / 2) - 40, `O ${L.id === 'Of' ? 'front' : 'rear'} y: ${fmt(L.F[1], 0)} N`, L.id === 'Of' ? 'start' : 'end'); if (L.F[2]) { const g2 = group(svg, L); const yz = Y(-g.h / 2 - 40); arrow(g2, Zc(g.zB) + 70, yz, Zc(g.zB) + 16, yz, null); putLabel(g2, Zc(g.zB) + 76, yz + 4, lbl(L.F[2]) + ' z, front face'); } continue; }
+    if (L.id === 'Af' || L.id === 'Ar') { const zz = L.id === 'Af' ? Zc(g.zD) : Zc(-g.zD); forceArrow(gg, zz, Y(300), [0, L.F[1], 0], map, null, 46); putLabel(gg, L.id === 'Af' ? zz + 8 : zz - 8, Y(300) + (L.F[1] > 0 ? -52 : 60), `${L.id === 'Af' ? 'front' : 'rear'} plate y: ${fmt(L.F[1], 0)} N`, L.id === 'Af' ? 'start' : 'end'); continue; }
+    if (L.fam === 'chain') continue;  // along x: shown in the other two views
+    forceArrow(gg, pz, py, L.F, map, lbl(Math.hypot(...L.F)));
+  }
+  return el('figure', {}, svg, el('figcaption', {}, 'End view (y–z) from the rotor end, y and z components only. This is where torsion lives: the drag far below the axis twists the beam about x, and the front and rear plates answer with unequal vertical forces (their x-components are in the other views).'));
+}
+
+function setHover(id) {
+  HOVER = id;
+  for (const svg of document.querySelectorAll('#views svg')) { svg.classList.toggle('has-hl', !!id); for (const gg of svg.querySelectorAll('.ld')) gg.classList.toggle('hl', gg.dataset.id === id); }
+  for (const tr of document.querySelectorAll('tr[data-id]')) tr.classList.toggle('hl', tr.dataset.id === id);
+}
+
+// ---------- walkthrough ----------
+function steps() {
+  const g = R.geom, pw = R.power, rx = R.reactions, M = R.sumExt.M, F = R.sumExt.F, d = rx.diag;
+  const al = d.alpha, ca = Math.cos(al), sa = Math.sin(al);
+  return [
+    { title: 'Geometry and frame', vis: {}, body: [
+      el('p', {}, `Origin at pin O on the beam's neutral axis; +x toward the fixed structure, +y up, +z toward the viewer of the side view ("Front"). The rotor axis is at x = −1200 mm, pin A at x = −${S.a} mm, pin B at (0, +500). The beam runs from x = −1300 to +50 mm.`),
+      el('p', {}, `Everything hangs off the beam height: with h = ${fmt(g.h, 1)} mm the chain line is at y = −(h/2 + 50) = ${fmt(g.yChain, 1)} mm, the CG at −(h/2 + 350) = ${fmt(g.yCG, 1)} mm and the COP at −(h/2 + 500) = ${fmt(g.yCOP, 1)} mm. The two plates sit on the beam faces at z = ±(w + t)/2 = ±${fmt(g.zD, 1)} mm; the bracket load lines at O are at z = ±(w + ½ in)/2 = ±${fmt(g.zB, 1)} mm.`),
+      el('div', { class: 'note' }, 'Change h or w in the control strip and watch the lever arms move: the drag lever (h/2 + 500) sets the torsion, the plate spacing (w + t) sets how hard the plates work to react it.')] },
+    { title: 'Power, torque and chain tension', vis: { chain: true, water: true }, body: [
+      el('div', { class: 'eq' }, `P_fluid = ½ ρ A v³ = ½ · 1000 · 0.25 · 2.5³ = ${fmt(pw.Pf, 0)} W\nP_mech  = 0.30 · P_fluid = ${fmt(pw.Pm, 0)} W      P_elec = 0.82 · P_mech = ${fmt(pw.Pe, 0)} W\nω = 285 rpm = ${fmt(pw.omega, 2)} rad/s   τ = P_mech / ω = ${fmt(pw.tau, 2)} N·m about +y\nT = τ / r_pitch = ${fmt(pw.tau, 2)} / ${fmt(pw.R1 / 1000, 4)} m = ${fmt(pw.T, 1)} N on the tight side, 0 on the slack side (no preload)`),
+      el('p', {}, 'Which side is tight: the rotor sprocket drives and turns +y. On its −z (rear) side the sprocket surface moves away from the generator, so it pulls chain toward itself from the generator: that run is tight. The bottom view draws it as the solid line; the +z run is slack.'),
+      el('p', {}, `The tight run is tangent to both pitch circles, so it is tilted ${fmt(g.chainTheta * 180 / Math.PI, 2)}° from x (radii differ by ${fmt(pw.R1 - pw.R2, 1)} mm over a ${fmt(g.xGen + 1200, 0)} mm center distance). That tilt is small but it matters in step 5.`)] },
+    { title: 'What the rotor hands to the beam', vis: { water: true, chain: true, weight: true, bearing: true }, body: [
+      el('p', {}, 'Isolate the rotor assembly (rotor, shaft, sprocket). It is loaded by the water torque, the drag, its weight and the chain pull, and it is held by the two shaft-box bearings. Bearings transmit forces, and because there are two of them a distance apart they transmit moments about x and z, but a bearing cannot resist rotation about its own axis y.'),
+      el('div', { class: 'eq' }, `Σ M_y about the shaft axis on the rotor = 0:\n  + τ_water − T · r_pitch = ${fmt(pw.tau, 2)} − ${fmt(pw.T, 1)} · ${fmt(pw.R1 / 1000, 4)} = 0  ✓\nSo the bearings carry no y-moment, and the beam receives only forces plus Mx and Mz:\n  F_box = W_rotor + F_drag + T_chain = (${fmt(R.bearing.F[0], 1)}, ${fmt(R.bearing.F[1], 1)}, ${fmt(R.bearing.F[2], 1)}) N\n  M_box about the beam axis at x = −1200 = (${fmt(R.bearing.M[0], 1)}, ${fmt(R.bearing.M[1], 2)}, ${fmt(R.bearing.M[2], 1)}) N·m`),
+      el('p', {}, 'Mx is the drag times its lever below the axis (that is the torsion), Mz is the chain pull times its 100 mm offset below the axis. Switch the free body to "rotor assembly alone" or "beam alone" in the control strip to see each side of this hand-off.')] },
+    { title: 'Weights', vis: { weight: true }, body: [
+      el('p', {}, `Four weights: rotor assembly 150 N at the CG, generator 120 N on its shaft axis, the beam's own ${fmt(g.Wbeam, 0)} N at its midpoint (x = ${fmt((g.xL + g.xRend) / 2, 0)} mm), and half of each plate's weight (${fmt(-R.loads[7].F[1], 1)} N together) at pin A. A vertical force's moment about O depends only on its x, so the beam height does not enter here.`),
+      el('div', { class: 'eq' }, `Σ M_z about O from the weights = ${R.sysLoads.filter(l => l.fam === 'weight').map(l => `(${fmt(l.r[0], 0)})(${fmt(l.F[1], 0)})`).join(' + ')} N·mm\n                                 = ${fmt(R.sysLoads.filter(l => l.fam === 'weight').reduce((s, l) => s + l.Mo[2], 0), 1)} N·m  (positive: the weights hang the beam down about O)`)] },
+    { title: 'The drag and its two moments', vis: { water: true }, body: [
+      el('p', {}, 'The 560 N drag acts in +z at the COP, out of the side-view page. It does three things: it is a sideways force the pins must carry; it bends the beam sideways (moment about y, lever = 1200 mm from O); and because it acts (h/2 + 500) mm below the beam axis it twists the beam (moment about x). Only the end view shows the twist.'),
+      el('div', { class: 'eq' }, `r × F with r = (−1200, ${fmt(g.yCOP, 1)}, 0) mm, F = (0, 0, 560) N:\n  M_x = y·F_z − z·F_y = (${fmt(g.yCOP, 1)})(560)/1000 = ${fmt(g.yCOP * 560 / 1000, 1)} N·m   (torsion)\n  M_y = z·F_x − x·F_z = −(−1200)(560)/1000 = ${fmt(1200 * 560 / 1000, 1)} N·m   (sideways bending about O)\n  M_z = x·F_y − y·F_x = 0`),
+      el('p', {}, 'Requirement 10 says pin O cannot react the torsion, so the full M_x has to be carried by the two plates as a pair of unequal vertical forces. That one sentence is why the plates see kilonewtons while the weights only need a few hundred newtons.')] },
+    { title: 'The chain pair cancels, the water torque does not', vis: { chain: true, water: true }, body: [
+      el('p', {}, 'The chain pulls on both sprockets, and both sprockets are on this free body. The two forces are equal, opposite and on the same line, so together they contribute no net force and no net moment: a null system. You may leave them off the whole-system FBD, but keep the water torque, which is external.'),
+      el('div', { class: 'eq' }, `Σ M_y about O from C1 + C2 = ${fmt(R.sysLoads[3].Mo[1] + R.sysLoads[4].Mo[1], 2)} N·m   (${S.chain === 'exact' ? 'exact tangent line: zero' : 'x-only approximation: not zero, this is the error'})\nΣ M_y the pins must react = drag ${fmt(1200 * 0.56, 1)} + water torque ${fmt(pw.tau, 2)} = ${fmt(M[1], 1)} N·m`),
+      el('div', { class: 'note warn' }, `Switch the chain line to "parallel to x" in the control strip: the two forces are then at different z (−${fmt(pw.R1, 0)} and −${fmt(pw.R2, 0)} mm) and no longer collinear, which invents a couple of (r₁ − r₂)·T = ${fmt((pw.R1 - pw.R2) / 1000 * pw.T, 1)} N·m about y. The free body is then not in equilibrium. Draw the chain force along the real tangent.`)] },
+    { title: 'Unknowns and the count', vis: { pin: true, plate: true }, body: [
+      el('p', {}, 'Each plate is pinned at both ends and carries nothing but its own small weight in between, so it is a two-force member: its force on the beam lies along A–B, unknown magnitude only. Two plates: F_front and F_rear (tension positive). Pin O has a front and a rear bracket: Ox_front, Ox_rear, Oy_front, Oy_rear, and a z-force. That is seven unknowns for six equations.'),
+      el('p', {}, 'Requirement 10 removes one: pin O carries no moment about x, so Oy_front = Oy_rear. The z-force goes to the front bracket face (the drag pushes the beam against it). Six unknowns, six equations, statically determinate.'),
+      el('div', { class: 'eq' }, `unit vector A→B:  e = (cos α, sin α, 0) = (${fmt(ca, 4)}, ${fmt(sa, 4)}, 0),  α = atan(500/${S.a}) = ${fmt(al * 180 / Math.PI, 1)}°\nfront plate on beam at (−${S.a}, 0, +${fmt(g.zD, 1)}):  F_f · e      rear plate at (−${S.a}, 0, −${fmt(g.zD, 1)}):  F_r · e\nfront bracket at (0, 0, +${fmt(g.zB, 1)}): (Ox_f, Oy, Oz)      rear bracket at (0, 0, −${fmt(g.zB, 1)}): (Ox_r, Oy, 0)`)] },
+    { title: 'Solve: three moment equations decouple', vis: { pin: true, plate: true, water: true, weight: true }, body: [
+      el('div', { class: 'eq' }, `Σ M_z = 0:  ${fmt(M[2], 1)} − a sinα (F_f + F_r) = 0\n   ⇒ F_f + F_r = ${fmt(M[2], 1)} / (${fmt(S.a / 1000, 3)} · ${fmt(sa, 4)}) = ${fmt(d.Ff + d.Fr, 0)} N        (the weights, shared by both plates)\n\nΣ M_x = 0:  ${fmt(M[0], 1)} − z_d sinα (F_f − F_r) = 0\n   ⇒ F_f − F_r = ${fmt(M[0], 1)} / (${fmt(g.zD / 1000, 4)} · ${fmt(sa, 4)}) = ${fmt(d.Ff - d.Fr, 0)} N        (the torsion, as a difference)\n\n   F_front = ${fmt(d.Ff, 0)} N (${d.Ff < 0 ? 'compression' : 'tension'})     F_rear = ${fmt(d.Fr, 0)} N (${d.Fr < 0 ? 'compression' : 'tension'})\n\nΣ M_y = 0:  ${fmt(M[1], 1)} + z_d cosα (F_f − F_r) + z_b (Ox_f − Ox_r) = 0\n   plates' share: z_d cosα (F_f − F_r) = ${fmt(g.zD / 1000 * ca * (d.Ff - d.Fr), 1)} N·m   (fixed by the torsion result)\n   ⇒ Ox_f − Ox_r = ${fmt(rx.Oxdiff, 0)} N over the ${fmt(2 * g.zB, 1)} mm bracket spacing`),
+      el('p', {}, 'Read the structure: the vertical loads set the plate sum, the torsion sets the plate difference, and the sideways bending is split between the plates (through the inclined geometry, cot α of the torsion) and the pin-O bracket pair. Nothing about stiffness enters because the system is determinate.')] },
+    { title: 'Solve: force equations give the totals', vis: { pin: true, plate: true, water: true, weight: true }, body: [
+      el('div', { class: 'eq' }, `Σ F_x = 0:  Ox_f + Ox_r + (F_f + F_r) cosα + ${fmt(F[0], 1)} = 0   ⇒  Ox_f + Ox_r = ${fmt(rx.O_total[0], 0)} N\nΣ F_y = 0:  2·Oy + (F_f + F_r) sinα + (${fmt(F[1], 1)}) = 0        ⇒  Oy = ${fmt(rx.O_total[1] / 2, 0)} N each side\nΣ F_z = 0:  Oz + ${fmt(F[2], 1)} = 0                                   ⇒  Oz = ${fmt(rx.O_total[2], 0)} N on the front bracket face`),
+      el('div', { class: 'eq' }, `Front / Rear loads (force on the beam, N):\n  O front  (${fmt(rx.O_front[0], 0)}, ${fmt(rx.O_front[1], 0)}, ${fmt(rx.O_front[2], 0)})     O rear  (${fmt(rx.O_rear[0], 0)}, ${fmt(rx.O_rear[1], 0)}, 0)\n  A front  (${fmt(rx.A_front[0], 0)}, ${fmt(rx.A_front[1], 0)}, 0)        A rear  (${fmt(rx.A_rear[0], 0)}, ${fmt(rx.A_rear[1], 0)}, 0)\n  B = −A for each plate (two-force member)`),
+      el('p', {}, `Equilibrium check with every load and reaction: Σ F = (${R.residual.F.map(v => fmt(v, 3)).join(', ')}) N, Σ M_O = (${R.residual.M.map(v => fmt(v, 3)).join(', ')}) N·m.`),
+      el('div', { class: 'note' }, 'Move the slider: the plate difference barely changes with a (the torsion lever does not), but the plate sum and the pin-O x-split trade off with a and with the plate angle. That trade-off is the whole design question for the diagonal position.')] },
+  ];
+}
+
+// ---------- tables ----------
+function table(head, rows, o = {}) {
+  const t = el('table', {}, el('thead', {}, el('tr', {}, head.map((h, i) => el('th', { class: (o.numFrom !== undefined && i >= o.numFrom) ? 'num' : '' }, h)))));
+  const tb = el('tbody'); for (const r of rows) { const tr = el('tr', { 'data-id': r.id || null }, r.cells.map((c, i) => el('td', { class: (o.numFrom !== undefined && i >= o.numFrom) ? 'num' : '' }, c))); if (r.id) { tr.addEventListener('mouseenter', () => setHover(r.id)); tr.addEventListener('mouseleave', () => setHover(null)); } tb.append(tr); }
+  if (o.foot) tb.append(el('tr', { class: 'total' }, o.foot.map((c, i) => el('td', { class: (o.numFrom !== undefined && i >= o.numFrom) ? 'num' : '' }, c))));
+  t.append(tb); return t;
+}
+function renderTables() {
+  const host = $('#tables'); host.innerHTML = '';
+  const loads = LOADS;
+  const rows = loads.map(l => ({ id: l.id, cells: [el('span', {}, el('span', { class: 'sw', style: `--c:${l.color}; margin-right:6px` }), l.name + (l.unknown ? ' (unknown, solved)' : l.internal ? ' (internal pair)' : '')), fmt(l.r[0], 1), fmt(l.r[1], 1), fmt(l.r[2], 1), fmt(l.F[0], 1), fmt(l.F[1], 1), fmt(l.F[2], 1), fmt(l.Mo[0], 2), fmt(l.Mo[1], 2), fmt(l.Mo[2], 2)] }));
+  const tot = [0, 1, 2].map(i => loads.reduce((s, l) => s + l.F[i], 0)), totM = [0, 1, 2].map(i => loads.reduce((s, l) => s + l.Mo[i], 0));
+  host.append(el('h2', {}, 'Load table for this free body: coordinates, components, and each load\u2019s moment about O'),
+    el('p', { style: 'color: var(--fg-2); font-size: 13px; max-width: 80ch' }, 'Mx, My, Mz are r × F for each load (plus any applied couple). The last row is the equilibrium check: with the solved reactions included every column sums to zero. Hover a row to find its arrow.'),
+    el('div', { class: 'tablewrap' }, table(['Load', 'x (mm)', 'y (mm)', 'z (mm)', 'Fx (N)', 'Fy (N)', 'Fz (N)', 'Mx (N·m)', 'My (N·m)', 'Mz (N·m)'], rows, { numFrom: 1, foot: ['Sum (loads + reactions)', '', '', '', fmt(tot[0], 1), fmt(tot[1], 1), fmt(tot[2], 1), fmt(totM[0], 2), fmt(totM[1], 2), fmt(totM[2], 2)] })),
+    el('p', { style: 'color: var(--fg-2); font-size: 13px; max-width: 80ch' }, 'Why each load is there:'),
+    el('ul', { style: 'font-size: 13px; color: var(--fg-2); max-width: 80ch; margin: 0; padding-left: 20px' }, loads.map(l => el('li', {}, el('b', {}, l.name + ': '), l.why || ''))));
+}
+
+// ---------- render ----------
+function renderViews() {
+  const host = $('#views'); host.innerHTML = '';
+  const sysName = { system: 'Beam + rotor assembly + generator + chain (the system the rubric\u2019s load table describes)', beam: 'Support beam alone: bearing resultant from the shaft box, generator-side chain force, weights, pins', rotor: 'Rotor assembly alone: how the water torque is balanced by the chain', plate: 'One diagonal plate: a two-force member' }[S.system];
+  host.append(el('h2', {}, 'Free-body views', el('span', { class: 'pill info' }, `a = ${S.a} mm`), el('span', { class: 'pill ' + (R.residual.F.every(v => Math.abs(v) < 1e-3) ? 'ok' : 'bad') }, 'equilibrium residual 0')), el('p', { style: 'color: var(--fg-2); font-size: 13px' }, sysName));
+  host.append(sideView());
+  const two = el('div', { class: 'viewsgrid' }); two.append(bottomView(), endView()); host.append(two);
+}
+function renderWalk() {
+  const host = $('#walk'); host.innerHTML = '';
+  host.id = 'walk';
+  const st = steps(); if (S.step >= st.length) S.step = 0;
+  host.append(el('h2', {}, 'Where the forces come from'), el('p', { style: 'color: var(--fg-2); font-size: 13px' }, 'Pick a step: the views dim everything except the loads that step is about.'));
+  const list = el('div', { class: 'steps' }); st.forEach((s, i) => list.append(el('button', { class: 'stepbtn', 'aria-current': String(S.step === i), onclick: () => { S.step = i; applyStepVis(); render(); } }, el('b', {}, String(i + 1)), s.title))); host.append(list);
+  const cur = st[S.step];
+  host.append(el('div', { class: 'stepbody' }, el('h3', {}, `${S.step + 1}. ${cur.title}`), ...cur.body));
+  host.append(el('div', { class: 'nav' }, el('button', { disabled: S.step === 0, onclick: () => { S.step--; applyStepVis(); render(); } }, '← Previous'), el('button', { class: 'primary', disabled: S.step === st.length - 1, onclick: () => { S.step++; applyStepVis(); render(); } }, 'Next →')));
+}
+function applyStepVis() { const st = steps(); const v = st[S.step].vis; const all = Object.keys(v).length === 0; for (const k of Object.keys(S.vis)) S.vis[k] = all ? true : !!v[k]; syncToggles(); }
+function syncToggles() {
+  const t = $('#toggles'); t.innerHTML = '';
+  for (const [k, f] of Object.entries(FAMILY)) t.append(el('label', {}, el('input', { type: 'checkbox', checked: S.vis[k], onchange: e => { S.vis[k] = e.target.checked; render(); } }), el('span', { class: 'sw', style: `--c:${f.color}` }), f.name));
+}
+function render() { compute(); renderViews(); renderWalk(); renderTables(); $('#aVal').textContent = S.a; save(); }
+function bind() {
+  $('#a').addEventListener('input', e => { S.a = +e.target.value; render(); });
+  $('#h').addEventListener('change', e => { S.h = Math.max(1, +e.target.value); render(); });
+  $('#w').addEventListener('change', e => { S.w = Math.max(4, +e.target.value); render(); });
+  $('#td').addEventListener('change', e => { S.td = Math.max(0.0625, +e.target.value); render(); });
+  $('#xGen').addEventListener('change', e => { S.xGen = +e.target.value; render(); });
+  $('#chain').addEventListener('change', e => { S.chain = e.target.value; render(); });
+  $('#system').addEventListener('change', e => { S.system = e.target.value; render(); });
+  $('#labels').addEventListener('change', e => { S.labels = e.target.checked; render(); });
+  window.addEventListener('resize', () => renderViews());
+}
+$('#a').value = S.a; $('#h').value = S.h; $('#w').value = S.w; $('#td').value = S.td; $('#xGen').value = String(S.xGen); $('#chain').value = S.chain; $('#system').value = S.system; $('#labels').checked = S.labels;
+syncToggles(); bind(); render();
+</script>
+</body></html>

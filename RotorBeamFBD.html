@@ -1,0 +1,717 @@
+<title>Rotor Beam Free Body</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..700&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an engineer's bench. Givens strip on top, the 3D free body (left) beside the equation stepper (right), then load path, tables and assumptions. Stacks to one column on phones. */
+:root {
+  --bg: #edf0f3; --surface: #fafbfc; --surface-2: #e4e8ed; --fg: #12161b; --fg-2: #4a5361; --muted: #737d8b;
+  --line: #d3d9e0; --line-2: #bcc4ce; --accent: #2752c9; --accent-soft: #dde5fa; --accent-ink: #ffffff;
+  --c-grav: #4b5bd0; --c-water: #0d8a85; --c-pinO: #c02a4b; --c-plate: #cf5f12; --c-chain: #a07a00; --c-bad: #c02a4b; --c-good: #1b7f3a;
+  --ghost: #98a2af; --body-1: #d6dce4; --body-2: #c5ccd6; --body-3: #b4bdc9; --body-edge: #5d6775;
+  --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --font: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1115; --surface: #161a20; --surface-2: #1f242c; --fg: #e6eaef; --fg-2: #aab3c0; --muted: #7c8695;
+  --line: #2a313b; --line-2: #3a4350; --accent: #86a8ff; --accent-soft: #1d2a4a; --accent-ink: #0b1430;
+  --c-grav: #9aa6ff; --c-water: #3cc9c0; --c-pinO: #ff6f8c; --c-plate: #ff9b52; --c-chain: #e2bb3a; --c-bad: #ff6f8c; --c-good: #5fd17f;
+  --ghost: #566070; --body-1: #2b323d; --body-2: #333b47; --body-3: #3c4552; --body-edge: #8d98a8; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0e1115; --surface: #161a20; --surface-2: #1f242c; --fg: #e6eaef; --fg-2: #aab3c0; --muted: #7c8695;
+  --line: #2a313b; --line-2: #3a4350; --accent: #86a8ff; --accent-soft: #1d2a4a; --accent-ink: #0b1430;
+  --c-grav: #9aa6ff; --c-water: #3cc9c0; --c-pinO: #ff6f8c; --c-plate: #ff9b52; --c-chain: #e2bb3a; --c-bad: #ff6f8c; --c-good: #5fd17f;
+  --ghost: #566070; --body-1: #2b323d; --body-2: #333b47; --body-3: #3c4552; --body-edge: #8d98a8; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.5; margin: 0; padding-inline: 16px; padding-block: 0 56px; }
+h1, h2, h3 { font-family: var(--font-display); font-stretch: 82%; font-weight: 650; margin: 0; text-wrap: balance; letter-spacing: -0.005em; }
+h1 { font-size: clamp(28px, 4vw, 38px); line-height: 1.05; }
+h2 { font-size: 20px; }
+h3 { font-size: 15.5px; }
+p { margin: 0; }
+sub { font-size: 0.72em; line-height: 0; }
+.mono, .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1480px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.eyebrow { font-size: 11.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+header.top { padding-block: 22px 4px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 28px; align-items: end; }
+header.top .lede { color: var(--fg-2); max-width: 68ch; margin-top: 8px; }
+@media (max-width: 860px) { header.top { grid-template-columns: minmax(0, 1fr); } }
+.givens { display: grid; grid-template-columns: repeat(3, auto); gap: 4px 22px; font-size: 13px; color: var(--fg-2); }
+.givens b { font-family: var(--font-mono); font-weight: 500; color: var(--fg); font-size: 12.5px; }
+@media (max-width: 520px) { .givens { grid-template-columns: repeat(2, auto); } }
+
+.controls { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: flex-end; }
+.field { display: flex; flex-direction: column; gap: 3px; font-size: 12.5px; color: var(--fg-2); min-width: 0; }
+.field > span { white-space: nowrap; }
+.field output { font-family: var(--font-mono); color: var(--fg); font-size: 12.5px; }
+input[type=number], select { font: inherit; font-size: 13.5px; color: var(--fg); background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 5px; padding: 4px 7px; max-width: 100%; }
+input[type=number] { width: 78px; font-family: var(--font-mono); font-size: 12.5px; }
+input[type=range] { width: 190px; accent-color: var(--accent); }
+.check { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--fg-2); cursor: pointer; }
+input[type=checkbox] { accent-color: var(--accent); }
+button { font: inherit; font-size: 13px; font-weight: 500; color: var(--fg); background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 5px; padding: 4px 10px; cursor: pointer; }
+button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(330px, 420px); gap: 16px; align-items: start; }
+@media (max-width: 1080px) { .main { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+.viewer { position: relative; overflow: hidden; }
+.vbar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.seg { display: inline-flex; gap: 0; }
+.seg button { border-radius: 0; margin-left: -1px; }
+.seg button:first-child { border-radius: 5px 0 0 5px; margin-left: 0; }
+.seg button:last-child { border-radius: 0 5px 5px 0; }
+.layers { display: flex; flex-wrap: wrap; gap: 4px 14px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+.sw { width: 11px; height: 11px; border-radius: 2px; display: inline-block; background: var(--c); }
+#scene { display: block; width: 100%; height: auto; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+#scene.drag { cursor: grabbing; }
+.vfoot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; padding: 8px 12px 10px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line-2); border-radius: 6px; padding: 7px 9px; font-size: 12.5px; box-shadow: 0 6px 18px rgb(0 0 0 / 0.14); max-width: 280px; z-index: 4; }
+.tip .t { font-weight: 600; margin-bottom: 2px; }
+.tip .mono { font-size: 11.5px; color: var(--fg-2); }
+
+/* SVG classes */
+.g-ghost { fill: none; stroke: var(--ghost); stroke-width: 1; stroke-dasharray: 4 3; }
+.g-ghost-fill { fill: var(--ghost); fill-opacity: 0.07; stroke: var(--ghost); stroke-width: 1; stroke-dasharray: 4 3; }
+.f1 { fill: var(--body-1); } .f2 { fill: var(--body-2); } .f3 { fill: var(--body-3); }
+.edge { stroke: var(--body-edge); stroke-width: 1; stroke-linejoin: round; }
+.thin { fill: none; stroke: var(--body-edge); stroke-width: 1; }
+.chainT { fill: none; stroke: var(--c-chain); stroke-width: 2.2; }
+.chainS { fill: none; stroke: var(--body-edge); stroke-width: 1; stroke-dasharray: 3 3; }
+.axis { stroke: var(--fg-2); stroke-width: 1.2; }
+.axlbl { fill: var(--fg-2); font: italic 600 13px var(--font); }
+.ptlbl { fill: var(--fg); font: 600 12px var(--font-display); font-stretch: 85%; paint-order: stroke; stroke: var(--surface); stroke-width: 3.5px; stroke-linejoin: round; }
+.ptdot { fill: var(--surface); stroke: var(--fg); stroke-width: 1.3; }
+.lbl { font: 500 12px var(--font-mono); paint-order: stroke; stroke: var(--surface); stroke-width: 3.5px; stroke-linejoin: round; }
+.arm { stroke: var(--accent); stroke-width: 1.4; stroke-dasharray: 5 4; fill: none; }
+.armaxis { stroke: var(--accent); stroke-width: 3; opacity: 0.55; }
+.armlbl { fill: var(--accent); font: 600 12px var(--font-mono); paint-order: stroke; stroke: var(--surface); stroke-width: 3.5px; }
+.hit { stroke: transparent; stroke-width: 16; fill: none; pointer-events: stroke; cursor: help; }
+.mk.dim { opacity: 0.13; }
+.mk.internal path.shaft { stroke-dasharray: 6 4; }
+
+/* Equation stepper */
+.eqpanel { display: flex; flex-direction: column; }
+.eqhead { padding: 12px 14px 8px; display: flex; flex-direction: column; gap: 4px; border-bottom: 1px solid var(--line); }
+.eqhead p { font-size: 13px; color: var(--fg-2); }
+.eqlist { list-style: none; margin: 0; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+.eqbtn { width: 100%; text-align: left; display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 2px 10px; align-items: baseline; background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 7px 8px; }
+.eqbtn:hover { background: var(--surface-2); }
+.eqbtn[aria-pressed="true"] { background: var(--accent-soft); color: var(--fg); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.eqbtn .n { font-family: var(--font-mono); color: var(--muted); font-size: 12px; }
+.eqbtn .e { font-family: var(--font-display); font-stretch: 85%; font-weight: 650; font-size: 15px; }
+.eqbtn .s { grid-column: 2 / 4; font-size: 12.5px; color: var(--fg-2); }
+.eqbtn .r { font-family: var(--font-mono); font-size: 12.5px; white-space: nowrap; }
+.eqdetail { border-top: 1px solid var(--line); padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; }
+.eqdetail .why { font-size: 13.5px; color: var(--fg-2); }
+.terms { display: flex; flex-direction: column; gap: 5px; }
+.term { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) 64px; gap: 8px; align-items: center; font-size: 12.5px; }
+.term .nm { min-width: 0; }
+.term .nm small { display: block; color: var(--muted); font-family: var(--font-mono); font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar { position: relative; height: 12px; background: var(--surface-2); border-radius: 2px; }
+.bar::after { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--line-2); }
+.bar i { position: absolute; top: 1px; bottom: 1px; background: var(--c); border-radius: 1px; }
+.term .v { font-family: var(--font-mono); text-align: right; font-size: 12px; }
+.term.sum { border-top: 1px solid var(--line); padding-top: 6px; font-weight: 600; }
+.solved { background: var(--surface-2); border-radius: 6px; padding: 8px 10px; font-size: 13.5px; }
+.solved .mono { font-size: 12.5px; }
+
+/* Lower sections */
+section.block { display: flex; flex-direction: column; gap: 10px; }
+.paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+.path { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; border-top: 3px solid var(--c); }
+.path p { font-size: 13.5px; color: var(--fg-2); }
+.path .eqn { font-family: var(--font-mono); font-size: 12.5px; color: var(--fg); background: var(--surface-2); border-radius: 4px; padding: 5px 7px; overflow-x: auto; white-space: nowrap; }
+.tablewrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 6px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+th { font-weight: 600; color: var(--fg-2); font-size: 12px; background: var(--surface-2); }
+th:first-child, td:first-child { text-align: left; }
+td.num { font-size: 12.5px; }
+td .chip { display: inline-block; width: 9px; height: 9px; border-radius: 2px; background: var(--c); margin-right: 7px; }
+tr.grp td { background: color-mix(in srgb, var(--surface-2) 55%, transparent); font-weight: 600; font-size: 12px; color: var(--fg-2); text-align: left; }
+.note { font-size: 13px; color: var(--muted); max-width: 90ch; }
+.assume { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; max-width: 92ch; color: var(--fg-2); font-size: 14px; }
+.assume b { color: var(--fg); font-weight: 600; }
+.tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 0 6px; border-radius: 3px; line-height: 1.6; }
+.tag.T { color: var(--c-good); background: color-mix(in srgb, var(--c-good) 14%, transparent); }
+.tag.C { color: var(--c-bad); background: color-mix(in srgb, var(--c-bad) 14%, transparent); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">ME 3180 · Design Problem 1 · Support beam free-body diagram</div>
+      <h1>Rotor Beam Free Body</h1>
+      <p class="lede">The system is the support beam plus everything mounted on it: shaft box, rotor, sprockets, chain and generator. It is cut free at pin O (two brackets) and at pin A (two diagonal plates). Drag the drawing to orbit it. Pick an equation on the right to see which forces enter it, how far each sits from the axis, and what the equation solves for.</p>
+    </div>
+    <div class="givens" id="givens"></div>
+  </header>
+
+  <section class="controls" aria-label="Geometry inputs">
+    <label class="field" for="in-a"><span>Diagonal-to-beam pin, a = <output id="out-a">500</output> mm from O</span><input id="in-a" type="range" min="250" max="800" step="10" value="500"></label>
+    <label class="field" for="in-h"><span>Beam height h (in)</span><input id="in-h" type="number" min="1" max="10" step="0.25" value="4"></label>
+    <label class="field" for="in-w"><span>Beam width w (in, ≥ 4)</span><input id="in-w" type="number" min="4" max="10" step="0.25" value="4"></label>
+    <label class="field" for="in-tp"><span>Plate thickness (in)</span>
+      <select id="in-tp"><option value="0.1875">3/16</option><option value="0.25" selected>1/4</option><option value="0.375">3/8</option><option value="0.5">1/2</option></select></label>
+    <label class="field" for="in-bp"><span>Plate width (in)</span><input id="in-bp" type="number" min="1" max="6" step="0.25" value="2"></label>
+    <label class="field" for="in-xg"><span>Generator sprocket position</span>
+      <select id="in-xg"><option value="fig" selected>x = −197 mm (Fig. 2, 39.49 in from rotor)</option><option value="alt">x = −50 mm (alternate reading)</option></select></label>
+    <label class="check" for="in-sw"><input id="in-sw" type="checkbox" checked> Include self weight</label>
+    <label class="field" for="in-bw"><span>Beam N/m</span><input id="in-bw" type="number" min="0" step="1" value="189.9"></label>
+    <label class="field" for="in-pw"><span>Each plate N/m</span><input id="in-pw" type="number" min="0" step="0.1" value="25.3"></label>
+    <label class="field" for="in-sc"><span>Arrow length</span>
+      <select id="in-sc"><option value="sqrt" selected>∝ √|F| (small loads visible)</option><option value="lin">∝ |F| (true proportion)</option></select></label>
+  </section>
+
+  <div class="main">
+    <div class="panel viewer" id="viewer">
+      <div class="vbar">
+        <div class="seg" role="group" aria-label="Free body">
+          <button id="sys-beam" aria-pressed="true">Beam assembly</button>
+          <button id="sys-plate" aria-pressed="false">Diagonal plates</button>
+        </div>
+        <div class="seg" role="group" aria-label="View">
+          <button data-view="iso" aria-pressed="true">Iso</button>
+          <button data-view="side" aria-pressed="false">Side (+z)</button>
+          <button data-view="top" aria-pressed="false">Top</button>
+          <button data-view="bottom" aria-pressed="false">Bottom</button>
+          <button data-view="end" aria-pressed="false">End (−x)</button>
+        </div>
+        <div class="seg" role="group" aria-label="Zoom">
+          <button id="zout" aria-label="Zoom out">−</button>
+          <button id="zin" aria-label="Zoom in">+</button>
+        </div>
+      </div>
+      <div class="layers" aria-label="Layers">
+        <label class="check"><input type="checkbox" id="ly-applied" checked><span class="sw" style="--c:var(--c-grav)"></span><span class="sw" style="--c:var(--c-water)"></span> Applied loads</label>
+        <label class="check"><input type="checkbox" id="ly-react" checked><span class="sw" style="--c:var(--c-pinO)"></span><span class="sw" style="--c:var(--c-plate)"></span> Pin reactions</label>
+        <label class="check"><input type="checkbox" id="ly-chain"><span class="sw" style="--c:var(--c-chain)"></span> Chain pair (internal)</label>
+        <label class="check"><input type="checkbox" id="ly-ghost" checked> Removed parts</label>
+        <label class="check"><input type="checkbox" id="ly-labels" checked> Values</label>
+      </div>
+      <svg id="scene" viewBox="0 0 1000 620" role="img" aria-label="3D free-body diagram of the rotor support beam showing weights, water drag and torque, and the reactions at pin O and the two diagonal plates."></svg>
+      <div class="vfoot">
+        <span>Drag to orbit · hover or tap an arrow for its numbers · forces drawn on the body, at their true points</span>
+        <span id="legendnote"></span>
+      </div>
+      <div class="tip" id="tip" hidden></div>
+    </div>
+
+    <aside class="panel eqpanel" id="eqpanel" aria-label="Equilibrium equations"></aside>
+  </div>
+
+  <section class="block">
+    <div><div class="eyebrow">Load path</div><h2>Where each applied load ends up</h2></div>
+    <div class="paths" id="paths"></div>
+  </section>
+
+  <section class="block">
+    <div><div class="eyebrow">Deliverable table, Part A.2</div><h2>Applied loads on the beam assembly</h2></div>
+    <p class="note">Coordinates in the Figure 2 frame: origin at pin O on the beam's neutral axis, x along the beam toward the wall, y up, z toward the viewer of the side view (the “front”). The chain is internal to this system and is listed separately for the internal-load diagrams.</p>
+    <div class="tablewrap"><table id="tbl-loads"></table></div>
+  </section>
+
+  <section class="block">
+    <div><div class="eyebrow">Part B.1</div><h2>Pin loads, front and rear</h2></div>
+    <p class="note">Front is the +z side of each pin, rear is −z. O and A list the force the pin puts <i>on the beam</i>. B lists the force the pin puts <i>on the fixed bracket</i>; it is equal and opposite to the plate force at A because each plate is a two-force member. Size the pins on the largest magnitude.</p>
+    <div class="tablewrap"><table id="tbl-pins"></table></div>
+  </section>
+
+  <section class="block">
+    <div><div class="eyebrow">State these in the report</div><h2>Assumptions behind the numbers</h2></div>
+    <ol class="assume" id="assume"></ol>
+  </section>
+</div>
+
+<script>
+/* ---------- model: statics of the beam assembly (independent of the earlier lab) ---------- */
+const IN = 25.4;
+const S = { a: 500, h: 4, w: 4, tp: 0.25, bp: 2, tb: 0.5, xg: 'fig', selfW: true, beamNpm: 189.9, plateNpm: 25.3, scale: 'sqrt',
+  sys: 'beam', focus: null, theta: 0.62, phi: 0.36, zoom: 1,
+  ly: { applied: true, react: true, chain: false, ghost: true, labels: true } };
+
+const add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+const mul = (a, s) => [a[0] * s, a[1] * s, a[2] * s];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const crs = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const nrm = a => Math.hypot(a[0], a[1], a[2]);
+const unit = a => mul(a, 1 / nrm(a));
+
+function solveLin(A, b) {
+  const n = b.length, M = A.map((r, i) => [...r, b[i]]);
+  for (let c = 0; c < n; c++) {
+    let p = c; for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+    [M[c], M[p]] = [M[p], M[c]];
+    for (let r = 0; r < n; r++) if (r !== c) { const f = M[r][c] / M[c][c]; for (let k = c; k <= n; k++) M[r][k] -= f * M[c][k]; }
+  }
+  return M.map((r, i) => r[n] / r[i]);
+}
+
+function model(s) {
+  const h = s.h * IN, w = s.w * IN, tp = s.tp * IN, tb = s.tb * IN, bp = s.bp * IN, a = s.a;
+  const xg = s.xg === 'fig' ? -1200 + 39.49 * IN : -50;
+  const xL = -1300, xR = 50, yb = -h / 2, yc = yb - 50;
+  const omega = 285 * 2 * Math.PI / 60, Pfl = 0.5 * 1000 * 0.25 * 2.5 ** 3, Pm = 0.30 * Pfl, Pe = 0.82 * Pm, tau = Pm / omega;
+  const r1 = 9.554 * IN / 2, r2 = 3.038 * IN / 2, T = tau / (r1 / 1000);
+  const dC = xg + 1200, nx = (r1 - r2) / dC, nz = Math.sqrt(1 - nx * nx);
+  const P1 = [-1200 + r1 * nx, yc, -r1 * nz], P2 = [xg + r2 * nx, yc, -r2 * nz];   // tight span on −z
+  const Q1 = [-1200 + r1 * nx, yc, r1 * nz], Q2 = [xg + r2 * nx, yc, r2 * nz];     // slack span on +z
+  const u = unit(sub(P2, P1));
+  const zb = w / 2 + tb / 2, zp = w / 2 + tp / 2;
+  const L = Math.hypot(a, 500), ua = [a / L, 500 / L, 0], sa = 500 / L, ca = a / L;
+  const Lplate = L + bp;
+
+  const applied = [
+    { id: 'Wr', name: 'Rotor + shaft + sprocket weight', sym: 'W_r', cat: 'grav', p: [-1200, yb - 350, 0], F: [0, -150, 0], at: 'rotor CG, 350 mm below beam bottom' },
+    { id: 'D', name: 'Water drag', sym: 'D', cat: 'water', p: [-1200, yb - 500, 0], F: [0, 0, 560], at: 'center of pressure, 500 mm below beam bottom' },
+    { id: 'Tw', name: 'Water torque on rotor', sym: 'τ_w', cat: 'water', couple: true, p: [-1200, yb - 230, 0], F: [0, 0, 0], C: [0, tau, 0], at: 'couple about the rotor axis (free vector)' },
+    { id: 'Wg', name: 'Generator + sprocket weight', sym: 'W_g', cat: 'grav', p: [xg, h / 2, 0], F: [0, -120, 0], at: 'on the generator shaft axis (any y on that line)' },
+  ];
+  if (s.selfW) {
+    const Wb = s.beamNpm * (xR - xL) / 1000;
+    applied.push({ id: 'Wb', name: 'Beam self weight', sym: 'W_b', cat: 'grav', p: [(xL + xR) / 2, 0, 0], F: [0, -Wb, 0], at: `beam centroid, beam from x = ${xL} to +${xR} mm` });
+    const Wp = s.plateNpm * Lplate / 1000 / 2;
+    applied.push({ id: 'Wpf', name: 'Half of front plate weight', sym: 'W_p,f/2', cat: 'grav', p: [-a, 0, zp], F: [0, -Wp, 0], at: 'lumped at pin A, front' });
+    applied.push({ id: 'Wpr', name: 'Half of rear plate weight', sym: 'W_p,r/2', cat: 'grav', p: [-a, 0, -zp], F: [0, -Wp, 0], at: 'lumped at pin A, rear' });
+  }
+  const chain = [
+    { id: 'Ch1', name: 'Chain on rotor sprocket', sym: 'T_c', cat: 'chain', internal: true, p: P1, F: mul(u, T), at: 'tight span tangent point, rotor sprocket' },
+    { id: 'Ch2', name: 'Chain on generator sprocket', sym: 'T_c', cat: 'chain', internal: true, p: P2, F: mul(u, -T), at: 'tight span tangent point, generator sprocket' },
+  ];
+
+  const mO = it => add(crs(mul(it.p, 1e-3), it.F), it.C || [0, 0, 0]);
+  const Fapp = applied.reduce((acc, it) => add(acc, it.F), [0, 0, 0]);
+  const Mapp = applied.reduce((acc, it) => add(acc, mO(it)), [0, 0, 0]);
+
+  // unknowns: Ofx Orx Ofy Ory Oz Pf Pr ; 6 equilibrium rows + Req. 10 (Ofy = Ory)
+  const col = (p, f) => [...f, ...crs(mul(p, 1e-3), f)];
+  const cols = [col([0, 0, zb], [1, 0, 0]), col([0, 0, -zb], [1, 0, 0]), col([0, 0, zb], [0, 1, 0]), col([0, 0, -zb], [0, 1, 0]),
+    col([0, 0, zb], [0, 0, 1]), col([-a, 0, zp], ua), col([-a, 0, -zp], ua)];
+  const A = []; for (let r = 0; r < 6; r++) A.push(cols.map(c => c[r]));
+  A.push([0, 0, 1, -1, 0, 0, 0]);
+  const rhs = [...Fapp, ...Mapp].map(v => -v); rhs.push(0);
+  const [Ofx, Orx, Ofy, Ory, Oz, Pf, Pr] = solveLin(A, rhs);
+
+  const reactions = [
+    { id: 'Of', name: 'Pin O, front bracket', sym: 'O_f', cat: 'pinO', p: [0, 0, zb], F: [Ofx, Ofy, Oz], comps: true, inward: [[-1, 0, 0], [0, 0, 0], [0, 0, -1]] },
+    { id: 'Or', name: 'Pin O, rear bracket', sym: 'O_r', cat: 'pinO', p: [0, 0, -zb], F: [Orx, Ory, 0], comps: true, inward: [[-1, 0, 0], [0, 0, 0], [0, 0, 1]] },
+    { id: 'Af', name: 'Front plate on beam at A', sym: 'P_f', cat: 'plate', p: [-a, 0, zp], F: mul(ua, Pf), P: Pf, inward: mul(ua, -1) },
+    { id: 'Ar', name: 'Rear plate on beam at A', sym: 'P_r', cat: 'plate', p: [-a, 0, -zp], F: mul(ua, Pr), P: Pr, inward: mul(ua, -1) },
+  ];
+  const all = [...applied, ...reactions];
+  const resid = all.reduce((acc, it) => { const m = mO(it); return acc.map((v, i) => v + (i < 3 ? it.F[i] : m[i - 3])); }, [0, 0, 0, 0, 0, 0]);
+  return { h, w, tp, tb, bp, a, xg, xL, xR, yb, yc, Pfl, Pm, Pe, omega, tau, r1, r2, T, P1, P2, Q1, Q2, u, zb, zp, L, ua, sa, ca, Lplate,
+    applied, chain, reactions, Fapp, Mapp, Ofx, Orx, Ofy, Ory, Oz, Pf, Pr, mO, resid };
+}
+</script>
+<script>
+/* ---------- formatting ---------- */
+const fmt = (v, d = 0) => { const t = 0.5 * 10 ** -d; if (Math.abs(v) < t) v = 0; const s = Math.abs(v).toFixed(d); return (v < 0 ? '−' : '') + s; };
+const fmts = (v, d = 0) => (v > 0 && Math.abs(v) >= 0.5 * 10 ** -d ? '+' : '') + fmt(v, d);
+const subH = s => { const i = s.indexOf('_'); return i < 0 ? s : `${s.slice(0, i)}<sub>${s.slice(i + 1)}</sub>`; };
+const subS = s => { const i = s.indexOf('_'); return i < 0 ? s : `${s.slice(0, i)}<tspan baseline-shift="sub" font-size="9.5">${s.slice(i + 1)}</tspan>`; };
+const catVar = { grav: 'var(--c-grav)', water: 'var(--c-water)', pinO: 'var(--c-pinO)', plate: 'var(--c-plate)', chain: 'var(--c-chain)' };
+const AX = ['x', 'y', 'z'];
+
+/* ---------- marks: one arrow per drawn vector (pin O reactions split into components) ---------- */
+function marksFor(R) {
+  const out = [];
+  if (S.sys === 'beam') {
+    for (const it of R.applied) out.push({ it, kind: it.couple ? 'couple' : 'force', p: it.p, F: it.F, C: it.C, sym: it.sym, layer: 'applied', inward: null });
+    for (const it of R.reactions) {
+      if (it.comps) it.F.forEach((f, k) => { if (Math.abs(f) > 0.05) { const F = [0, 0, 0]; F[k] = f; out.push({ it, kind: 'force', p: it.p, F, sym: `${it.sym.replace('_', '_')},${AX[k]}`, comp: k, layer: 'react', inward: it.inward[k] }); } });
+      else out.push({ it, kind: 'force', p: it.p, F: it.F, sym: it.sym, layer: 'react', inward: it.inward });
+    }
+    for (const it of R.chain) out.push({ it, kind: 'force', p: it.p, F: it.F, sym: it.sym, layer: 'chain', inward: null, internal: true });
+  } else {
+    for (const [side, P, z] of [['f', R.Pf, R.zp], ['r', R.Pr, -R.zp]]) {
+      const name = side === 'f' ? 'Front plate' : 'Rear plate';
+      const itA = { id: 'pA' + side, name: `${name}: beam pushes/pulls at A`, cat: 'plate', P };
+      const itB = { id: 'pB' + side, name: `${name}: bracket at B`, cat: 'plate', P };
+      out.push({ it: itA, kind: 'force', p: [-R.a, 0, z], F: mul(R.ua, -P), sym: `A_${side}`, layer: 'react', inward: R.ua });
+      out.push({ it: itB, kind: 'force', p: [0, 500, z], F: mul(R.ua, P), sym: `B_${side}`, layer: 'react', inward: mul(R.ua, -1) });
+    }
+  }
+  return out;
+}
+function contrib(R, m, k) {
+  if (k < 3) return m.F[k];
+  const mm = add(crs(mul(m.p, 1e-3), m.F), m.C || [0, 0, 0]);
+  return mm[k - 3];
+}
+</script>
+<script>
+/* ---------- 3D projection (orthographic) ---------- */
+const W = 1000, H = 620;
+let R = model(S), CEN = [-590, -120, 0], SC = 0.42, M = null;
+function setMat() { M = { ct: Math.cos(S.theta), st: Math.sin(S.theta), cp: Math.cos(S.phi), sp: Math.sin(S.phi) }; SC = 0.42 * S.zoom; }
+function rot(v) { const x1 = v[0] * M.ct + v[2] * M.st, z1 = -v[0] * M.st + v[2] * M.ct, y1 = v[1]; return [x1, y1 * M.cp - z1 * M.sp, y1 * M.sp + z1 * M.cp]; }
+function P(p) { const q = rot(sub(p, CEN)); return [W / 2 + SC * q[0], H / 2 - SC * q[1], q[2]]; }
+const pts = arr => arr.map(p => { const q = P(p); return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ');
+
+function box(c, ax, hf, cls, ghost) {
+  // ax: three unit axes, hf: half sizes. returns [{depth, svg}]
+  const corner = (i, j, k) => add(add(add(c, mul(ax[0], i * hf[0])), mul(ax[1], j * hf[1])), mul(ax[2], k * hf[2]));
+  const faces = [];
+  for (let d = 0; d < 3; d++) for (const sgn of [-1, 1]) {
+    const n = mul(ax[d], sgn), e = [0, 1, 2].filter(x => x !== d);
+    const q = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([s1, s2]) => { const ijk = [0, 0, 0]; ijk[d] = sgn; ijk[e[0]] = s1; ijk[e[1]] = s2; return corner(...ijk); });
+    const vis = rot(n)[2] > 1e-6;
+    if (ghost) { if (vis) faces.push(`<polygon class="g-ghost-fill" points="${pts(q)}"/>`); continue; }
+    if (vis) faces.push(`<polygon class="${(cls || ['f1', 'f2', 'f3'])[d]} edge" points="${pts(q)}"/>`);
+  }
+  return { depth: P(c)[2], svg: faces.join('') };
+}
+function circleXZ(c, r, n = 56) { const o = []; for (let i = 0; i <= n; i++) { const t = i / n * 2 * Math.PI; o.push([c[0] + r * Math.cos(t), c[1], c[2] + r * Math.sin(t)]); } return o; }
+function cylinderY(c, r, y0, y1, ghost) {
+  const top = circleXZ([c[0], y1, c[2]], r), bot = circleXZ([c[0], y0, c[2]], r);
+  const st = top.map(P); let iMin = 0, iMax = 0; st.forEach((q, i) => { if (q[0] < st[iMin][0]) iMin = i; if (q[0] > st[iMax][0]) iMax = i; });
+  const cls = ghost ? 'g-ghost' : 'thin';
+  let s = `<polygon class="${ghost ? 'g-ghost-fill' : 'f1'}" points="${pts([top[iMin], ...walk(top, iMin, iMax), top[iMax], bot[iMax], ...walk(bot, iMax, iMin), bot[iMin]])}" style="fill-opacity:${ghost ? 0.05 : 0.35}"/>`;
+  s += `<polyline class="${cls}" points="${pts(top)}"/><polyline class="${cls}" points="${pts(bot)}" style="opacity:.6"/>`;
+  s += `<line class="${cls}" x1="${st[iMin][0]}" y1="${st[iMin][1]}" x2="${P(bot[iMin])[0]}" y2="${P(bot[iMin])[1]}"/><line class="${cls}" x1="${st[iMax][0]}" y1="${st[iMax][1]}" x2="${P(bot[iMax])[0]}" y2="${P(bot[iMax])[1]}"/>`;
+  return { depth: P([c[0], (y0 + y1) / 2, c[2]])[2], svg: s };
+}
+function walk(ring, i0, i1) { const n = ring.length - 1, o = []; let i = i0; while (i !== i1) { i = (i + 1) % n; o.push(ring[i]); } return o; }
+const line3 = (a, b, cls, extra = '') => { const p = P(a), q = P(b); return `<line class="${cls}" x1="${p[0].toFixed(1)}" y1="${p[1].toFixed(1)}" x2="${q[0].toFixed(1)}" y2="${q[1].toFixed(1)}" ${extra}/>`; };
+
+function arrowLen(F) { const f = Math.abs(F); return S.scale === 'sqrt' ? 40 + 330 * Math.sqrt(f / 5000) : 12 + 400 * f / 5000; }
+
+function drawForce(m, idx, dim, color) {
+  const mag = nrm(m.F); if (mag < 1e-6) return '';
+  const dir = unit(m.F), Lm = arrowLen(mag) / S.zoom ** 0.15;
+  const push = m.inward && dot(dir, m.inward) > 0.3;
+  const tail = push ? sub(m.p, mul(dir, Lm)) : m.p, head = push ? m.p : add(m.p, mul(dir, Lm));
+  const a = P(tail), b = P(head);
+  const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);
+  let g = `<g class="mk${dim ? ' dim' : ''}${m.internal ? ' internal' : ''}" data-mark="${idx}" style="color:${color}">`;
+  if (len < 10) { // pointing at or away from the viewer
+    const q = P(m.p), toward = b[2] > a[2];
+    g += `<circle cx="${q[0]}" cy="${q[1]}" r="8" fill="var(--surface)" stroke="currentColor" stroke-width="2"/>`;
+    g += toward ? `<circle cx="${q[0]}" cy="${q[1]}" r="2.6" fill="currentColor"/>` : `<path d="M${q[0] - 5} ${q[1] - 5}L${q[0] + 5} ${q[1] + 5}M${q[0] + 5} ${q[1] - 5}L${q[0] - 5} ${q[1] + 5}" stroke="currentColor" stroke-width="2"/>`;
+    g += `<circle class="hit" cx="${q[0]}" cy="${q[1]}" r="10" style="pointer-events:all;fill:transparent"/>`;
+    if (S.ly.labels) g += label(m, q[0] + 12, q[1] - 10, 1, color, mag);
+    return g + '</g>';
+  }
+  const ux = dx / len, uy = dy / len, hl = Math.min(13, len * 0.45), hw = hl * 0.42;
+  const bx = b[0] - ux * hl, by = b[1] - uy * hl;
+  g += `<path class="shaft" d="M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${bx.toFixed(1)} ${by.toFixed(1)}" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+  g += `<polygon points="${b[0].toFixed(1)},${b[1].toFixed(1)} ${(bx - uy * hw).toFixed(1)},${(by + ux * hw).toFixed(1)} ${(bx + uy * hw).toFixed(1)},${(by - ux * hw).toFixed(1)}" fill="currentColor"/>`;
+  g += `<path class="hit" d="M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${b[0].toFixed(1)} ${b[1].toFixed(1)}"/>`;
+  if (S.ly.labels) { const far = push ? a : b, sx = push ? -ux : ux, sy = push ? -uy : uy; g += label(m, far[0] + sx * 8, far[1] + sy * 8 + 4, sx, color, mag); }
+  return g + '</g>';
+}
+function label(m, x, y, sx, color, mag) {
+  let val = mag >= 1000 ? (mag / 1000).toFixed(2) + ' kN' : mag.toFixed(0) + ' N';
+  if (m.comp !== undefined) val = fmt(m.F[m.comp]) + ' N';
+  let tc = '';
+  if (m.it.P !== undefined) tc = m.it.P < 0 ? ' C' : ' T';
+  return `<text class="lbl" x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${sx < -0.2 ? 'end' : sx > 0.2 ? 'start' : 'middle'}" fill="${color}">${subS(m.sym)} ${val}${tc}</text>`;
+}
+function drawCouple(m, idx, dim, color) {
+  const C = m.C, mag = nrm(C), ax = unit(C);
+  const ref = Math.abs(ax[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0];
+  const e1 = unit(crs(ax, ref)), e2 = crs(ax, e1), r = 95;
+  const ring = []; for (let i = 0; i <= 40; i++) { const t = 0.15 * Math.PI + i / 40 * 1.55 * Math.PI; ring.push(add(m.p, add(mul(e1, r * Math.cos(t)), mul(e2, r * Math.sin(t))))); }
+  const sp = ring.map(P), b = sp[sp.length - 1], a = sp[sp.length - 3];
+  const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len, hl = 12, hw = 5.2;
+  const bx = b[0] - ux * hl, by = b[1] - uy * hl;
+  let g = `<g class="mk${dim ? ' dim' : ''}" data-mark="${idx}" style="color:${color}">`;
+  g += `<polyline points="${sp.slice(0, -1).map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ')}" fill="none" stroke="currentColor" stroke-width="2.6"/>`;
+  g += `<polygon points="${b[0].toFixed(1)},${b[1].toFixed(1)} ${(bx - uy * hw).toFixed(1)},${(by + ux * hw).toFixed(1)} ${(bx + uy * hw).toFixed(1)},${(by - ux * hw).toFixed(1)}" fill="currentColor"/>`;
+  // right-hand-rule vector (double head)
+  const v0 = P(m.p), v1 = P(add(m.p, mul(ax, 150)));
+  g += `<line x1="${v0[0]}" y1="${v0[1]}" x2="${v1[0]}" y2="${v1[1]}" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 3"/>`;
+  g += `<polyline class="hit" points="${sp.map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ')}"/>`;
+  if (S.ly.labels) { const q = sp[20]; g += `<text class="lbl" x="${(q[0] + 10).toFixed(1)}" y="${(q[1] + 4).toFixed(1)}" fill="${color}">${subS(m.sym)} ${mag.toFixed(1)} N·m</text>`; }
+  return g + '</g>';
+}
+
+function scene() {
+  setMat();
+  const isBeam = S.sys === 'beam';
+  const ghostAll = !isBeam; // in plate view everything but the plates is context
+  const shapes = [];
+  const X = [1, 0, 0], Y = [0, 1, 0], Z = [0, 0, 1];
+  // beam assembly bodies
+  const bodyGhost = ghostAll;
+  if (!bodyGhost || S.ly.ghost) {
+    shapes.push(box([(R.xL + R.xR) / 2, 0, 0], [X, Y, Z], [(R.xR - R.xL) / 2, R.h / 2, R.w / 2], null, bodyGhost));
+    shapes.push(box([-1200, R.h / 2 + 70, 0], [X, Y, Z], [100, 70, R.w / 2 * 0.95], null, bodyGhost));            // shaft box
+    shapes.push(box([R.xg, R.h / 2 + 55, 0], [X, Y, Z], [45, 55, R.w / 2 * 0.8], null, bodyGhost));             // generator
+    shapes.push(cylinderY([-1200, 0, 0], 250, R.yb - 650, R.yb - 150, bodyGhost));                               // rotor drum
+    const shaft = line3([-1200, R.yb, 0], [-1200, R.yb - 150, 0], bodyGhost ? 'g-ghost' : 'thin') + line3([R.xg, R.yb, 0], [R.xg, R.yc, 0], bodyGhost ? 'g-ghost' : 'thin');
+    const spr = `<polyline class="${bodyGhost ? 'g-ghost' : 'thin'}" points="${pts(circleXZ([-1200, R.yc, 0], R.r1))}"/><polyline class="${bodyGhost ? 'g-ghost' : 'thin'}" points="${pts(circleXZ([R.xg, R.yc, 0], R.r2, 28))}"/>`;
+    const ch = line3(R.P1, R.P2, bodyGhost ? 'g-ghost' : 'chainT') + line3(R.Q1, R.Q2, bodyGhost ? 'g-ghost' : 'chainS');
+    shapes.push({ depth: P([-700, R.yc, 0])[2], svg: shaft + spr + ch });
+  }
+  // removed parts / plates
+  const uax = R.ua, vax = [-R.ua[1], R.ua[0], 0], mid = [-R.a / 2, 250, 0];
+  for (const z of [R.zp, -R.zp]) {
+    const c = [mid[0], mid[1], z];
+    if (!isBeam) shapes.push(box(c, [uax, vax, Z], [R.L / 2 + R.bp / 2, R.bp / 2, R.tp / 2], ['f3', 'f2', 'f1'], false));
+    else if (S.ly.ghost) shapes.push(box(c, [uax, vax, Z], [R.L / 2 + R.bp / 2, R.bp / 2, R.tp / 2], null, true));
+  }
+  if (S.ly.ghost) {
+    for (const z of [R.zb, -R.zb]) shapes.push(box([35, 0, z], [X, Y, Z], [55, Math.max(R.h / 2, 45), R.tb / 2], null, true));
+    for (const z of [R.zp + R.tp / 2 + R.tb / 2, -(R.zp + R.tp / 2 + R.tb / 2)]) shapes.push(box([35, 500, z], [X, Y, Z], [55, 45, R.tb / 2], null, true));
+    shapes.push(box([105, 250, 0], [X, Y, Z], [15, 420, R.w / 2 + 90], null, true));                             // wall
+  }
+  shapes.sort((p, q) => p.depth - q.depth);
+  let s = shapes.map(x => x.svg).join('');
+
+  // axes at O
+  const ax = [[1, 0, 0, 'x'], [0, 1, 0, 'y'], [0, 0, 1, 'z']];
+  for (const [i, j, k, n] of ax) { const e = [i * 170, j * 170, k * 170]; s += line3([0, 0, 0], e, 'axis'); const q = P(mul(e, 1.12)); s += `<text class="axlbl" x="${q[0]}" y="${q[1] + 4}" text-anchor="middle">${n}</text>`; }
+
+  // focus: axis + position arms
+  const marks = marksFor(R);
+  const k = isBeam ? S.focus : null;
+  const active = marks.map(m => {
+    if (m.layer === 'chain') return k === null;
+    if (k === null) return true;
+    return Math.abs(contrib(R, m, k)) > 0.05;
+  });
+  if (k !== null && k >= 3) {
+    const e = [0, 0, 0]; e[k - 3] = 1;
+    const span = k === 3 ? [[-1450, 0, 0], [180, 0, 0]] : k === 4 ? [[0, -820, 0], [0, 620, 0]] : [[0, 0, -320], [0, 0, 320]];
+    s += line3(span[0], span[1], 'armaxis');
+    const q = P(span[1]); s += `<text class="armlbl" x="${q[0] + 6}" y="${q[1] - 6}">M${AX[k - 3]} axis through O</text>`;
+    marks.forEach((m, i) => {
+      if (!active[i] || m.kind === 'couple' || m.layer === 'chain') return;
+      const foot = mul(e, m.p[k - 3]);
+      if (nrm(sub(m.p, foot)) < 1) return;
+      s += line3(foot, m.p, 'arm');
+    });
+  } else if (k !== null) {
+    const e = [0, 0, 0]; e[k] = 1;
+    const q = P(mul(e, 260)); s += line3([0, 0, 0], mul(e, 240), 'armaxis') + `<text class="armlbl" x="${q[0] + 6}" y="${q[1] - 6}">+F${AX[k]}</text>`;
+  }
+
+  // points
+  const ptsL = isBeam ? [['O', [0, 0, 0]], ['A', [-R.a, 0, R.zp]], ['CG', [-1200, R.yb - 350, 0]], ['COP', [-1200, R.yb - 500, 0]]] : [['A', [-R.a, 0, R.zp]], ['B', [0, 500, R.zp]]];
+  if (S.ly.ghost || !isBeam) ptsL.push(['B', [0, 500, R.zp]]);
+  const seen = new Set();
+  for (const [n, p] of ptsL) { if (seen.has(n)) continue; seen.add(n); const q = P(p); s += `<circle class="ptdot" cx="${q[0]}" cy="${q[1]}" r="3.2"/><text class="ptlbl" x="${q[0] - 7}" y="${q[1] - 7}" text-anchor="end">${n}</text>`; }
+
+  // arrows: dimmed first, then active
+  const order = marks.map((m, i) => i).sort((i, j) => (active[i] ? 1 : 0) - (active[j] ? 1 : 0));
+  for (const i of order) {
+    const m = marks[i];
+    if (m.layer === 'applied' && !S.ly.applied) continue;
+    if (m.layer === 'react' && !S.ly.react) continue;
+    if (m.layer === 'chain' && !S.ly.chain) continue;
+    const col = catVar[m.it.cat];
+    s += m.kind === 'couple' ? drawCouple(m, i, !active[i], col) : drawForce(m, i, !active[i], col);
+  }
+  // orientation triad (screen corner)
+  const o = [64, H - 58];
+  for (const [i, j, kk, n] of ax) { const q = rot([i, j, kk]); const x = o[0] + q[0] * 34, y = o[1] - q[1] * 34; s += `<line x1="${o[0]}" y1="${o[1]}" x2="${x}" y2="${y}" class="axis"/><text class="axlbl" x="${o[0] + q[0] * 46}" y="${o[1] - q[1] * 46 + 4}" text-anchor="middle" style="font-size:11px">${n}</text>`; }
+  svg.innerHTML = s;
+  window.__marks = marks;
+}
+</script>
+<script>
+/* ---------- panels ---------- */
+const svg = document.getElementById('scene');
+const EQS = [
+  { k: 2, t: 'ΣF<sub>z</sub> = 0', s: 'Gives O<sub>z</sub>, the sideways push on the front bracket.' },
+  { k: 3, t: 'ΣM<sub>x</sub> = 0 about O', s: 'Gives P<sub>r</sub> − P<sub>f</sub>. Only the plates can resist twist (Req. 10).' },
+  { k: 5, t: 'ΣM<sub>z</sub> = 0 about O', s: 'Gives P<sub>f</sub> + P<sub>r</sub>. The plates hold the beam up like a strut.' },
+  { k: 1, t: 'ΣF<sub>y</sub> = 0', s: 'Gives the vertical pin O force, split evenly front/rear.' },
+  { k: 0, t: 'ΣF<sub>x</sub> = 0', s: 'Gives O<sub>f,x</sub> + O<sub>r,x</sub>, which balances the plates’ horizontal pull.' },
+  { k: 4, t: 'ΣM<sub>y</sub> = 0 about O', s: 'Gives O<sub>f,x</sub> − O<sub>r,x</sub>: the bracket couple that stops the beam swinging sideways.' },
+];
+function eqResult(k) {
+  const r = R;
+  switch (k) {
+    case 2: return `O<sub>z</sub> = ${fmt(r.Oz)} N`;
+    case 3: return `P<sub>r</sub> − P<sub>f</sub> = ${fmt(r.Pr - r.Pf)} N`;
+    case 5: return `P<sub>f</sub> + P<sub>r</sub> = ${fmt(r.Pf + r.Pr)} N`;
+    case 1: return `O<sub>y</sub> = ${fmt(r.Ofy)} N each`;
+    case 0: return `ΣO<sub>x</sub> = ${fmt(r.Ofx + r.Orx)} N`;
+    case 4: return `ΔO<sub>x</sub> = ${fmt(r.Ofx - r.Orx)} N`;
+  }
+}
+function eqWhy(k) {
+  const r = R, deg = (Math.atan2(500, r.a) * 180 / Math.PI).toFixed(1);
+  switch (k) {
+    case 2: return `Drag is the only applied z-force. The flat plates are pinned and cannot carry load out of their plane, so the beam presses on the front bracket at O and gets O<sub>z</sub> = −560 N back.`;
+    case 3: return `The drag acts ${fmt(-(r.yb - 500))} mm below the beam axis, so it twists the beam by ${fmt(r.Mapp[0], 1)} N·m. The plates sit ${fmt(r.zp, 1)} mm either side of the axis and only their vertical parts (sin α, α = ${deg}°) have a lever arm about x. Their difference makes a couple: P<sub>r</sub> − P<sub>f</sub> = −ΣM<sub>x,app</sub> / (z<sub>p</sub> sin α).`;
+    case 5: return `Weights hanging out at the rotor end try to rotate the beam down about O. The plate pins at A, ${r.a} mm from O, push back with their vertical component: P<sub>f</sub> + P<sub>r</sub> = ΣM<sub>z,app</sub> / (a sin α). Pin O forces pass through the axis and drop out.`;
+    case 1: return `Weights pull down; the plates’ vertical parts push up by (P<sub>f</sub> + P<sub>r</sub>) sin α, which is more than the weights. Pin O makes up the difference. Requirement 10 sends all twist to the plates, so the two O brackets share this equally.`;
+    case 0: return `No applied load acts along x (the chain pair is internal). The plates pull the beam toward the wall by (P<sub>f</sub> + P<sub>r</sub>) cos α, so pin O must push back by the same amount.`;
+    case 4: return `The drag swings the beam sideways (560 N × 1.2 m) and the water torque adds ${r.tau.toFixed(1)} N·m. The plates take M<sub>x</sub> cot α of this through their unequal horizontal parts. The rest is a force couple across the two O brackets, ${fmt(2 * r.zb, 1)} mm apart, which is why O<sub>f,x</sub> and O<sub>r,x</sub> are large and opposite.`;
+  }
+}
+function solvedText(k) {
+  const r = R;
+  if (k === 5) return `With step 2: P<sub>f</sub> = <b class="mono">${fmt(r.Pf)} N</b> <span class="tag ${r.Pf < 0 ? 'C' : 'T'}">${r.Pf < 0 ? 'compression' : 'tension'}</span>, P<sub>r</sub> = <b class="mono">${fmt(r.Pr)} N</b> <span class="tag ${r.Pr < 0 ? 'C' : 'T'}">${r.Pr < 0 ? 'compression' : 'tension'}</span>`;
+  if (k === 4) return `With step 5: O<sub>f,x</sub> = <b class="mono">${fmt(r.Ofx)} N</b>, O<sub>r,x</sub> = <b class="mono">${fmt(r.Orx)} N</b>`;
+  return `${eqResult(k)}`;
+}
+function termText(m, k) {
+  if (k < 3) return `F${AX[k]}`;
+  if (m.kind === 'couple') return 'couple';
+  const p = mul(m.p, 1e-3), F = m.F, i = k - 3, j = (i + 1) % 3, l = (i + 2) % 3; // M_i = r_j F_l − r_l F_j
+  const parts = [];
+  if (Math.abs(p[j] * F[l]) > 0.01) parts.push(`${AX[j]}·F${AX[l]} = (${fmt(p[j], 3)})(${fmt(F[l])})`);
+  if (Math.abs(p[l] * F[j]) > 0.01) parts.push(`−${AX[l]}·F${AX[j]} = −(${fmt(p[l], 3)})(${fmt(F[j])})`);
+  return parts.join('  ');
+}
+function eqPanel() {
+  const el = document.getElementById('eqpanel');
+  if (S.sys !== 'beam') {
+    const row = (n, P) => `<tr><td>${n}</td><td class="num">${fmt(P)}</td><td><span class="tag ${P < 0 ? 'C' : 'T'}">${P < 0 ? 'C' : 'T'}</span></td><td class="num">${fmt(Math.abs(P))}</td></tr>`;
+    el.innerHTML = `<div class="eqhead"><div class="eyebrow">Free body 2</div><h2>Each plate is a two-force member</h2>
+      <p>A plate is loaded only through its two pins and its weight is small. For it to be in equilibrium, ΣF = 0 makes the two pin forces equal and opposite, and ΣM = 0 puts them on the same line. That line is A–B, at α = ${(Math.atan2(500, R.a) * 180 / Math.PI).toFixed(1)}° above the beam.</p></div>
+      <div class="eqdetail"><p class="why">So the whole plate is described by one number, its axial force P. The beam free body found P; this view shows what the plate feels. Arrows pointing toward each other mean compression, which is the buckling case for the plate design.</p>
+      <div class="tablewrap" style="border:0"><table><tr><th>Plate</th><th>P (N)</th><th></th><th>|force| at A and B (N)</th></tr>${row('Front (+z)', R.Pf)}${row('Rear (−z)', R.Pr)}</table></div>
+      <p class="why">Length between pins: <span class="mono">${fmt(R.L, 1)} mm</span>. Cut length with ${S.bp} in rounded ends: <span class="mono">${fmt(R.Lplate, 0)} mm</span> each.</p></div>`;
+    return;
+  }
+  const marks = marksFor(R).filter(m => m.layer !== 'chain');
+  let h = `<div class="eqhead"><div class="eyebrow">Solve in this order</div><h2>Six equations, seven unknowns, one rule</h2>
+    <p>Unknowns: O<sub>f,x</sub>, O<sub>r,x</sub>, O<sub>f,y</sub>, O<sub>r,y</sub>, O<sub>z</sub>, P<sub>f</sub>, P<sub>r</sub>. Requirement 10 (all twist to the diagonals) supplies the seventh equation, O<sub>f,y</sub> = O<sub>r,y</sub>. Moments are about pin O.</p></div><ul class="eqlist">`;
+  EQS.forEach((e, i) => {
+    h += `<li><button class="eqbtn" data-k="${e.k}" aria-pressed="${S.focus === e.k}"><span class="n">${i + 1}</span><span class="e">${e.t}</span><span class="r">${eqResult(e.k)}</span><span class="s">${e.s}</span></button></li>`;
+  });
+  h += `</ul>`;
+  if (S.focus !== null) {
+    const k = S.focus;
+    const rows = marks.map(m => ({ m, v: contrib(R, m, k) })).filter(r => Math.abs(r.v) > 0.05);
+    const mx = Math.max(...rows.map(r => Math.abs(r.v)), 1);
+    const unitS = k < 3 ? 'N' : 'N·m';
+    h += `<div class="eqdetail"><p class="why">${eqWhy(k)}</p><div class="terms">`;
+    for (const { m, v } of rows) {
+      const wpc = Math.abs(v) / mx * 50;
+      const left = v < 0 ? 50 - wpc : 50;
+      h += `<div class="term"><div class="nm">${subH(m.sym)} <span style="color:var(--muted)">${m.it.name.replace(/^Pin O, /, '')}</span><small>${termText(m, k)}</small></div><div class="bar" style="--c:${catVar[m.it.cat]}"><i style="left:${left}%;width:${wpc}%"></i></div><div class="v">${fmt(v, 1)}</div></div>`;
+    }
+    const sum = rows.reduce((a, r) => a + r.v, 0);
+    h += `<div class="term sum"><div class="nm">Sum</div><div class="bar"></div><div class="v">${fmt(sum, 1)}</div></div></div>`;
+    h += `<p class="note">Bars are each term’s share in ${unitS}; left is negative. ${k >= 3 ? 'Dashed blue lines in the drawing run from the axis to each point of application.' : ''}</p>`;
+    h += `<div class="solved">Solved: ${solvedText(k)}</div></div>`;
+  } else {
+    h += `<div class="eqdetail"><p class="why">Pick an equation. Forces that do not enter it fade, and the bars show how the terms cancel.</p>
+      <p class="note">Equilibrium residuals with the solved reactions: <span class="mono">${R.resid.map(v => Math.abs(v).toExponential(0)).join(', ')}</span></p></div>`;
+  }
+  el.innerHTML = h;
+  el.querySelectorAll('.eqbtn').forEach(b => b.addEventListener('click', () => { const k = +b.dataset.k; S.focus = S.focus === k ? null : k; update(); }));
+}
+
+function lowerPanels() {
+  const r = R, deg = Math.atan2(500, r.a) * 180 / Math.PI, cot = r.a / 500;
+  document.getElementById('givens').innerHTML = `
+    <span>Fluid power <b>${r.Pfl.toFixed(0)} W</b></span><span>Shaft power <b>${r.Pm.toFixed(0)} W</b></span><span>Electrical <b>${r.Pe.toFixed(0)} W</b></span>
+    <span>Rotor torque <b>${r.tau.toFixed(2)} N·m</b></span><span>Chain tension <b>${r.T.toFixed(1)} N</b></span><span>Generator <b>${(285 * 60 / 19).toFixed(0)} rpm</b></span>`;
+  const path = (c, eb, t, p, e) => `<div class="path" style="--c:${c}"><div class="eyebrow">${eb}</div><h3>${t}</h3><p>${p}</p><div class="eqn">${e}</div></div>`;
+  document.getElementById('paths').innerHTML =
+    path('var(--c-water)', 'Drag, z-direction', 'Front bracket at O', `The 560 N drag pushes the beam toward the front bracket. Plates take nothing out of plane.`, `O<sub>z</sub> = −ΣF<sub>z</sub> = ${fmt(r.Oz)} N`) +
+    path('var(--c-plate)', 'Twist about x', 'Plate force couple', `Drag × depth = ${fmt(r.Mapp[0], 1)} N·m. The plates are only ${fmt(2 * r.zp, 0)} mm apart, so the couple needs large opposite plate forces.`, `P<sub>r</sub> − P<sub>f</sub> = ${fmt(-r.Mapp[0], 1)} / (${(r.zp / 1000).toFixed(4)} × ${r.sa.toFixed(3)}) = ${fmt(r.Pr - r.Pf)} N`) +
+    path('var(--c-grav)', 'Weights, bending about z', 'Plate strut', `Weights acting left of O give ${fmt(r.Mapp[2], 1)} N·m about z. Both plates share it through their vertical parts at x = −a.`, `P<sub>f</sub> + P<sub>r</sub> = ${fmt(r.Mapp[2], 1)} / (${(r.a / 1000).toFixed(3)} × ${r.sa.toFixed(3)}) = ${fmt(r.Pf + r.Pr)} N`) +
+    path('var(--c-pinO)', 'Sideways bending about y', 'Plates, then bracket couple', `Drag lever + water torque = ${fmt(r.Mapp[1], 1)} N·m. Plates take M<sub>x</sub> cot α = ${fmt(r.Mapp[0] * cot, 1)} N·m; the O brackets take the rest as a couple.`, `O<sub>f,x</sub> − O<sub>r,x</sub> = (${fmt(-r.Mapp[1], 1)} ${fmts(-r.Mapp[0] * cot, 1)}) / ${(r.zb / 1000).toFixed(4)} = ${fmt(r.Ofx - r.Orx)} N`);
+
+  // load table
+  const row = (it, extra = '') => { const C = it.C || [0, 0, 0]; return `<tr><td><span class="chip" style="--c:${catVar[it.cat]}"></span>${it.name}${extra}</td><td class="num">${fmt(it.p[0], 1)}</td><td class="num">${fmt(it.p[1], 1)}</td><td class="num">${fmt(it.p[2], 1)}</td>
+    <td class="num">${fmt(it.F[0], 1)}</td><td class="num">${fmt(it.F[1], 1)}</td><td class="num">${fmt(it.F[2], 1)}</td><td class="num">${fmt(C[0], 2)}</td><td class="num">${fmt(C[1], 2)}</td><td class="num">${fmt(C[2], 2)}</td></tr>`; };
+  let t = `<tr><th>Load</th><th>x (mm)</th><th>y (mm)</th><th>z (mm)</th><th>F<sub>x</sub> (N)</th><th>F<sub>y</sub> (N)</th><th>F<sub>z</sub> (N)</th><th>M<sub>x</sub> (N·m)</th><th>M<sub>y</sub> (N·m)</th><th>M<sub>z</sub> (N·m)</th></tr>`;
+  t += `<tr class="grp"><td colspan="10">External loads on the beam assembly</td></tr>`;
+  r.applied.forEach(it => t += row(it, it.couple ? ' <span style="color:var(--muted)">(couple, location free)</span>' : ''));
+  t += `<tr><td><b>Resultant about O</b></td><td colspan="3"></td><td class="num"><b>${fmt(r.Fapp[0], 1)}</b></td><td class="num"><b>${fmt(r.Fapp[1], 1)}</b></td><td class="num"><b>${fmt(r.Fapp[2], 1)}</b></td><td class="num"><b>${fmt(r.Mapp[0], 2)}</b></td><td class="num"><b>${fmt(r.Mapp[1], 2)}</b></td><td class="num"><b>${fmt(r.Mapp[2], 2)}</b></td></tr>`;
+  t += `<tr class="grp"><td colspan="10">Internal pair (cancels on this free body; needed for beam N, V, M diagrams)</td></tr>`;
+  r.chain.forEach(it => t += row(it));
+  t += `<tr class="grp"><td colspan="10">Unknown reactions, solved</td></tr>`;
+  r.reactions.forEach(it => t += row(it, it.P !== undefined ? ` <span class="tag ${it.P < 0 ? 'C' : 'T'}">${it.P < 0 ? 'C' : 'T'}</span>` : ''));
+  document.getElementById('tbl-loads').innerHTML = t;
+
+  // pin table
+  const B = [0, 500];
+  const pr = (pin, side, p, F) => `<tr><td>${pin}</td><td>${side}</td><td class="num">(${fmt(p[0])}, ${fmt(p[1])}, ${fmt(p[2], 1)})</td><td class="num">${fmt(F[0])}</td><td class="num">${fmt(F[1])}</td><td class="num">${fmt(F[2])}</td><td class="num"><b>${fmt(nrm(F))}</b></td></tr>`;
+  let pt = `<tr><th>Pin</th><th>Side</th><th>Point (mm)</th><th>F<sub>x</sub> (N)</th><th>F<sub>y</sub> (N)</th><th>F<sub>z</sub> (N)</th><th>|F| (N)</th></tr>`;
+  pt += pr('O · bracket on beam', 'Front (+z)', [0, 0, r.zb], [r.Ofx, r.Ofy, r.Oz]) + pr('O · bracket on beam', 'Rear (−z)', [0, 0, -r.zb], [r.Orx, r.Ory, 0]);
+  pt += pr('A · plate on beam', 'Front (+z)', [-r.a, 0, r.zp], mul(r.ua, r.Pf)) + pr('A · plate on beam', 'Rear (−z)', [-r.a, 0, -r.zp], mul(r.ua, r.Pr));
+  pt += pr('B · plate on bracket', 'Front (+z)', [0, 500, r.zp], mul(r.ua, -r.Pf)) + pr('B · plate on bracket', 'Rear (−z)', [0, 500, -r.zp], mul(r.ua, -r.Pr));
+  document.getElementById('tbl-pins').innerHTML = pt;
+
+  document.getElementById('assume').innerHTML = [
+    `<b>Generator at x = ${fmt(r.xg)} mm.</b> In the Figure 2 bottom view the “50” sits between the z-axis at pin O and the beam’s right end, so it is the beam overhang past O. The generator is then 39.49 in (1003 mm) from the rotor axis at x = −1200. Beam runs x = −1300 to +50 mm. Confirm on Piazza.`,
+    `<b>Pin B is at (0, 500, ±z<sub>p</sub>),</b> directly above O, per the 1200 / 800 extension line in Figure 2.`,
+    `<b>Plates are pinned two-force members.</b> Each pushes or pulls only along A–B. Half of each plate’s weight is lumped at A.`,
+    `<b>Requirement 10:</b> all torque about x goes to the diagonals, so the two O brackets carry equal vertical force (O<sub>f,y</sub> = O<sub>r,y</sub>). This is the seventh equation.`,
+    `<b>The drag’s z-force goes to the front bracket at O,</b> because the beam bears on that bracket’s inner face and the flat plates have no out-of-plane stiffness.`,
+    `<b>Chain tight span is on −z (rear).</b> The rotor turns +y (counterclockwise from above) and pulls in the −z span. Tension = τ / r<sub>pitch</sub> = ${r.T.toFixed(1)} N, slack side 0 (no preload). The two chain forces lie on the same line, so they cancel here.`,
+    `<b>The water torque +${r.tau.toFixed(2)} ŷ N·m is external;</b> the generator’s electromagnetic torque is internal because its stator is bolted to the beam.`,
+    `<b>Self weight</b> uses the inputs above (default: 304 stainless 4 × 4 × 1/4 in tube, two 2 × 1/4 in plates). Change them to match your parts.`,
+  ].map(x => `<li>${x}</li>`).join('');
+  document.getElementById('legendnote').textContent = S.scale === 'sqrt' ? 'Arrow length ∝ √|force|; read magnitudes from labels' : 'Arrow length ∝ |force|';
+}
+
+function update() { R = model(S); scene(); eqPanel(); lowerPanels(); }
+
+/* ---------- interaction ---------- */
+const VIEWS = { iso: [0.62, 0.36], side: [0, 0], top: [0, Math.PI / 2], bottom: [0, -Math.PI / 2], end: [Math.PI / 2, 0] };
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function goView(v) {
+  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === v));
+  const [t1, p1] = VIEWS[v], t0 = S.theta, p0 = S.phi;
+  let d = ((t1 - t0 + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+  if (reduce) { S.theta = t1; S.phi = p1; scene(); return; }
+  const start = performance.now();
+  const step = now => { const f = Math.min(1, (now - start) / 420), e = 1 - (1 - f) ** 3; S.theta = t0 + d * e; S.phi = p0 + (p1 - p0) * e; scene(); if (f < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => goView(b.dataset.view)));
+document.getElementById('zin').addEventListener('click', () => { S.zoom = Math.min(3, S.zoom * 1.2); scene(); });
+document.getElementById('zout').addEventListener('click', () => { S.zoom = Math.max(0.5, S.zoom / 1.2); scene(); });
+for (const [id, sys] of [['sys-beam', 'beam'], ['sys-plate', 'plate']]) document.getElementById(id).addEventListener('click', () => {
+  S.sys = sys; document.getElementById('sys-beam').setAttribute('aria-pressed', sys === 'beam'); document.getElementById('sys-plate').setAttribute('aria-pressed', sys === 'plate'); update();
+});
+let drag = null;
+svg.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, t: S.theta, p: S.phi, moved: false }; svg.setPointerCapture(e.pointerId); svg.classList.add('drag'); });
+svg.addEventListener('pointermove', e => {
+  if (drag) {
+    const k = 2 * Math.PI / svg.clientWidth * 0.9, dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 3) { drag.moved = true; tip.hidden = true; document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', 'false')); }
+    S.theta = drag.t - dx * k; S.phi = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, drag.p + dy * k)); scene(); return;
+  }
+  showTip(e);
+});
+svg.addEventListener('pointerup', e => { const wasTap = drag && !drag.moved; drag = null; svg.classList.remove('drag'); if (wasTap) showTip(e, true); });
+svg.addEventListener('pointerleave', () => { if (!drag) tip.hidden = true; });
+const tip = document.getElementById('tip'), viewer = document.getElementById('viewer');
+function showTip(e, tap) {
+  const g = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-mark]');
+  if (!g) { if (!tap || true) tip.hidden = true; return; }
+  const m = window.__marks[+g.dataset.mark]; if (!m) return;
+  const c = m.C || [0, 0, 0], isC = m.kind === 'couple';
+  let h = `<div class="t">${subH(m.sym)} · ${m.it.name}</div>`;
+  if (m.it.at) h += `<div style="color:var(--muted)">${m.it.at}</div>`;
+  h += `<div class="mono">at (${fmt(m.p[0], 1)}, ${fmt(m.p[1], 1)}, ${fmt(m.p[2], 1)}) mm</div>`;
+  h += isC ? `<div class="mono">M = (${fmt(c[0], 2)}, ${fmt(c[1], 2)}, ${fmt(c[2], 2)}) N·m</div>` : `<div class="mono">F = (${fmt(m.F[0], 1)}, ${fmt(m.F[1], 1)}, ${fmt(m.F[2], 1)}) N</div>`;
+  if (!isC && m.layer !== 'chain' && S.sys === 'beam') { const mo = crs(mul(m.p, 1e-3), m.F); h += `<div class="mono">r×F about O = (${fmt(mo[0], 1)}, ${fmt(mo[1], 1)}, ${fmt(mo[2], 1)}) N·m</div>`; }
+  if (m.it.P !== undefined) h += `<div>${m.it.P < 0 ? 'Compression' : 'Tension'} in the plate</div>`;
+  if (m.internal) h += `<div style="color:var(--muted)">Internal: the equal and opposite force acts on the other sprocket along the same line.</div>`;
+  tip.innerHTML = h; tip.hidden = false;
+  const vr = viewer.getBoundingClientRect();
+  let x = e.clientX - vr.left + 14, y = e.clientY - vr.top + 14;
+  if (x + 290 > vr.width) x = Math.max(8, e.clientX - vr.left - 290);
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+
+const bind = (id, key, conv, ev = 'input') => document.getElementById(id).addEventListener(ev, e => { const v = conv(e.target); if (v === null) return; S[key] = v; if (key === 'a') document.getElementById('out-a').textContent = v; update(); });
+const num = (min) => el => { const v = parseFloat(el.value); return isFinite(v) && v >= min ? v : null; };
+bind('in-a', 'a', el => +el.value);
+bind('in-h', 'h', num(1)); bind('in-w', 'w', num(4)); bind('in-bp', 'bp', num(0.5));
+bind('in-tp', 'tp', el => +el.value, 'change'); bind('in-xg', 'xg', el => el.value, 'change'); bind('in-sc', 'scale', el => el.value, 'change');
+bind('in-sw', 'selfW', el => el.checked, 'change'); bind('in-bw', 'beamNpm', num(0)); bind('in-pw', 'plateNpm', num(0));
+for (const k of ['applied', 'react', 'chain', 'ghost', 'labels']) document.getElementById('ly-' + k).addEventListener('change', e => { S.ly[k] = e.target.checked; scene(); });
+
+update();
+</script>
