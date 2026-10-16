@@ -25,6 +25,7 @@ Run any script with `python3 <script>.py` (needs NumPy and Matplotlib).
 | `DP1_Solver/` | Full analysis model and cheapest-design search over McMaster stock (`dp1-solver.js`, `dp1-search.js`, catalog in `dp1-catalog.js`); open `index.html` to browse results; `node build_results.js` regenerates them |
 | `dp1_model.py` | Independent Python hand-calculation model: statics, internal loads, stresses and deflection |
 | `dp1_fe_check.py` | 3-D frame finite-element cross-check of `dp1_model.py` (beam elements plus two truss diagonals) |
+| `RotorSupport3D.html` | 3-D model of the final design: every force on the beam, the rotor-CG deflection split into its eight causes with the working, and a live explorer that re-runs `DP1_Solver` (report conventions) for any McMaster beam, diagonal, pin and attachment point a, with price and pass/fail. Self-contained; open in a browser |
 | `RotorBeamFBD.html`, `RotorSupportFBDLab.html`, `RotorSupportExplorer.html` | Interactive 3-D free-body diagram and design-exploration tools (open in a browser) |
 
 McMaster prices and properties were read in October 2026 and may have changed.

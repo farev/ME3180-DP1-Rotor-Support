@@ -9,6 +9,7 @@
 !/RotorBeamFBD.html
 !/RotorSupportFBDLab.html
 !/RotorSupportExplorer.html
+!/RotorSupport3D.html
 
 **/__pycache__/
 *.bak
