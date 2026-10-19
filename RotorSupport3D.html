@@ -159,6 +159,15 @@ canvas{display:block;width:100%}
 .crow .bar b{display:block;height:100%;background:var(--cc)}
 .crow .r{display:grid;justify-items:end;gap:.3rem;font-size:11.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .crow .r a{font-size:11px;color:var(--soft)}
+.lrow{display:grid;grid-template-columns:auto 8px minmax(0,1fr) auto;gap:.5rem;align-items:start;padding:.4rem .25rem;border-bottom:1px solid var(--rule)}
+.lrow input{margin-top:2px;accent-color:var(--lc)}
+.lrow .sw{width:8px;height:8px;margin-top:4px;background:var(--lc)}
+.lrow .t{font-size:12px;line-height:16px}
+.lrow .bar{height:3px;background:var(--rule);margin-top:.35rem}
+.lrow .bar b{display:block;height:100%;background:var(--lc)}
+.lrow .r{display:grid;justify-items:end;gap:.3rem;font-size:11.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lrow.off .t,.lrow.off .r span{color:var(--faint)}
+.lrow.solo{background:var(--paper);outline:1px solid var(--lc);outline-offset:-1px}
 .ck{display:grid;grid-template-columns:1.1rem minmax(0,1fr) auto;gap:.45rem;padding:.3rem .25rem;border-bottom:1px solid var(--rule);font-size:11.5px;line-height:15px;align-items:baseline}
 .ck .m{font-weight:700}
 .ck.ok .m{color:var(--pass)}
@@ -301,6 +310,11 @@ footer p{margin:0 0 .8rem}
               <button class="btn sm" id="optGhost" aria-pressed="true">Ghost</button>
               <button class="btn sm" id="optHeat" aria-pressed="true">Colour</button>
             </div>
+          </div>
+          <div>
+            <div class="fhead"><span>Loads acting</span><button class="btn sm" id="loadsAll">All</button></div>
+            <div id="llist"></div>
+            <p class="readout" style="border:0;margin:.4rem 0 0;padding:0">Each row is the CG deflection that load causes on its own. The structure is linear, so the rows add up to the total; switch loads off to see what the rest do.</p>
           </div>
           <div>
             <div class="fhead"><span>What moves the CG</span><button class="btn sm" id="allOn">All</button></div>
@@ -1334,44 +1348,66 @@ function makeEngine(DP1, DP1S, CAT) {
     if (sec.kind === 'tube') { sec.Asy = 2 * sec.t * (sec.H - 2 * sec.t); sec.Asz = 2 * sec.t * (sec.W - 2 * sec.t); }
     const tp = pl.t, b = pl.b, dh = dv.dh, Lcut = dv.Lcut, Ep = pl.mat.E;
     const Wp = pl.mat.rho * GRAV * (b * tp * Lcut - 2 * Math.PI / 4 * dh * dh * tp);
-    const core = DP1.core(beam, tp, a, Wp, dh, PROB.overhang, 0);
-    const g = core.g, R = core.R, L = g.Lpp;
-    const df = R.F_f * L / (b * tp * Ep), dr = R.F_r * L / (b * tp * Ep);
-    const cg = DP1.cgDeflection(core, df, dr);
-
-    // ---- elastic fields along the beam (O-clamped frame), 1 mm steps, kept every 5 mm
+    // ---- one elastic solution for a set of applied loads (off = set of load-group keys switched off; null = all loads).
+    // The structure is linear, so the solutions for single load groups add up to the full one.
+    const LOAD_GROUP = { Wrot: 'Wrot', D: 'D', Tw: 'Tw', Ch1: 'Ch', Ch2: 'Ch', Wgen: 'Wgen', Wpf: 'Wp', Wpr: 'Wp' };
     const EIz = m.E * sec.Iz, EIy = m.E * sec.Iy, GJ = m.G * sec.J, EA = m.E * sec.A, GAy = m.G * sec.Asy, GAz = m.G * sec.Asz;
-    const st0 = () => ({ x: 0, thz: 0, v: 0, wp: 0, w: 0, phi: 0, u: 0, vs: 0, ws: 0 });
-    const grid = new Array(NX);
-    const put = s => { const i = Math.round((s.x - X0) / DX); if (Math.abs(X0 + i * DX - s.x) < 1e-6 && i >= 0 && i < NX) grid[i] = Object.assign({}, s); };
-    for (const dir of [-1, 1]) {
-      let s = st0(); put(s);
-      const end = dir < 0 ? X0 : X1, h = 1;
-      while (dir < 0 ? s.x > end + 1e-9 : s.x < end - 1e-9) {
-        const hh = h * dir, I = core.internal(s.x + hh / 2, '+');
-        const thz = s.thz + I.Mz / EIz * hh, wp = s.wp - I.My / EIy * hh;
-        s = { x: Math.round((s.x + hh) * 1e6) / 1e6, thz, wp, v: s.v + (s.thz + thz) / 2 * hh, w: s.w + (s.wp + wp) / 2 * hh,
-          phi: s.phi + I.Tx / GJ * hh, u: s.u + I.N / EA * hh, vs: s.vs + I.Vy / GAy * hh, ws: s.ws + I.Vz / GAz * hh };
-        put(s);
+    function solveLoads(off, wantField) {
+      let core;
+      if (!off || !off.size) core = DP1.core(beam, tp, a, Wp, dh, PROB.overhang, 0);
+      else {
+        const g = DP1.geometry(beam, tp, a, dh, PROB.overhang, 0);
+        const AL = DP1.appliedLoads(g, beam.mat, beam.sec, Wp);
+        AL.loads = AL.loads.filter(l => !off.has(LOAD_GROUP[l.key]));
+        if (off.has('Wb')) { AL.q = 0; AL.Wb = 0; }
+        const R = DP1.statics(g, AL), internal = DP1.makeInternal(g, AL, R), el = DP1.beamElastic(g, beam, internal);
+        core = { g, AL, R, internal, el, atA: el.at[String(-a)], atRot: el.at[String(PROB.x_rot)] };
       }
+      const g = core.g, R = core.R, L = g.Lpp;
+      const df = R.F_f * L / (b * tp * Ep), dr = R.F_r * L / (b * tp * Ep);
+      const cg = DP1.cgDeflection(core, df, dr);
+      if (!wantField) return { core, df, dr, cg };
+      // elastic fields along the beam (O-clamped frame), 1 mm steps, kept every 5 mm
+      const st0 = () => ({ x: 0, thz: 0, v: 0, wp: 0, w: 0, phi: 0, u: 0, vs: 0, ws: 0 });
+      const grid = new Array(NX);
+      const put = s => { const i = Math.round((s.x - X0) / DX); if (Math.abs(X0 + i * DX - s.x) < 1e-6 && i >= 0 && i < NX) grid[i] = Object.assign({}, s); };
+      for (const dir of [-1, 1]) {
+        let s = st0(); put(s);
+        const end = dir < 0 ? X0 : X1, h = 1;
+        while (dir < 0 ? s.x > end + 1e-9 : s.x < end - 1e-9) {
+          const hh = h * dir, I = core.internal(s.x + hh / 2, '+');
+          const thz = s.thz + I.Mz / EIz * hh, wp = s.wp - I.My / EIy * hh;
+          s = { x: Math.round((s.x + hh) * 1e6) / 1e6, thz, wp, v: s.v + (s.thz + thz) / 2 * hh, w: s.w + (s.wp + wp) / 2 * hh,
+            phi: s.phi + I.Tx / GJ * hh, u: s.u + I.N / EA * hh, vs: s.vs + I.Vy / GAy * hh, ws: s.ws + I.Vz / GAz * hh };
+          put(s);
+        }
+      }
+      const sn = Math.sin(g.theta), co = Math.cos(g.theta), cot = co / sn;
+      const thyA = -core.atA.wpb;
+      const rig = { thx_cpl: thyA * cot, thx_pl: (df - dr) / (2 * g.z_d * sn), thz_bend: core.atA.vb / a, thz_shear: core.atA.vs / a,
+        thz_ax: core.atA.u * co / (a * sn), thz_pl: (df + dr) / 2 / (a * sn), phiA: core.atA.phi };
+      const COMPF = {
+        bend_xy: f => [0, f.v + rig.thz_bend * f.x, 0, 0, 0, f.thz + rig.thz_bend],
+        bend_xz: f => [0, 0, f.w, 0, -f.wp, 0],
+        couple: () => [0, 0, 0, rig.thx_cpl, 0, 0],
+        twist: f => [0, 0, 0, f.phi - rig.phiA, 0, 0],
+        plate_diff: () => [0, 0, 0, rig.thx_pl, 0, 0],
+        plate_mean: f => [0, rig.thz_pl * f.x, 0, 0, 0, rig.thz_pl],
+        shear: f => [0, f.vs + rig.thz_shear * f.x, f.ws, 0, 0, rig.thz_shear],
+        axial: f => [f.u, rig.thz_ax * f.x, 0, 0, 0, rig.thz_ax],
+      };
+      const FIELD = {};
+      for (const k in COMPF) { const arr = new Float64Array(NX * 6); for (let i = 0; i < NX; i++) { const q = COMPF[k](grid[i]); for (let j = 0; j < 6; j++) arr[i * 6 + j] = q[j]; } FIELD[k] = arr; }
+      return { core, df, dr, cg, grid, rig, thyA, FIELD, at: x => grid[Math.round((x - X0) / DX)] };
     }
-    const at = x => grid[Math.round((x - X0) / DX)];
-    const sn = Math.sin(g.theta), co = Math.cos(g.theta), cot = co / sn;
-    const thyA = -core.atA.wpb;
-    const rig = { thx_cpl: thyA * cot, thx_pl: (df - dr) / (2 * g.z_d * sn), thz_bend: core.atA.vb / a, thz_shear: core.atA.vs / a,
-      thz_ax: core.atA.u * co / (a * sn), thz_pl: (df + dr) / 2 / (a * sn), phiA: core.atA.phi };
-    const COMPF = {
-      bend_xy: f => [0, f.v + rig.thz_bend * f.x, 0, 0, 0, f.thz + rig.thz_bend],
-      bend_xz: f => [0, 0, f.w, 0, -f.wp, 0],
-      couple: () => [0, 0, 0, rig.thx_cpl, 0, 0],
-      twist: f => [0, 0, 0, f.phi - rig.phiA, 0, 0],
-      plate_diff: () => [0, 0, 0, rig.thx_pl, 0, 0],
-      plate_mean: f => [0, rig.thz_pl * f.x, 0, 0, 0, rig.thz_pl],
-      shear: f => [0, f.vs + rig.thz_shear * f.x, f.ws, 0, 0, rig.thz_shear],
-      axial: f => [f.u, rig.thz_ax * f.x, 0, 0, 0, rig.thz_ax],
-    };
-    const FIELD = {};
-    for (const k in COMPF) { const arr = new Float64Array(NX * 6); for (let i = 0; i < NX; i++) { const q = COMPF[k](grid[i]); for (let j = 0; j < 6; j++) arr[i * 6 + j] = q[j]; } FIELD[k] = arr; }
+    const full = solveLoads(null, true);
+    const core = full.core, g = core.g, R = core.R, L = g.Lpp, df = full.df, dr = full.dr, cg = full.cg;
+    const rig = full.rig, thyA = full.thyA, FIELD = full.FIELD, at = full.at;
+    const sn = Math.sin(g.theta), co = Math.cos(g.theta);
+    // CG deflection caused by each load group acting alone
+    const GROUPS = ['Wrot', 'D', 'Tw', 'Ch', 'Wgen', 'Wb', 'Wp'];
+    const loadAlone = {};
+    for (const k of GROUPS) { const off = new Set(GROUPS.filter(q => q !== k)); const r = solveLoads(off, false); loadAlone[k] = { total: r.cg.total, mag: r.cg.mag, comps: r.cg.comps }; }
 
     // ---- internal loads for the chart
     const xs = []; for (let i = 0; i < NX; i++) xs.push(X0 + i * DX);
@@ -1442,7 +1478,8 @@ function makeEngine(DP1, DP1S, CAT) {
       atA: { thyA, v: at(-a).v, vs: at(-a).vs, u: at(-a).u, phi: at(-a).phi },
       atR: { v: at(PROB.x_rot).v, w: at(PROB.x_rot).w, phi: at(PROB.x_rot).phi, thz: at(PROB.x_rot).thz },
       cg: { comps: cg.comps, total: cg.total, mag: cg.mag },
-      FIELD, NX, DX, xs, intl,
+      FIELD, NX, DX, xs, intl, loadAlone, LOAD_GROUPS: GROUPS,
+      deflectFor: off => { const r = solveLoads(off, true); return { FIELD: r.FIELD, cg: { comps: r.cg.comps, total: r.cg.total, mag: r.cg.mag } }; },
     };
   }
   return { BEAMS, PLATES, PINS, OPTS, analyze, X0, X1, DX, NX };
@@ -1588,8 +1625,24 @@ for (const [d, n] of [[[1, 0, 0], 'x'], [[0, 1, 0], 'y'], [[0, 0, 1], 'z']]) {
 // ---------------------------------------------------------------- the model, rebuilt for each design
 let D = null, model = null, LABELS = [], vmeshes = [], pivots = [], FORCES = [], CHAIN = [], totArrow = null, ring = null, cgNew = null, cgMat = null, dimGroup = null, spin = null;
 let SUM = null, NX = ENG.NX, X0 = ENG.X0, DX = ENG.DX;
+const LOADS = [
+  { key: 'Wrot', col: '--c-weight', sym: 'W<sub>r</sub>', name: 'Rotor weight', forces: ['Wrot'] },
+  { key: 'D', col: '--c-water', sym: 'D', name: 'Water drag', forces: ['D'] },
+  { key: 'Tw', col: '--c-water', sym: 'τ<sub>w</sub>', name: 'Water torque', forces: ['Tw'] },
+  { key: 'Ch', col: '--c-chain', sym: 'T<sub>c</sub>', name: 'Chain tension, both sprockets', forces: ['Ch1', 'Ch2'] },
+  { key: 'Wgen', col: '--c-weight', sym: 'W<sub>g</sub>', name: 'Generator weight', forces: ['Wgen'] },
+  { key: 'Wb', col: '--c-weight', sym: 'W<sub>b</sub>', name: 'Beam self-weight', forces: ['Wb'] },
+  { key: 'Wp', col: '--c-weight', sym: 'W<sub>p</sub>', name: 'Diagonal plate weights', forces: ['Wpf', 'Wpr'] },
+];
+const offLoads = new Set(); let loadSolo = null, CUR = null;
+const forceOn = key => !LOADS.some(l => l.forces.includes(key) && offLoads.has(l.key));
+function solveCurrent() {
+  CUR = offLoads.size ? D.deflectFor(offLoads) : { FIELD: D.FIELD, cg: D.cg };
+  const byKey = Object.fromEntries(CUR.cg.comps.map(c => [c.key, c.d]));
+  COMP.forEach(c => { c.d = byKey[c.key]; c.mag = norm(c.d); });
+}
 const active = new Set(COMP.map(c => c.key));
-function rebuildSum() { SUM = new Float64Array(NX * 6); for (const k of active) { const f = D.FIELD[k]; for (let i = 0; i < SUM.length; i++) SUM[i] += f[i]; } }
+function rebuildSum() { SUM = new Float64Array(NX * 6); for (const k of active) { const f = CUR.FIELD[k]; for (let i = 0; i < SUM.length; i++) SUM[i] += f[i]; } }
 function dispAt(x, px, py, pz, out) {
   const s = Math.min(Math.max((x - X0) / DX, 0), NX - 1.0001), i = Math.floor(s), t = s - i, a = i * 6, b = a + 6;
   const L = k => SUM[a + k] + (SUM[b + k] - SUM[a + k]) * t;
@@ -1788,7 +1841,7 @@ function refreshVisibility() {
   const inDefl = mode === 'defl';
   const causes = new Set(inDefl && solo ? COMP.find(c => c.key === solo).causes : []);
   for (const f of FORCES) {
-    const vis = inDefl ? causes.has(f.key) : showGroup[f.grp];
+    const vis = inDefl ? (forceOn(f.key) && (causes.has(f.key) || (f.grp === 'applied' && (offLoads.size > 0 || loadSolo) && !solo))) : showGroup[f.grp];
     f.obj.visible = vis;
     const dimmed = !inDefl && hotForce && hotForce !== f.key;
     f.obj.userData.m.opacity = dimmed ? 0.12 : 1; f.obj.userData.m.depthWrite = !dimmed;
@@ -1844,12 +1897,10 @@ let pendingAnalyze = false, pendingSync = false;
 function requestAnalyze(sync) { pendingSync = pendingSync || sync; pendingAnalyze = false; runAnalyze(); }
 function runAnalyze() {
   D = ENG.analyze(SEL);
-  const byKey = Object.fromEntries(D.cg.comps.map(c => [c.key, c.d]));
-  COMP.forEach(c => { c.d = byKey[c.key]; c.mag = norm(c.d); });
-  rebuildSum(); buildModel();
+  solveCurrent(); rebuildSum(); buildModel();
   if (pendingSync) syncControls(); else document.querySelectorAll('#presets button').forEach((b, i) => { const s = PRESETS[i].sel; b.setAttribute('aria-pressed', s.beam === SEL.beam && s.plate === SEL.plate && s.pin === SEL.pin && s.a === SEL.a); });
   pendingSync = false;
-  setAuto(); renderStatus(); renderForcePane(); renderCompList(); updateReadout(); renderChecksPane(); renderSections(); drawChart();
+  setAuto(); renderStatus(); renderForcePane(); renderLoadList(); renderCompList(); updateReadout(); renderChecksPane(); renderSections(); drawChart();
   dirty = true;
 }
 
@@ -1924,7 +1975,10 @@ const magToSlider = m => Math.round(Math.log(m) / Math.log(MAGMAX) * 1000), slid
 function activeCG() { const s = [0, 0, 0]; for (const c of COMP) if (active.has(c.key)) for (let i = 0; i < 3; i++) s[i] += c.d[i]; return s; }
 function updateReadout() {
   const s = activeCG(), m = norm(s);
-  $('#roLabel').textContent = active.size === COMP.length ? 'Rotor CG moves, all 8 effects' : active.size === 1 ? 'Rotor CG moves, effect ' + COMP.find(c => active.has(c.key)).no + ' only' : `Rotor CG moves, ${active.size} of 8 effects`;
+  const nL = LOADS.length - offLoads.size;
+  const eff = active.size === COMP.length ? 'all 8 effects' : active.size === 1 ? 'effect ' + COMP.find(c => active.has(c.key)).no + ' only' : `${active.size} of 8 effects`;
+  const lds = nL === LOADS.length ? 'all loads' : nL === 1 ? LOADS.find(l => !offLoads.has(l.key)).name.toLowerCase() + ' only' : `${nL} of ${LOADS.length} loads`;
+  $('#roLabel').textContent = `Rotor CG moves: ${eff}, ${lds}`;
   $('#roMag').innerHTML = `<span class="${m > 0.7 ? 'bad' : ''}">${m.toFixed(m < 0.01 ? 4 : 3)}</span> <small>mm</small>`;
   $('#roVec').innerHTML = `Δ = (<b>${sg(s[0], 3)}</b>, <b>${sg(s[1], 3)}</b>, <b>${sg(s[2], 3)}</b>) mm`;
   const fill = $('#roFill'); fill.style.width = Math.min(m / 0.7 * 100, 100) + '%'; fill.classList.toggle('over', m > 0.7);
@@ -1955,6 +2009,29 @@ $('#allOn').addEventListener('click', () => { solo = null; COMP.forEach(c => act
     row.querySelector('[data-a=solo]').addEventListener('click', () => { if (solo === c.key) { solo = null; COMP.forEach(k => active.add(k.key)); } else { solo = c.key; active.clear(); active.add(c.key); } changed(); });
     row.querySelector('[data-a=calc]').addEventListener('click', e => { e.preventDefault(); const el = document.getElementById('calc-' + c.key); el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1600); });
     list.appendChild(row);
+  }
+}
+function loadsChanged() {
+  solveCurrent(); rebuildSum(); setAuto(); renderLoadList(); renderCompList(); updateReadout(); refreshVisibility();
+}
+$('#loadsAll').addEventListener('click', () => { offLoads.clear(); loadSolo = null; loadsChanged(); });
+function renderLoadList() {
+  const box = $('#llist'), maxMag = Math.max(...LOADS.map(l => D.loadAlone[l.key].mag));
+  box.innerHTML = '';
+  for (const l of LOADS) {
+    const v = D.loadAlone[l.key], d = v.total, on = !offLoads.has(l.key);
+    const dom = Math.abs(d[2]) >= Math.max(Math.abs(d[0]), Math.abs(d[1])) ? `Δz ${sg(d[2], 3)}` : `|Δ| ${v.mag.toFixed(3)}`;
+    const row = document.createElement('div'); row.className = 'lrow' + (on ? '' : ' off') + (loadSolo === l.key ? ' solo' : ''); row.style.setProperty('--lc', `var(${l.col})`);
+    row.innerHTML = `<input type="checkbox" ${on ? 'checked' : ''} aria-label="${l.name}"><span class="sw"></span>
+      <div><div class="t">${l.sym} ${l.name}</div><div class="bar"><b style="width:${(v.mag / maxMag * 100).toFixed(1)}%"></b></div></div>
+      <div class="r"><span>${dom} mm</span><button class="btn sm" aria-pressed="${loadSolo === l.key}">Solo</button></div>`;
+    row.querySelector('input').addEventListener('change', e => { loadSolo = null; e.target.checked ? offLoads.delete(l.key) : offLoads.add(l.key); if (offLoads.size === LOADS.length) offLoads.delete(l.key); loadsChanged(); });
+    row.querySelector('button').addEventListener('click', () => {
+      offLoads.clear();
+      if (loadSolo === l.key) loadSolo = null; else { loadSolo = l.key; LOADS.forEach(q => { if (q.key !== l.key) offLoads.add(q.key); }); }
+      loadsChanged();
+    });
+    box.appendChild(row);
   }
 }
 function renderCompList() {
@@ -2091,7 +2168,9 @@ function renderSections() {
 function renderCalcs() {
   const G = D.geom, R = D.R, S = D.sec, K = D.stiff, st = D.stretch, rg = D.rig, fin = isFinal();
   const Ld = Object.fromEntries(D.loads.map(l => [l.key, l]));
-  const comp = k => COMP.find(c => c.key === k);
+  const FULLD = Object.fromEntries(D.cg.comps.map(c => [c.key, c.d]));
+  const ALL = COMP.map(c => Object.assign({}, c, { d: FULLD[c.key], mag: norm(FULLD[c.key]) }));
+  const comp = k => ALL.find(c => c.key === k);
   const dvec = d => `(${sg(d[0], 4)}, ${sg(d[1], 4)}, ${sg(d[2], 4)}) mm`;
   const a = G.a, Lar = 1200 - a, ycg = -G.y_cg, ycop = -G.y_cop, ych = -G.y_chain, sinT = Math.sin(G.theta), cot = 1 / Math.tan(G.theta);
   const c13 = Ld.Ch1.F[2], Vz1 = Ld.D.F[2] + Ld.Ch1.F[2], Vz2 = Vz1 + Ld.Ch2.F[2];
@@ -2163,14 +2242,14 @@ function renderCalcs() {
       <p class="src">δ = FL/AE, Shigley Eq. 4-3.</p>`,
   };
   const box = $('#calcs'); box.innerHTML = '';
-  for (const c of COMP) {
+  for (const c of ALL) {
     const el = document.createElement('div'); el.className = 'stmt'; el.id = 'calc-' + c.key; el.style.setProperty('--cc', c.col);
     const res = Math.abs(c.d[2]) >= Math.max(Math.abs(c.d[0]), Math.abs(c.d[1])) ? `Δz = ${sg(c.d[2], 3)} mm` : `|Δ| = ${c.mag.toFixed(3)} mm`;
     const drv = c.causes.map(k => FORCES.find(f => f.key === k)).map(f => `<span class="chip raw col ${f.grp === 'applied' ? '' : 'dash'}" style="--lc:var(${FCOL[f.col]})">${f.sym}</span>`).join('');
     el.innerHTML = `<span class="label"><span style="color:${c.col}">Contribution ${c.no}</span><span class="res">${res}</span></span><h3>${c.name}</h3>${WORK[c.key]}<p class="drv">Driven by ${drv}</p>`;
     box.appendChild(el);
   }
-  const t = D.cg.total, row = i => COMP.map(c => c.d[i]).filter(v => Math.abs(v) > 1e-9).map((v, j) => (j ? (v < 0 ? ' − ' : ' + ') : (v < 0 ? '−' : '')) + Math.abs(v).toFixed(3)).join('');
+  const t = D.cg.total, row = i => ALL.map(c => c.d[i]).filter(v => Math.abs(v) > 1e-9).map((v, j) => (j ? (v < 0 ? ' − ' : ' + ') : (v < 0 ? '−' : '')) + Math.abs(v).toFixed(3)).join('');
   const m = D.cg.mag;
   $('#totalLaw').innerHTML = `<div class="params">Δx = ${row(0)} = ${sg(t[0], 3)} mm<br>Δy = ${row(1)} = ${sg(t[1], 3)} mm<br>Δz = ${row(2)} = ${sg(t[2], 3)} mm</div>
     <div class="eq ${m > 0.7 ? 'bad' : ''}" style="margin-top:.6rem">|Δ| = √(${fx(t[0], 3)}² + ${fx(t[1], 3)}² + ${fx(t[2], 3)}²) = ${m.toFixed(3)} mm ${m <= 0.7 ? '≤' : '>'} 0.70 mm</div>
