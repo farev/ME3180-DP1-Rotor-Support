@@ -1,0 +1,33 @@
+part,family,steel,D_in,len_in,price_USD,od_tol_in,hardness,stainless,shape,observed,note
+4138N13,4138N plain rotary,1045,1.25,120,222.83,0.002,HB197,0,plain,2026-11-10,only length >= 21.8 in for 1-1/4 1045
+1346K45,1346K plain rotary,1566,1.25,24,62.74,0.004,HRC25,0,plain,2026-11-10,
+5936K29,5936K nitride-coated,carbon (core not rated),1.25,24,55.73,0.001,NR,0,nitride,2026-11-10,surface HRC60 only
+2672N39,2672N high-strength alloy,alloy,1.25,36,134.00,0.001,HRC28,0,plain,2026-11-10,shortest >= 21.8 in
+8364T25,8364T 303 precision,303 SS,1.25,24,307.42,0.0004,HRB83,1,plain,2026-11-10,
+6493K22,6493K 316 precision,316 SS,1.25,36,591.60,0.001,HRB89,1,plain,2026-11-10,shortest >= 21.8 in
+4138N22,4138N plain rotary,1045,1.4375,24,55.85,0.002,HB197,0,plain,2026-11-10,
+4138N14,4138N plain rotary,1045,1.5,120,306.52,0.002,HB197,0,plain,2026-11-10,only length offered
+1346K534,1346K plain rotary,1566,1.5,24,112.69,0.004,HRC25,0,plain,2026-11-10,
+5936K31,5936K nitride-coated,carbon (core not rated),1.5,24,72.39,0.001,NR,0,nitride,2026-11-10,surface HRC60 only
+4138N27,4138N plain rotary,1045,1.6875,24,76.03,0.002,HB197,0,plain,2026-11-10,
+4138N33,4138N plain rotary,1045,1.9375,24,97.65,0.002,HB197,0,plain,2026-11-10,
+1482K53,1482K metric plain,carbon RC25,1.181102,39.370079,86.98,0.004016,HRC25,0,plain,2026-11-10,30 mm x 1000 mm (500 mm too short)
+4143N61,4143N metric 303,303 SS,1.181102,23.622047,210.05,0.000394,HRB83,1,plain,2026-11-10,30 mm x 600 mm
+4138N66,4138N metric plain,1045,1.377953,39.370079,80.56,0.002008,HB197,0,plain,2026-11-10,35 mm x 1000 mm
+4138N93,4138N metric plain,1045,1.574803,39.370079,115.56,0.002008,HB197,0,plain,2026-11-10,40 mm x 1000 mm
+8632T42,8632T D-profile,1045,1.25,24,48.21,0.003,HRB90,0,d-profile,2026-11-10,full-length 5/8 flat
+8632T48,8632T D-profile,1045,1.375,24,65.83,0.003,HRB90,0,d-profile,2026-11-10,full-length 11/16 flat
+8632T55,8632T D-profile,1045,1.5,24,67.93,0.003,HRB90,0,d-profile,2026-11-10,full-length 3/4 flat
+8632T75,8632T D-profile,1045,2.0,24,96.95,0.003,HRB90,0,d-profile,2026-11-10,full-length 1 flat
+7398K16,7398K fully keyed 304,304 SS,1.25,24,155.34,0.003,HRB85,1,fully-keyed,2026-11-10,
+7398K112,7398K fully keyed 304,304 SS,1.4375,24,177.75,0.003,HRB85,1,fully-keyed,2026-11-10,
+7398K17,7398K fully keyed 304,304 SS,1.5,24,225.67,0.003,HRB85,1,fully-keyed,2026-11-10,
+7398K18,7398K fully keyed 304,304 SS,2.0,24,405.39,0.0035,HRB85,1,fully-keyed,2026-11-10,
+7405K16,7405K fully keyed 316,316 SS,1.25,24,214.79,0.003,HRB85,1,fully-keyed,2026-11-10,
+8377T34,8377T partially keyed 303,303 SS,1.25,24,175.86,0.001,HRB80,1,partially-keyed,2026-11-10,keyways 4 in and 14 in
+8377T41,8377T partially keyed 303,303 SS,1.4375,24,232.76,0.001,HRB80,1,partially-keyed,2026-11-10,keyways 4 in and 14 in
+1497K401,1497K fully keyed,carbon,1.25,24,69.26,0.003,HRB95,0,fully-keyed,2026-11-10,
+1497K701,1497K fully keyed,carbon,1.4375,24,98.16,0.003,HRB95,0,fully-keyed,2026-11-10,
+1497K801,1497K fully keyed,carbon,1.5,24,103.86,0.003,HRB95,0,fully-keyed,2026-11-10,
+6117K171,6117K partially keyed,1045,1.25,24,110.00,0.002,HB190,0,partially-keyed,2026-11-10,keyways 4 in and 14 in
+6117K193,6117K partially keyed,1045,1.5,24,123.33,0.002,HB190,0,partially-keyed,2026-11-10,keyways 4 in and 14 in

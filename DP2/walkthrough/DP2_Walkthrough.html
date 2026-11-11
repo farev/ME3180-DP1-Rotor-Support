@@ -1,0 +1,1162 @@
+<title>DP2 Rotor Shaft Walkthrough</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<script>
+window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] }, svg: { fontCache: 'global' }, options: { enableMenu: false } };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js" async></script>
+<style>
+/* Layout: engineering calc-sheet. Sticky step index on the left, one readable column of worked steps on the right. */
+:root{
+  --paper:#f5f6f3; --sheet:#ffffff; --ink:#18232d; --muted:#5b6670; --rule:#d9ddd6;
+  --blue:#1f4d8f; --blue-soft:#e7eef8;          /* layout-dye blue: equations, links */
+  --amber:#a8620a; --amber-soft:#fbf0de;        /* decisions */
+  --slate:#4f5d6b; --slate-soft:#eceff2;        /* assumptions */
+  --ok:#2c7a46; --ok-soft:#e3f2e7; --warn:#a35a00; --warn-soft:#fdf0dc; --bad:#b3261e; --bad-soft:#fbe5e3;
+  --code:#eef0ec;
+  --f-display:"Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#12171c; --sheet:#182028; --ink:#e3e8ec; --muted:#9aa6b1; --rule:#2c3640;
+  --blue:#8db4ec; --blue-soft:#1d2b3d; --amber:#e8a548; --amber-soft:#33281a; --slate:#aebbc8; --slate-soft:#222b34;
+  --ok:#6cc58a; --ok-soft:#1b2e22; --warn:#e8a548; --warn-soft:#33281a; --bad:#ef7d74; --bad-soft:#3a1f1d; --code:#1f2830; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#12171c; --sheet:#182028; --ink:#e3e8ec; --muted:#9aa6b1; --rule:#2c3640;
+  --blue:#8db4ec; --blue-soft:#1d2b3d; --amber:#e8a548; --amber-soft:#33281a; --slate:#aebbc8; --slate-soft:#222b34;
+  --ok:#6cc58a; --ok-soft:#1b2e22; --warn:#e8a548; --warn-soft:#33281a; --bad:#ef7d74; --bad-soft:#3a1f1d; --code:#1f2830; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:400 16.5px/1.55 var(--f-body);margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:220px minmax(0,1fr);gap:40px}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);align-self:start;max-height:calc(100vh - 32px);overflow:auto;font-size:14px}
+nav.toc .h{font:700 11px/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+nav.toc ol{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:2px}
+nav.toc a{color:var(--ink);text-decoration:none;display:flex;gap:8px;padding:4px 8px;border-radius:4px}
+nav.toc a:hover,nav.toc a:focus-visible{background:var(--blue-soft);outline:none}
+nav.toc a span{font:600 12px/1.6 var(--f-mono);color:var(--muted);min-width:22px}
+main{min-width:0}
+header.top{margin-bottom:28px}
+.eyebrow{font:700 12px/1 var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--amber)}
+h1{font:800 clamp(30px,4.4vw,44px)/1.08 var(--f-display);letter-spacing:-.01em;margin:10px 0 10px;text-wrap:balance}
+.lede{max-width:68ch;color:var(--muted);margin:0}
+.status{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0}
+.pill{display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 var(--f-body);padding:6px 10px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet)}
+.pill.warn{border-color:transparent;background:var(--warn-soft);color:var(--warn)}
+.pill.ok{border-color:transparent;background:var(--ok-soft);color:var(--ok)}
+.spec{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0;margin:24px 0 0;border:1px solid var(--rule);background:var(--sheet);border-radius:6px;overflow:hidden}
+.spec div{padding:12px 14px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.spec dt{font:600 11px/1.2 var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.spec dd{margin:6px 0 0;font:600 17px/1.25 var(--f-mono);font-variant-numeric:tabular-nums}
+.spec dd small{display:block;font:400 12.5px/1.35 var(--f-body);color:var(--muted);margin-top:3px}
+section.step{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:26px clamp(16px,3vw,32px);margin:0 0 22px;scroll-margin-top:16px}
+section.step > h2{display:flex;align-items:baseline;gap:12px;font:700 23px/1.2 var(--f-display);margin:0 0 6px;text-wrap:balance}
+section.step > h2 .n{font:600 14px/1 var(--f-mono);color:var(--blue);border:1.5px solid var(--blue);border-radius:4px;padding:4px 6px;flex:none}
+.sub{color:var(--muted);margin:0 0 16px;max-width:70ch}
+h3{font:700 16px/1.3 var(--f-display);margin:22px 0 8px;letter-spacing:.01em}
+p{margin:0 0 12px;max-width:72ch}
+.tag{display:inline-block;font:700 10.5px/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;padding:4px 6px;border-radius:3px;vertical-align:2px;margin-right:6px;white-space:nowrap}
+.tag.d{background:var(--amber-soft);color:var(--amber)}
+.tag.a{background:var(--slate-soft);color:var(--slate)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.tag.bad{background:var(--bad-soft);color:var(--bad)}
+.tag.q{background:var(--blue-soft);color:var(--blue)}
+.box{border-left:3px solid var(--amber);background:var(--amber-soft);padding:12px 16px;border-radius:0 4px 4px 0;margin:14px 0}
+.box.a{border-color:var(--slate);background:var(--slate-soft)}
+.box.r{border-color:var(--warn);background:var(--warn-soft)}
+.box.g{border-color:var(--ok);background:var(--ok-soft)}
+.box p:last-child{margin-bottom:0}
+.box .lbl{font:700 11px/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;display:block}
+.box .lbl{color:var(--amber)} .box.a .lbl{color:var(--slate)} .box.r .lbl{color:var(--warn)} .box.g .lbl{color:var(--ok)}
+.eq{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;margin:8px 0;padding:6px 0;overflow-x:auto}
+.eq > div{overflow-x:auto;min-width:0}
+.eq .no{font:400 13px/1 var(--f-mono);color:var(--muted)}
+.eq mjx-container[display="true"]{margin:.2em 0 !important;text-align:left !important}
+.src{font-size:13px;color:var(--muted)}
+.tbl{overflow-x:auto;margin:10px 0 14px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font:700 11.5px/1.3 var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1.5px solid var(--ink)}
+td.num,th.num{text-align:right;font-family:var(--f-mono);font-size:13.5px;white-space:nowrap}
+tr.hl td{background:var(--blue-soft)}
+.pass{color:var(--ok);font-weight:700}.fail{color:var(--bad);font-weight:700}
+ul.flat{margin:0 0 12px;padding-left:20px} ul.flat li{margin:4px 0}
+.findings{display:grid;gap:10px;margin:8px 0 0}
+.f{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;padding:12px 14px;border:1px solid var(--rule);border-radius:5px;background:var(--sheet)}
+.f .tag{margin:2px 0 0}
+.f p{margin:0}
+.f b{font-weight:700}
+figure{margin:12px 0 16px}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:13px;color:var(--muted);margin-top:6px}
+.chartwrap{border:1px solid var(--rule);border-radius:5px;padding:10px;background:var(--paper)}
+.ctl{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:10px 0}
+.ctl label{font:600 14px var(--f-body)}
+.ctl input[type=range]{width:min(360px,100%);accent-color:var(--blue)}
+.ctl output{font:600 16px var(--f-mono)}
+.ctl button{font:600 13px var(--f-body);padding:6px 10px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);border-radius:4px;cursor:pointer}
+.ctl button:hover,.ctl button:focus-visible{border-color:var(--blue);outline:none}
+code,.mono{font-family:var(--f-mono);font-size:.88em;background:var(--code);padding:1px 5px;border-radius:3px}
+a{color:var(--blue)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+@media (max-width:900px){ .wrap{grid-template-columns:minmax(0,1fr)} nav.toc{position:static;max-height:none;border:1px solid var(--rule);border-radius:6px;padding:12px;background:var(--sheet)} nav.toc ol{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))} }
+@media (prefers-reduced-motion:reduce){ *{scroll-behavior:auto} }
+html{scroll-behavior:smooth}
+
+/* ---- interactive layout: reading column + sticky 3D bench ---- */
+:root{
+  --c-water:#1f6fb2; --c-chain:#c7650a; --c-weight:#6a4fa3; --c-react:#2c7a46; --c-feat:#c2271d; --c-hw:#8a5a14;
+  --c-steel:#9aa5ae; --c-part:#b9c1c7; --stage:#eef1ee; --glow:#ffb020;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --c-water:#5fa8e8; --c-chain:#f0954a; --c-weight:#a68ae0; --c-react:#62c283; --c-feat:#f26b62; --c-hw:#d9a050;
+  --c-steel:#7d8a95; --c-part:#55626d; --stage:#141b21; --glow:#ffc24d }}
+:root[data-theme="dark"]{
+  --c-water:#5fa8e8; --c-chain:#f0954a; --c-weight:#a68ae0; --c-react:#62c283; --c-feat:#f26b62; --c-hw:#d9a050;
+  --c-steel:#7d8a95; --c-part:#55626d; --stage:#141b21; --glow:#ffc24d }
+
+.wrap{max-width:none;display:grid;grid-template-columns:minmax(0,760px) minmax(360px,1fr);gap:28px;align-items:start}
+nav.toc{display:none}
+.bench{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);height:calc(100vh - 24px - env(safe-area-inset-top,0px));display:flex;flex-direction:column;border:1px solid var(--rule);border-radius:8px;background:var(--sheet);overflow:hidden;min-width:0}
+.bench-top{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.bench-top .stepno{font:600 12px/1 var(--f-mono);color:var(--blue);border:1.5px solid var(--blue);border-radius:4px;padding:4px 6px}
+.bench-top select{flex:1 1 180px;min-width:0;font:600 14px var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:5px 6px}
+.ib{font:600 13px/1 var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:6px 9px;cursor:pointer;white-space:nowrap}
+.ib:hover,.ib:focus-visible{border-color:var(--blue);outline:none}
+.ib[aria-pressed="true"]{background:var(--blue-soft);border-color:var(--blue);color:var(--blue)}
+.progress{height:3px;background:var(--rule)} .progress i{display:block;height:100%;width:0;background:var(--blue);transition:width .25s}
+.stage{position:relative;flex:1 1 auto;min-height:0;background:var(--stage);touch-action:none}
+.stage canvas{display:block;width:100%;height:100%;cursor:grab}
+.stage canvas:active{cursor:grabbing}
+.labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;left:0;top:0;font:600 11.5px/1.2 var(--f-body);color:var(--ink);background:color-mix(in srgb,var(--sheet) 82%,transparent);border:1px solid var(--rule);border-left:3px solid var(--lc,var(--muted));border-radius:3px;padding:2px 5px;white-space:nowrap;transition:opacity .2s}
+.lbl.on{border-color:var(--glow);border-left-color:var(--lc,var(--glow));box-shadow:0 0 0 1px var(--glow)}
+.lbl.faint{opacity:.35}
+.views{position:absolute;top:8px;right:8px;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.views .ib{padding:5px 7px;font-size:12px}
+.hint{position:absolute;top:10px;left:10px;font-size:12px;color:var(--muted);pointer-events:none;max-width:45%}
+.info{position:absolute;left:10px;right:10px;bottom:10px;background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--ic,var(--blue));border-radius:5px;padding:10px 12px;box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.info h4{margin:0 0 2px;font:700 15px/1.25 var(--f-display)}
+.info .v{font:600 13px/1.4 var(--f-mono);margin:2px 0 4px}
+.info p{margin:0;font-size:13.5px;color:var(--muted);max-width:none}
+.info .row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.info .x{position:absolute;top:6px;right:6px;border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;padding:4px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;padding:8px 12px;border-top:1px solid var(--rule);font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.toggles{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;border-top:1px solid var(--rule)}
+
+/* chips and clickable mentions in the text */
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 16px}
+.chips .lead{font:700 11px/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-right:2px}
+.chip,.ref{font:600 13px/1.2 var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-left:3px solid var(--cc,var(--blue));border-radius:4px;padding:5px 8px;cursor:pointer}
+.chip small{font-weight:400;color:var(--muted);margin-left:4px;font-family:var(--f-mono);font-size:11.5px}
+.ref{display:inline;padding:0 4px;border-width:0 0 2px 0;border-bottom-color:var(--cc,var(--blue));border-radius:2px;font:inherit;font-weight:600}
+.chip:hover,.chip:focus-visible,.ref:hover,.ref:focus-visible{background:var(--blue-soft);outline:none}
+.chip.on,.ref.on{background:color-mix(in srgb,var(--glow) 22%,var(--sheet));border-color:var(--glow);border-left-color:var(--cc,var(--glow))}
+tr[data-f]{cursor:pointer}
+tr[data-f]:hover td{background:var(--blue-soft)}
+tr[data-f].on td{background:color-mix(in srgb,var(--glow) 18%,var(--sheet))}
+tr[data-f] td:first-child::before{content:"◎ ";color:var(--blue);font-size:11px}
+section.step.active{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+.mobile-toggle{display:none}
+
+@media (max-width:1000px){
+  .wrap{grid-template-columns:minmax(0,1fr);gap:16px}
+  .bench{order:-1;position:sticky;top:env(safe-area-inset-top,0px);height:46vh;z-index:5;border-radius:0 0 8px 8px}
+  .bench.min{height:auto}
+  .bench.min .stage,.bench.min .legend,.bench.min .toggles{display:none}
+  .mobile-toggle{display:inline-block}
+  .hint{display:none}
+  .info{max-height:45%;overflow:auto}
+  .legend{display:none}
+}
+
+code{overflow-wrap:anywhere;word-break:break-word}
+
+.cutbox{position:absolute;bottom:10px;left:10px;width:min(300px,calc(100% - 20px));background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--glow);border-radius:5px;padding:8px 10px;font-size:12.5px;box-shadow:0 4px 14px rgba(0,0,0,.1)}
+.cutrow{display:flex;align-items:center;gap:8px}
+.cutrow label{font-weight:700;white-space:nowrap}
+.cutrow input[type=range]{flex:1;min-width:0;accent-color:var(--glow)}
+.cutrow output{font:600 12px var(--f-mono);white-space:nowrap}
+.cutrow.presets{flex-wrap:wrap;gap:4px;margin:6px 0}
+.cutrow.presets .ib{padding:3px 6px;font-size:11.5px}
+.cuteq{font:12px/1.45 var(--f-mono);color:var(--ink)}
+.lbl.dim{font:600 11px/1.2 var(--f-mono);background:color-mix(in srgb,var(--sheet) 88%,transparent)}
+.lbl.ruler{border-left:3px solid var(--muted)}
+@media (max-width:1000px){ .cutbox{bottom:6px;font-size:11.5px} .cutbox .cuteq{max-height:5.5em;overflow:auto} }
+
+.stage.cuton .info{bottom:auto;top:44px}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<div class="wrap">
+<main>
+<header class="top">
+  <p class="src" style="margin:0 0 6px">Click any underlined term, chip or ◎ table row to highlight it on the 3D model. Scroll and the model follows the step you are reading.</p>
+  <div class="eyebrow">ME 3180 · Design Problem 2 · Rev P3</div>
+  <h1>Rotor shaft and attachments, step by step</h1>
+  <p class="lede">Every decision, assumption and equation behind the DP2 design (Rev P3), with the numbers substituted. Each value was recomputed independently from the assignment and checked against Shigley 11th ed. Units: N, mm, MPa, N·m unless stated. y is measured up the shaft from the lower outside bearing face.</p>
+  <div class="status">
+    <span class="pill ok">Shaft S<sub>y</sub> on the Piazza-approved list</span>
+    <span class="pill ok">All numbers reproduced independently</span>
+    <span class="pill ok">Catalog-wide shaft search, 10 Nov</span>
+    <span class="pill">Rev P3: 1566 shaft 1346K534</span>
+    <span class="pill">Due 13 Nov 2026, 11:59 pm</span>
+  </div>
+  <dl class="spec">
+    <div><dt>Shaft</dt><dd>Ø1.500 in × 554 mm<small>1566 HRC25 precision rotary, McMaster 1346K534 (24 in)</small></dd></div>
+    <div><dt>Shaft yield</dt><dd>n<sub>y</sub> = 3.08<small>lower ring groove, K<sub>t</sub> used (3.63 by Shigley Eq. 7-15, keyseat)</small></dd></div>
+    <div><dt>Shaft fatigue</dt><dd>n<sub>f</sub> = 1.44<small>keyseat end, conservative model</small></dd></div>
+    <div><dt>Hardware minimum</dt><dd>n = 1.27<small>set screw installation stress</small></dd></div>
+    <div><dt>Cost</dt><dd>$222.07<small>full 24 in stock + $100 coating allowance</small></dd></div>
+  </dl>
+</header>
+
+<!-- ============ REVIEW ============ -->
+<section class="step" id="review">
+  <h2><span class="n">R</span>Review verdict</h2>
+  <p class="sub">Rev P3 passes every Rev2 requirement with the Piazza-approved shaft properties. The geometry is the P2 design; only the shaft stock changed, after the approved 1045 yield strength (75 ksi) came in below the 598 MPa we had proposed and the cost rule was read as the full price of the shortest sufficient stock. Items marked ⚠ are corrections or improvements for the report.</p>
+  <div class="findings">
+    <div class="f"><span class="tag ok">Verified</span><p><b>Arithmetic.</b> Reactions, moments, Marin factors, notch sensitivity, all five section checks, the key, screw, pin and ring checks and the BOM total were rebuilt from scratch with vector statics (r × F about each cut). Every value matches the provisional PDF to four decimals.</p></div>
+    <div class="f"><span class="tag ok">Verified</span><p><b>Groove K<sub>t</sub> = 3.5 is conservative.</b> Reading Shigley Fig. A-15-16 (11th ed., p. 1047) at a/t = 1.51: the r/t = 0.40 curve gives 3.40 and r/t = 0.60 gives 3.17, so r/t = 0.478 gives K<sub>t</sub> ≈ 3.3. Using 3.5 adds about 6 %.</p></div>
+    <div class="f"><span class="tag ok">Verified</span><p><b>Shaft choice (Rev P3).</b> A solver (DP2/solver) ran every McMaster rotary shaft and every stainless ring for its diameter through these same equations. 1346K534 (1566, HRC25, 1-1/2 × 24 in, $112.69) is the cheapest that passes fatigue and both yield checks. 4138N27 (1-11/16 in 1045) is $20 cheaper but fails the added K<sub>t</sub> check. See Step 10.</p></div>
+    <div class="f"><span class="tag warn">⚠ Method</span><p><b>Yield check uses K<sub>t</sub>, Shigley uses K<sub>f</sub>.</b> Shigley Eq. (7-15) builds σ′<sub>max</sub> with K<sub>f</sub> and K<sub>fs</sub>. With K<sub>f</sub> = 2.72 at the groove, n<sub>y</sub> = 3.96 instead of 3.08. Report both. The keyseat governs the Shigley check at 3.63 (needs S<sub>y</sub> ≥ 501 MPa); the strict groove check needs S<sub>y</sub> ≥ 591 MPa. The approved 606.7 MPa clears both.</p></div>
+    <div class="f"><span class="tag ok">Fixed</span><p><b>Hardness conversion.</b> Shigley 11th ed. Eq. (2-36) is S<sub>ut</sub> = 3.4 H<sub>B</sub> MPa. For the 1566 shaft, HRC25 = HB 253, so S<sub>ut</sub> = 3.4(253) = 860.2 MPa. Piazza lists only S<sub>y</sub>, so this hardness minimum is used.</p></div>
+    <div class="f"><span class="tag warn">⚠ Drawing</span><p><b>Groove radius tolerance is not machinable.</b> R 0.0098–0.0100 in is a 5 µm band. R 0.008–0.010 in (0.20–0.25 mm) is inspectable and within Smalley's 0.010 in limit. At r<sub>min</sub> = 0.20 mm the chart gives K<sub>t</sub> ≈ 3.45 ≤ 3.5, so the result is unchanged.</p></div>
+    <div class="f"><span class="tag ok">Changed P2</span><p><b>Key lengthened to 1/2 in.</b> The class rule says a key must be longer than it is wide, so the 1/4 in key is out. The 1/2 in key gives n = 27.5 in shear and 23.5 in bearing and halves the key pressure on the keyseat (17.5 MPa). The slot is 22.45 mm.</p></div>
+    <div class="f"><span class="tag warn">⚠ Practice</span><p><b>Set-screw torque 0.75 ± 0.02 N·m.</b> That is about 1/13 of Shigley Table 7-4's seating torque for a 1/4 in screw (87 lbf·in = 9.8 N·m). It is chosen so the 18-8 screw stays under 205 MPa. The ±0.02 N·m band is tighter than a typical torque driver holds (about ±6 %). The checks already use the 0.73–0.77 N·m range, so the numbers stand; consider stating the tool accuracy.</p></div>
+    <div class="f"><span class="tag ok">Verified</span><p><b>Notch sensitivity.</b> q = 0.688 (Shigley Eqs. 6-33, 6-35, checked in US and SI forms). The design still passes with q up to 0.91. With K<sub>f</sub> = K<sub>t</sub> everywhere (as the reference design does), only a 1-15/16 in shaft passes, at $306.55.</p></div>
+    <div class="f"><span class="tag ok">Resolved</span><p><b>Shaft properties.</b> S<sub>y</sub> = 88 ksi for 1566 at HRC25, D ≤ 1.5 in, is on the instructor's approved list (10 Nov). No request is needed.</p></div>
+  </div>
+</section>
+
+<!-- ============ STEP 1 ============ -->
+<section class="step" id="s1">
+  <h2><span class="n">01</span>Assumptions and requirements</h2>
+  <p class="sub">What the design takes as given. Each of these is stated in the report.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>ID</th><th>Assumption</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag a">A1</span></td><td>Rev2 is the governing document; no later Piazza/Canvas clarifications.</td><td>Basis for all inputs.</td></tr>
+      <tr><td><span class="tag a">A2</span></td><td>The 300 mm dimension runs between the outside bearing faces. Bearings are 12.7 mm (1/2 in, Req. 8) wide with reactions at their midplanes, so the centres are 287.3 mm apart.</td><td>Reaction span L = 300 − 12.7 = 287.3 mm.</td></tr>
+      <tr><td><span class="tag a">A3</span></td><td>Drag and chain force are fixed in space while the shaft turns. Bending is fully reversed; torque and weights are steady. The given safety factors cover overloads; no extra shock factor.</td><td>σ<sub>a</sub> from bending, σ<sub>m</sub> and τ<sub>m</sub> from axial load and torque.</td></tr>
+      <tr><td><span class="tag a">A4</span></td><td>The hub bore carries the drag and its moment. The pin carries the torque and the 120 N rotor weight. Snug hub bore.</td><td>Pin sees only T and 120 N.</td></tr>
+      <tr><td><span class="tag a">A5</span></td><td>Ambient temperature, low speed, below critical speed. The ring speed rating (5900 rpm) is not exceeded.</td><td>k<sub>d</sub> = 1.</td></tr>
+      <tr><td><span class="tag a">A6</span></td><td>The upper ring and bearing carry all downward thrust. Both rings are still checked for the full thrust.</td><td>N = 203.6 N on the identical rings.</td></tr>
+      <tr><td><span class="tag a">A7</span></td><td>Distortion-energy yield and modified-Goodman fatigue. Machined surface factor at features. Reliability 99 % (k<sub>e</sub> = 0.814) added. Corrosion protection preserves the surface.</td><td>Lower S<sub>e</sub> than the k<sub>e</sub> = 1 default.</td></tr>
+      <tr><td><span class="tag a">A8</span></td><td>Assembly clearances and axial float are allowed. Section moments are read straight from the moment diagram, as in Shigley Example 7-2; no extra moment margin is added.</td><td>The safety factors cover small load-position shifts (0.5 mm of drag line = 0.28 N·m).</td></tr>
+      <tr><td><span class="tag a">A9</span></td><td>All dimensions and tolerances on the drawing are part of the design; a sharper groove invalidates the result.</td><td>Ties K<sub>t</sub> to the drawing.</td></tr>
+      <tr><td><span class="tag a">A10</span></td><td>Cost = full price of the shortest stock long enough for the shaft (Req. 4, as read for this design), plus prorated hardware; no tax or freight. Key stock cut and deburred. Pin spans the full 3 in hub OD.</td><td>Cost basis.</td></tr>
+    </tbody></table></div>
+  <h3>Requirements from Rev2 that drive the design</h3>
+  <ul class="flat">
+    <li>Shaft: n<sub>y</sub> ≥ 3.0, n<sub>f</sub> ≥ 1.2, infinite life. Key, set screw, rings, pin: n ≥ 1.2 (Req. 2, 3).</li>
+    <li>One McMaster precision rotary shaft; no chrome; +$100 if not stainless; hardness capped at HRC 25; properties only as approved on Piazza (Req. 5).</li>
+    <li>Key, set screw, rings stainless; pin 416 stainless; key S<sub>y</sub> = 0.8 S<sub>ut</sub> (Req. 5, 7).</li>
+    <li>Sprocket 1.125 in wide, toothed part 0.284 in, hub OD = 2d. Rotor hub 100 mm long, pin in the upper 40 mm, hub OD = 2d at the pin (Req. 9, 10).</li>
+  </ul>
+</section>
+
+<!-- ============ STEP 2 ============ -->
+<section class="step" id="s2">
+  <h2><span class="n">02</span>Geometry and loads</h2>
+  <p class="sub">Station map along the shaft (y = 0 at the lower outside bearing face, +y up), and the chain force resolved into x and z.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Station</th><th class="num">y (mm)</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr data-f="groove-u"><td>Shaft top end</td><td class="num">+303.5</td><td>Upper groove + end margin (Step 14)</td></tr>
+      <tr data-f="bearing-u"><td>Upper bearing midplane, y<sub>U</sub></td><td class="num">+293.65</td><td>300 − 12.7/2 <span class="tag a">A2</span></td></tr>
+      <tr data-f="bearing-l"><td>Lower bearing midplane, y<sub>L</sub></td><td class="num">+6.35</td><td>12.7/2 <span class="tag a">A2</span></td></tr>
+      <tr data-f="groove-l"><td>Lower ring groove (centre)</td><td class="num">−0.49</td><td>Just outside the lower bearing</td></tr>
+      <tr data-f="keyseat"><td>Keyseat (centre / upper end)</td><td class="num">−36.0 / −24.75</td><td>In the sprocket hub, under the set screw <span class="tag d">D9</span></td></tr>
+      <tr data-f="chain"><td>Chain line (tooth midplane)</td><td class="num">−50</td><td>Fig. 2</td></tr>
+      <tr data-f="hub"><td>Top of rotor hub</td><td class="num">−150</td><td>Fig. 2</td></tr>
+      <tr data-f="pin"><td>Pin centre</td><td class="num">−180</td><td>30 mm into the hub's upper 40 mm <span class="tag d">D12</span></td></tr>
+      <tr data-f="hub"><td>Bottom of hub / shaft bottom end</td><td class="num">−250 / −250.5</td><td>Shaft must pass through the hub</td></tr>
+      <tr data-f="wr"><td>Rotor CG (120 N)</td><td class="num">−350</td><td>Fig. 2</td></tr>
+      <tr data-f="drag"><td>Centre of pressure (560 N drag, +z)</td><td class="num">−500</td><td>Fig. 2</td></tr>
+    </tbody></table></div>
+  <figure class="chartwrap"><svg id="mapSvg" viewBox="0 0 720 230" role="img" aria-label="Shaft station map"></svg>
+  <figcaption>Station map drawn to scale along y. The dashed line below the hub is the rigid rotor/hub load path to the CG and COP, not shaft.</figcaption></figure>
+  <h3>Chain force components</h3>
+  <p><button type="button" class="ref" data-f="chain">The chain pulls with 161.8 N</button> at θ = −4.732° from x, measured about y. A rotation θ about +y takes x̂ to (cos θ, 0, −sin θ):</p>
+  <div class="eq"><div>\[F_{c,x}=F_c\cos\theta=161.8\cos(-4.732^\circ)=161.25\ \text{N}\]</div><span class="no">(1)</span></div>
+  <div class="eq"><div>\[F_{c,z}=-F_c\sin\theta=-161.8\sin(-4.732^\circ)=+13.35\ \text{N}\]</div><span class="no">(2)</span></div>
+  <p>The +z component adds to the drag, which is the conservative sign. The weights act along the axis: <button type="button" class="ref" data-f="wr">rotor 120 N</button> (through the pin), <button type="button" class="ref" data-f="ws">sprocket 35 N</button> (through key and set screw) and <button type="button" class="ref" data-f="wsh">shaft self-weight</button>:</p>
+  <div class="eq"><div>\[W_{sh}=\rho g\frac{\pi D^2}{4}L=7850(9.807)\frac{\pi(0.0381)^2}{4}(0.554)=48.62\ \text{N}\]</div><span class="no">(3)</span></div>
+  <div class="eq"><div>\[N=W_r+W_s+W_{sh}=120+35+48.62=203.62\ \text{N}\]</div><span class="no">(4)</span></div>
+  <p class="src">Using the full Ø38.1 cylinder slightly overestimates the weight of the machined shaft.</p>
+</section>
+
+<!-- ============ STEP 3 ============ -->
+<section class="step" id="s3">
+  <h2><span class="n">03</span>Bearing reactions (Shaft item 1)</h2>
+  <p class="sub">Each horizontal direction is a simply supported beam with an overhang. Moments about the lower bearing give R<sub>U</sub>; force balance gives R<sub>L</sub>. Span L = y<sub>U</sub> − y<sub>L</sub> = 287.30 mm.</p>
+  <h3>z direction (<button type="button" class="ref" data-f="drag">drag</button> and <button type="button" class="ref" data-f="chain">chain</button>)</h3>
+  <div class="eq"><div>\[R_{U,z}=\frac{D\,(y_L-y_{COP})+F_{c,z}(y_L-y_F)}{L}=\frac{560(506.35)+13.35(56.35)}{287.30}=+989.59\ \text{N}\]</div><span class="no">(5)</span></div>
+  <div class="eq"><div>\[R_{L,z}=-D-F_{c,z}-R_{U,z}=-560-13.35-989.59=-1562.93\ \text{N}\]</div><span class="no">(6)</span></div>
+  <h3>x direction (<button type="button" class="ref" data-f="chain">chain</button> only)</h3>
+  <div class="eq"><div>\[R_{U,x}=\frac{F_{c,x}(y_L-y_F)}{L}=\frac{161.25(56.35)}{287.30}=+31.63\ \text{N}\]</div><span class="no">(7)</span></div>
+  <div class="eq"><div>\[R_{L,x}=-F_{c,x}-R_{U,x}=-161.25-31.63=-192.88\ \text{N}\]</div><span class="no">(8)</span></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Bearing</th><th class="num">R<sub>x</sub> (N)</th><th class="num">R<sub>z</sub> (N)</th><th class="num">Resultant (N)</th></tr></thead>
+    <tbody>
+      <tr data-f="ru"><td>Upper, y = 293.65</td><td class="num">+31.63</td><td class="num">+989.59</td><td class="num">990.09</td></tr>
+      <tr data-f="rl" class="hl"><td>Lower, y = 6.35</td><td class="num">−192.88</td><td class="num">−1562.93</td><td class="num">1574.79</td></tr>
+    </tbody></table></div>
+  <p>Axially, the shaft hangs from the upper ring: <button type="button" class="ref" data-f="thrust">thrust N = 203.62 N</button>, Eq. (4). The torque entering at the pin leaves at the key, so the bearings carry no torque: ΣM<sub>y</sub> = 19.63 − 19.63 = 0.</p>
+</section>
+
+<!-- ============ STEP 4 ============ -->
+<section class="step" id="s4">
+  <h2><span class="n">04</span>Bending moment and torque along the shaft</h2>
+  <p class="sub">Cut the shaft at y and keep the part below the cut. Inside the hub the drag is treated as a 560 N force at y = −500 on a rigid extension, which is the cantilever envelope.</p>
+  <div class="eq"><div>\[-150\le y<-50:\quad |M_x|=560(y+500),\qquad M_z=0\]</div><span class="no">(9)</span></div>
+  <div class="eq"><div>\[-50\le y\le y_L:\quad |M_x|=560(y+500)+13.35(y+50),\qquad |M_z|=161.25(y+50)\]</div><span class="no">(10)</span></div>
+  <div class="eq"><div>\[y_L\le y\le y_U:\quad M=|R_U|(y_U-y)=990.09(293.65-y),\qquad M=\sqrt{M_x^2+M_z^2}\]</div><span class="no">(11)</span></div>
+  <p><button type="button" class="ref" data-f="mdiag,tdiag">Show these diagrams on the 3D shaft</button></p>
+  <figure class="chartwrap"><svg id="mtSvg" viewBox="0 0 720 330" role="img" aria-label="Resultant bending moment and torque along the shaft"></svg>
+  <figcaption>Resultant bending moment M (top) and torque T (bottom) along y, drawn from Eqs. (9)–(11). Torque exists only between the pin (y = −180) and the key; the full 19.63 N·m is carried through the whole keyseat.</figcaption></figure>
+  <div class="tbl"><table>
+    <thead><tr><th>Section</th><th class="num">y (mm)</th><th class="num">M<sub>x</sub></th><th class="num">M<sub>z</sub></th><th class="num">M</th><th class="num">T (N·m)</th></tr></thead>
+    <tbody>
+      <tr data-f="plain"><td>Lower bearing midplane</td><td class="num">6.35</td><td class="num">284.31</td><td class="num">9.09</td><td class="num">284.45</td><td class="num">0</td></tr>
+      <tr data-f="groove-l" class="hl"><td>Lower ring groove</td><td class="num">−0.49</td><td class="num">280.38</td><td class="num">7.98</td><td class="num">280.50</td><td class="num">0</td></tr>
+      <tr data-f="keyseat"><td>Keyseat upper end</td><td class="num">−24.75</td><td class="num">266.48</td><td class="num">4.07</td><td class="num">266.51</td><td class="num">19.63</td></tr>
+      <tr data-f="pinhole"><td>Pin hole, upper edge</td><td class="num">−176.81</td><td class="num">180.99</td><td class="num">0</td><td class="num">180.99</td><td class="num">19.63</td></tr>
+      <tr data-f="groove-u"><td>Upper ring groove</td><td class="num">+300.5</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+    </tbody></table></div>
+  <p>Example, groove at y = −0.4937: M<sub>x</sub> = 560(499.51) + 13.35(49.51) = 280 384 N·mm, M<sub>z</sub> = 161.25(49.51) = 7 983 N·mm, M = √(280 384² + 7 983²) = 280 498 N·mm.</p>
+  <div class="box a"><span class="lbl">Hub model check</span><p>A statically consistent hub contact (−1820 N at y = −160, +2380 N at y = −240) sums to 560 N with moment −280 N·m about y = 0. The pin-hole check instead uses the larger cantilever value at the hole edge (181 N·m). Average contact pressure in a 10 mm band: 2380/(38.05 × 10) = 6.26 MPa, covered by a 12 MPa mean-stress allowance at the hole.</p></div>
+</section>
+
+<!-- ============ STEP 5 ============ -->
+<section class="step" id="s5">
+  <h2><span class="n">05</span>Where the highest stress is (Shaft item 2)</h2>
+  <p>The shaft has one diameter and no shoulders, so the only stress raisers are the two ring grooves, the keyseat and the pin hole. The largest nominal moment is at the lower bearing midplane (284.5 N·m), but there is no notch there. Half a bearing width lower, the <button type="button" class="ref" data-f="groove-l">lower retaining-ring groove</button> combines almost the same moment (280.5 N·m) with the sharpest notch (K<sub>t</sub> 3.5) and the smallest section (root Ø37.06 mm). It carries no torque.</p>
+  <p>The <button type="button" class="ref" data-f="keyseat">keyseat upper end</button> comes second: slightly less moment (266.5 N·m), a milder notch, and the full 19.63 N·m torque. The <button type="button" class="ref" data-f="pinhole">pin hole</button> sees much less moment (181 N·m). The <button type="button" class="ref" data-f="groove-u">upper groove</button> sees no bending or torque.</p>
+  <div class="box"><span class="lbl">Result (Shaft items 2–3)</span><p>Highest stress: lower ring groove, M = 280.5 N·m, T = 0, with N = 203.6 N axial tension. Highest fatigue demand in the conservative model: keyseat upper end, M = 266.5 N·m, T = 19.63 N·m. Step 9 confirms the ranking: the groove governs yield, the keyseat governs fatigue.</p></div>
+</section>
+
+<!-- ============ STEP 6 ============ -->
+<section class="step" id="s6">
+  <h2><span class="n">06</span>Shaft material and properties</h2>
+<p><span class="tag d">D1</span><button type="button" class="ref" data-f="shaft">Shaft: McMaster 1346K534</button>, 1566 carbon steel precision rotary shaft, Rockwell C25, Ø1.500 in (OD 1.496–1.500 in), turned, ground and polished, 24 in stock at $112.69. Not chrome plated; not stainless, so the $100 allowance applies.</p>
+<p><span class="tag d">D2</span><b>Approved properties: S<sub>y</sub> = 88 ksi = 606.7 MPa</b> (instructor's Piazza list, 1566 at HRC25, D ≤ 1.5 in). S<sub>ut</sub> is not listed, so the hardness minimum is used.</p>
+<h3>Hardness rule (Req. 5)</h3>
+<p>The property set must match or exceed the tensile strength the McMaster hardness implies. HRC25 = HB 253 (ASTM E140); Shigley Eq. (2-36), 11th ed. p. 61:</p>
+<div class="eq"><div>\[S_{ut}=3.4\,H_B=3.4(253)=860.2\ \text{MPa}\]</div><span class="no">(12)</span></div>
+<p>HRC 25 is exactly the Rev2 hardness cap, so no strength beyond it is claimed. No heat treatment is added.</p>
+<div class="tbl"><table>
+  <thead><tr><th>Approved material (Piazza)</th><th class="num">S<sub>y</sub> (MPa)</th><th class="num">3.4 HB</th><th>McMaster shafts</th></tr></thead>
+  <tbody>
+    <tr><td>1045, Brinell 197</td><td class="num">517.1</td><td class="num">669.8</td><td>4138N plain (old 4138N14)</td></tr>
+    <tr><td>1045, Brinell 190, D ≤ 2 in</td><td class="num">517.1</td><td class="num">646.0</td><td>6117K partly keyed</td></tr>
+    <tr class="hl"><td>1566, Rockwell C25, D ≤ 1.5 in</td><td class="num">606.7</td><td class="num">860.2</td><td>1346K plain (selected)</td></tr>
+    <tr><td>1566, Rockwell C25, D &gt; 1.5 in</td><td class="num">565.4</td><td class="num">860.2</td><td>—</td></tr>
+    <tr><td>4140, Rockwell C28 (D ≤ 1 in / larger)</td><td class="num">827.4 / 758.4</td><td class="num">860.2 (cap)</td><td>2672N alloy</td></tr>
+  </tbody></table></div>
+<p class="src">The earlier Marks proposal for 1045 (703/598 MPa) is superseded: the approved 1045 value is 517 MPa, which leaves the old 4138N14 design at 2.62 on the strict check.</p>
+</section>
+
+<!-- ============ STEP 7 ============ -->
+<section class="step" id="s7">
+  <h2><span class="n">07</span>Ring groove geometry and K<sub>t</sub></h2>
+  <p><span class="tag d">D3</span><button type="button" class="ref" data-f="rings">Rings: McMaster 93576A210</button> 18-8 single-turn spiral rings for 1.500 in shafts. Catalog groove: Ø1.456 ± 0.004 in, width 0.031 +0.002/−0 in.</p>
+  <p><span class="tag d">D4</span><b>Shallow groove.</b> The drawing restricts the root to Ø1.4590–1.4600 in (the shallow end of the catalog range) with root radius 0.0098–0.0100 in (Smalley allows at most 0.010 in above 1 in shafts). A shallower, rounder groove lowers K<sub>t</sub>.</p>
+  <div class="eq"><div>\[d_{min}=1.459(25.4)=37.0586\ \text{mm},\qquad t_{max}=\frac{38.1000-37.0586}{2}=0.5207\ \text{mm}\]</div><span class="no">(13)</span></div>
+  <div class="eq"><div>\[\frac{r}{t}=\frac{0.2489}{0.5207}=0.478,\qquad \frac{a}{t}=\frac{0.7874}{0.5207}=1.512\]</div><span class="no">(14)</span></div>
+  <p>Shigley Fig. A-15-16 (flat-bottom groove, bending): at a/t = 1.51 the r/t = 0.40 curve reads 3.40 and the r/t = 0.60 curve reads 3.17. Interpolating gives K<sub>t</sub> ≈ 3.3 at r/t = 0.478.</p>
+  <div class="box"><span class="lbl">Decision D5</span><p>Use <b>K<sub>t</sub> = 3.5</b>, rounded up from the chart. The nominal stress is referred to the groove root d, as the chart defines σ<sub>0</sub> = 4F/(πd²) + 32M/(πd³).</p></div>
+  <div class="box r"><span class="lbl">Review note</span><p>Specify the radius as R 0.008–0.010 in (0.20–0.25 mm) instead of a 0.0002 in band. At r = 0.20 mm, r/t = 0.39 and the chart gives K<sub>t</sub> ≈ 3.45, still under 3.5.</p></div>
+</section>
+
+<!-- ============ STEP 8 ============ -->
+<section class="step" id="s8">
+  <h2><span class="n">08</span>Notch sensitivity and endurance limit</h2>
+  <p>Neuber constant for bending (Shigley Eq. 6-35), with S<sub>ut</sub> in kpsi: 860.2 MPa = 124.76 kpsi.</p>
+  <div class="eq"><div>\[\sqrt{a}=0.246-3.08(10^{-3})S_{ut}+1.51(10^{-5})S_{ut}^2-2.67(10^{-8})S_{ut}^3=0.0449\ \sqrt{\text{in}}\]</div><span class="no">(15)</span></div>
+  <div class="eq"><div>\[q=\frac{1}{1+\sqrt{a}/\sqrt{r}}=\frac{1}{1+0.0449/\sqrt{0.0098}}=0.688\]</div><span class="no">(16)</span></div>
+  <div class="eq"><div>\[K_f=1+q(K_t-1)=1+0.688(3.5-1)=2.720\]</div><span class="no">(17)</span></div>
+  <h3>Marin factors (Shigley Eqs. 6-18 to 6-20, Table 6-5)</h3>
+  <div class="eq"><div>\[k_a=4.51\,S_{ut}^{-0.265}=4.51(860.2)^{-0.265}=0.753\ \ (\text{machined}),\qquad k_b=1.24\,d^{-0.107}=1.24(38.1)^{-0.107}=0.840\]</div><span class="no">(18)</span></div>
+  <div class="eq"><div>\[k_c=k_d=k_f=1,\qquad k_e=0.814\ (99\%\ \text{reliability})\]</div><span class="no">(19)</span></div>
+  <div class="eq"><div>\[S_e=k_ak_bk_ck_dk_e(0.5S_{ut})=0.753(0.840)(0.814)(0.5)(860.2)=221.29\ \text{MPa}\]</div><span class="no">(20)</span></div>
+  <p>The plain, ground section uses k<sub>a</sub> = 1.58(860.2)<sup>−0.085</sup> = 0.890, giving S<sub>e</sub> = 261.62 MPa. Using the full 38.1 mm in k<sub>b</sub> is slightly conservative.</p>
+  <div class="box"><span class="lbl">Decision D6</span><p>At the keyseat and pin hole, take K<sub>f</sub> = K<sub>t</sub> (no notch-sensitivity credit).</p></div>
+</section>
+
+<!-- ============ STEP 9 ============ -->
+<section class="step" id="s9">
+  <h2><span class="n">09</span>Shaft checks at every feature (Shaft item 4)</h2>
+  <p class="sub">Nominal stresses, then distortion-energy yield and modified-Goodman fatigue (Shigley Eqs. 7-4, 7-5, 7-15, 7-16, 6-46).</p>
+  <div class="eq"><div>\[\sigma_b=\frac{32M}{\pi d^3},\qquad \tau_t=\frac{16T}{\pi d^3},\qquad \sigma_N=\frac{4N}{\pi d^2}\]</div><span class="no">(21)</span></div>
+  <div class="eq"><div>\[\sigma_a=K_f\sigma_b,\qquad \sigma_m=K_t\sigma_N(+\,p),\qquad \tau_m=K_{ts}\tau_t,\qquad \sigma'_m=\sqrt{\sigma_m^2+3\tau_m^2}\]</div><span class="no">(22)</span></div>
+  <div class="eq"><div>\[\text{Yield (design, strict): }\ n_y=\frac{S_y}{\sqrt{(K_t\sigma_b+\sigma_m)^2+3\tau_m^2}}\qquad \text{Fatigue: }\ \frac{1}{n_f}=\frac{\sigma_a}{S_e}+\frac{\sigma'_m}{S_{ut}}\]</div><span class="no">(23)</span></div>
+  <div class="box"><span class="lbl">Decision D7</span><p>The design checks yield with K<sub>t</sub>, no notch-sensitivity credit. Shigley's Eq. (7-15) uses K<sub>f</sub>. Both are shown below; the strict K<sub>t</sub> number is the one quoted as the design value.</p></div>
+
+  <h3><button type="button" class="ref" data-f="groove-l">Lower ring groove</button> (governs yield)</h3>
+  <div class="eq"><div>\[\sigma_b=\frac{32(280\,498)}{\pi(37.0586)^3}=56.139,\qquad \sigma_m=3.5\,\frac{4(203.62)}{\pi(37.0586)^2}=0.661\ \text{MPa}\]</div><span class="no">(24)</span></div>
+  <div class="eq"><div>\[n_y=\frac{606.7}{3.5(56.139)+0.661}=\frac{606.7}{197.15}=3.08\qquad\Big(\text{Eq. 7-15 with }K_f:\ \frac{606.7}{2.720(56.139)+0.661}=3.96\Big)\]</div><span class="no">(25)</span></div>
+  <div class="eq"><div>\[\frac{1}{n_f}=\frac{2.720(56.139)}{221.29}+\frac{0.661}{860.2}=0.6900+0.0008\ \Rightarrow\ n_f=1.45\]</div><span class="no">(26)</span></div>
+
+  <h3><button type="button" class="ref" data-f="keyseat">Keyseat upper end</button> (governs fatigue)</h3>
+  <p><span class="tag d">D8</span>Keyseat factors raised to <b>K<sub>t</sub> = 3.0, K<sub>ts</sub> = 4.0</b> (Shigley Table 7-1 gives 2.14 and 3.0 for r/d = 0.02; the drawing's floor radius R0.13–0.25 mm is sharper). The key bearing pressure p = 17.52 MPa (Step 11) is added to the mean normal stress as a conservative bound. Section at D<sub>min</sub> = 37.9984 mm (OD tolerance −0.004 in).</p>
+  <div class="eq"><div>\[\sigma_b=\frac{32(266\,508)}{\pi(37.9984)^3}=49.478,\quad \tau_t=\frac{16(19\,630)}{\pi(37.9984)^3}=1.822,\quad \sigma_N=0.180\ \text{MPa}\]</div><span class="no">(27)</span></div>
+  <div class="eq"><div>\[\sigma_a=3(49.478)=148.44,\quad \sigma_m=3(0.180)+17.52=18.06,\quad \tau_m=4(1.822)=7.29\]</div><span class="no">(28)</span></div>
+  <div class="eq"><div>\[n_y=\frac{606.7}{\sqrt{(148.44+18.06)^2+3(7.29)^2}}=\frac{606.7}{166.98}=3.63\]</div><span class="no">(29)</span></div>
+  <div class="eq"><div>\[\sigma'_m=\sqrt{18.06^2+3(7.29)^2}=22.04,\qquad \frac{1}{n_f}=\frac{148.44}{221.29}+\frac{22.04}{860.2}=0.6964\ \Rightarrow\ n_f=1.44\]</div><span class="no">(30)</span></div>
+  <p class="src">With plain Table 7-1 values and notch sensitivity (no bearing-pressure term) the keyseat gives n<sub>f</sub> = 2.29 and n<sub>y</sub> = 6.4. The 1.44 is a deliberately harsh model.</p>
+
+  <h3><button type="button" class="ref" data-f="pinhole">Pin hole</button> (Shigley Table A-16, solid bar)</h3>
+  <p>Hole 0.251 in = 6.375 mm, a/D = 6.375/37.998 = 0.1678. Bending: A = 0.732, K<sub>t</sub> = 2.114. Torsion: A = 0.856, K<sub>ts</sub> = 1.606 (interpolated). Net-section stresses σ = 32M/(πAD³), τ = 16T/(πAD³). Mean allowance 12 MPa for hub contact.</p>
+  <div class="eq"><div>\[\sigma_b=\frac{32(180\,985)}{\pi(0.732)(37.9984)^3}=45.93,\quad \tau_t=\frac{16(19\,630)}{\pi(0.856)(37.9984)^3}=2.13\]</div><span class="no">(31)</span></div>
+  <div class="eq"><div>\[n_y=\frac{606.7}{\sqrt{(97.12+12.38)^2+3(3.42)^2}}=5.53,\qquad \frac{1}{n_f}=\frac{97.12}{221.29}+\frac{13.72}{860.2}\ \Rightarrow\ n_f=2.20\]</div><span class="no">(32)</span></div>
+
+  <h3>Summary and S<sub>y</sub> sensitivity</h3>
+  <p>Move the slider to see how each section responds to a different approved yield strength (S<sub>ut</sub> and fatigue stay at 860.2 MPa).</p>
+  <div class="ctl">
+    <label for="sy">Approved S<sub>y</sub></label>
+    <input type="range" id="sy" min="400" max="700" step="1" value="607">
+    <output id="syOut" for="sy">607 MPa</output>
+    <button type="button" data-sy="607">607 (88 ksi, approved)</button>
+    <button type="button" data-sy="565">565 (82 ksi)</button>
+    <button type="button" data-sy="517">517 (75 ksi, 1045)</button>
+  </div>
+  <div class="tbl"><table id="secTbl">
+    <thead><tr><th>Location</th><th class="num">σ′<sub>max</sub> K<sub>t</sub></th><th class="num">n<sub>y</sub> strict</th><th class="num">n<sub>y</sub> Eq. 7-15</th><th class="num">n<sub>f</sub></th><th>Status</th></tr></thead>
+    <tbody></tbody></table></div>
+</section>
+
+<!-- ============ STEP 10 ============ -->
+<section class="step" id="s10">
+<h2><span class="n">10</span>Diameter, material and cost search</h2>
+<p>Shaft cost is the full price of the shortest stock of the part that is long enough for the 554 mm shaft (Req. 4, as read for this design), so 24 in sticks win. A solver (<code>DP2/solver/solver.py</code>) ran every McMaster rotary shaft from 1-1/4 to 3 in and 30 to 50 mm, paired with every stainless ring for its diameter, through the same equations as Steps 2–9 (its regression check reproduces this design exactly). Prices read 10 Nov.</p>
+<div class="tbl"><table>
+  <thead><tr><th>Shaft (stock)</th><th class="num">Stock</th><th class="num">Total</th><th>Result</th></tr></thead>
+  <tbody>
+    <tr><td>1045, 1-7/16 in, 4138N22 (24 in)</td><td class="num">$55.85</td><td class="num">$168.39</td><td>Fails fatigue at the deeper 2-turn ring groove (n<sub>f</sub> 1.06)</td></tr>
+    <tr><td>1566, 1-1/4 in, 1346K45 (24 in)</td><td class="num">$62.74</td><td class="num">$171.48</td><td>Fails fatigue (0.81)</td></tr>
+    <tr><td>1045, 35 mm, 4138N66 (1000 mm)</td><td class="num">$80.56</td><td class="num">$194.08</td><td>Fails fatigue (0.79)</td></tr>
+    <tr><td>1045, 1-11/16 in, 4138N27 (24 in)</td><td class="num">$76.03</td><td class="num">$202.18</td><td>Passes Shigley (3.87, n<sub>f</sub> 1.37); fails the strict K<sub>t</sub> check (2.69); 15-7 PH ring</td></tr>
+    <tr class="hl"><td>1566, 1-1/2 in, 1346K534 (24 in)</td><td class="num">$112.69</td><td class="num">$222.07</td><td>Selected: passes both yield checks and fatigue</td></tr>
+    <tr><td>1045, 1-15/16 in, 4138N33 (24 in)</td><td class="num">$97.65</td><td class="num">$306.55</td><td>Passes; heavy-duty rings $49.11 each</td></tr>
+    <tr><td>1045, 1-1/2 in, 4138N14 (120 in only)</td><td class="num">$306.52</td><td class="num">$415.90</td><td>Old design; passes Shigley only at 517 MPa</td></tr>
+  </tbody></table></div>
+<p class="src">Excluded before any stress check: keyed shafts (the keyway runs through the bearing seats and grooves), D-profile shafts (full-length flat), nitrided shafts (only case hardness listed, so no property set can meet Req. 5), chrome-plated shafts (Req. 5). Plain stainless stops at 1-1/4 in and fails fatigue badly.</p>
+<div class="box"><span class="lbl">Decision D1 justified</span><p>1346K534 is the cheapest shaft that passes fatigue, the Shigley yield check and the strict K<sub>t</sub> check, and it keeps the 1-1/2 in rings, key and pin. It also has the most margin on notch sensitivity: it still passes with q up to 0.91 (calculated 0.688).</p></div>
+<div class="eq"><div>\[C_{shaft}=\$112.69\ \ (\text{full price of the 24 in stick; the shaft uses }554/25.4=21.81\ \text{in})\]</div><span class="no">(33)</span></div>
+</section>
+
+<!-- ============ STEP 11 ============ -->
+<section class="step" id="s11">
+  <h2><span class="n">11</span>Key (Hardware item 1)</h2>
+  <p><span class="tag d">D9</span><button type="button" class="ref" data-f="key">18-8 stainless square key, 3/8 × 3/8 in, cut 1/2 in long</button> (12.70 ± 0.05 mm) from 36 in stock 92530A319 (width and height −0.003/0 in). The class rule requires a key longer than it is wide: 12.70 &gt; 9.525 mm. Key spans y = −42.35 to −29.65, inside the un-toothed sprocket hub (y = −46.39 to −25.03), centred under the set screw.</p>
+  <p><span class="tag d">D10</span><button type="button" class="ref" data-f="keyseat">Closed keyseat</button> 22.45 ± 0.05 mm long, 9.525 +0.0254/−0 mm wide, 4.7625 ± 0.0254 mm deep, semicircular ends, centred at y = −36.0 (spans −47.25 to −24.75, 0.28 mm past the sprocket face). Straight length 22.40 − 9.55 = 12.85 mm ≥ 12.75 mm maximum key.</p>
+  <p><span class="tag a">Req. 7</span>S<sub>y</sub> = 0.8 S<sub>ut</sub> = 0.8(515) = 412 MPa (ATI 304 annealed S<sub>ut</sub> as the 18-8 baseline).</p>
+  <div class="eq"><div>\[F=\frac{2T}{D_{min}}=\frac{2(19\,630)}{37.9984}=1033.2\ \text{N}\]</div><span class="no">(34)</span></div>
+  <div class="eq"><div>\[\tau=\frac{F}{b_{min}L_{min}}=\frac{1033.2}{9.4488(12.65)}=8.64\ \text{MPa},\qquad n_s=\frac{S_y}{\sqrt3\,\tau}=\frac{412}{\sqrt3(8.64)}=27.5\]</div><span class="no">(35)</span></div>
+  <p>Hub-side engagement = h<sub>min</sub> − seat depth<sub>max</sub> = 9.4488 − 4.7879 = 4.661 mm.</p>
+  <div class="eq"><div>\[p=\frac{F}{e\,L_{min}}=\frac{1033.2}{4.661(12.65)}=17.52\ \text{MPa},\qquad n_b=\frac{412}{17.52}=23.5\]</div><span class="no">(36)</span></div>
+  <div class="eq"><div>\[C_{key}=\frac{\$28.32}{36\ \text{in}}(0.50\ \text{in})=\$0.393\]</div><span class="no">(37)</span></div>
+  <div class="box g"><span class="lbl">Why 1/2 in</span><p>It is the shortest common fraction longer than the 3/8 in width. Longer keys barely change the keyseat (n<sub>f</sub> 1.238 at 5/8 in, 1.238 at 3/4 in) and cost more. Cutting from 36 in stock ($0.79/in) beats precut 1 in keys ($2.876 each) and 12 in stock ($10.49).</p></div>
+</section>
+
+<!-- ============ STEP 12 ============ -->
+<section class="step" id="s12">
+  <h2><span class="n">12</span>Set screw (Hardware item 2)</h2>
+  <p><span class="tag d">D11</span><button type="button" class="ref" data-f="screw">McMaster 94355A533</button>: 18-8 stainless, flat tip, 1/4"-20 × 1/4 in, 1/8 in hex. Tapped through the sprocket hub wall (19.05 mm) at the key centre, at least 4.5 mm of full thread engaged. Flat tip bears on the flat key. Tighten to 0.73–0.77 N·m.</p>
+  <p><span class="tag a">A</span>Friction μ ≥ 0.10 at the screw/key and key/shaft faces; nut factor K = 0.15–0.25. Only one interface is credited.</p>
+  <div class="eq"><div>\[F_{min}=\frac{T_{min}}{K_{max}d}=\frac{0.73}{0.25(0.00635)}=459.8\ \text{N},\qquad F_{max}=\frac{0.77}{0.15(0.00635)}=808.4\ \text{N}\]</div><span class="no">(38)</span></div>
+  <div class="eq"><div>\[n_{slip}=\frac{\mu F_{min}}{W_s}=\frac{0.10(459.8)}{35}=1.31\]</div><span class="no">(39)</span></div>
+  <p>Screw body at installation, S<sub>y</sub> = 205 MPa, root Ø4.57 mm minus the hex socket (across flats 3.175 mm):</p>
+  <div class="eq"><div>\[A=\frac{\pi(4.57)^2}{4}-\frac{\sqrt3}{2}(3.175)^2=7.673\ \text{mm}^2,\quad J=\frac{\pi}{32}\Big[4.57^4-\Big(\frac{2(3.175)}{\sqrt3}\Big)^4\Big]=25.09\ \text{mm}^4\]</div><span class="no">(40)</span></div>
+  <div class="eq"><div>\[\sigma=\frac{808.4}{7.673}=105.4,\quad \tau=\frac{770(2.285)}{25.09}=70.1,\quad n_y=\frac{205}{\sqrt{105.4^2+3(70.1)^2}}=\frac{205}{160.8}=1.27\]</div><span class="no">(41)</span></div>
+  <div class="eq"><div>\[n_{thread}=\frac{205/\sqrt3}{808.4/[0.5\pi(5.4)(4.5)]}=5.59,\qquad n_{tip}=\frac{205}{808.4/[\pi(3.5)^2/4]}=2.44\]</div><span class="no">(42)</span></div>
+  <div class="eq"><div>\[C_{screw}=\$4.81/25=\$0.192\]</div><span class="no">(43)</span></div>
+</section>
+
+<!-- ============ STEP 13 ============ -->
+<section class="step" id="s13">
+  <h2><span class="n">13</span>Pin (Hardware item 3)</h2>
+  <p><span class="tag d">D12</span><button type="button" class="ref" data-f="pin">McMaster 98380A556</button>: 416 stainless dowel pin, 1/4 in × 3 in (spans the 3 in hub OD), HRC 36 min, rated 7200 lbf double shear. At y = −180, 30 mm below the hub top. Shaft hole 6.363–6.375 mm (clearance, no press-fit hoop stress in the shaft); interference in one hub wall only retains it.</p>
+  <p><span class="tag a">A</span>S<sub>y,pin</sub> = 760 MPa: lower end of Swiss Steel's 416 condition-T range, an assumed typical value.</p>
+  <div class="eq"><div>\[F_t=\frac{T}{D_{min}}=\frac{19\,630}{37.9984}=516.6\ \text{N},\quad F_a=\frac{120}{2}=60\ \text{N},\quad R=\sqrt{516.6^2+60^2}=520.1\ \text{N per plane}\]</div><span class="no">(44)</span></div>
+  <div class="eq"><div>\[\tau=\frac{R}{\pi d_p^2/4}=\frac{520.1}{\pi(6.35)^2/4}=16.4\ \text{MPa}\]</div><span class="no">(45)</span></div>
+  <div class="eq"><div>\[M_p=R\frac{D}{2}=520.1(19.05)=9907\ \text{N·mm},\quad \sigma_b=\frac{32M_p}{\pi d_p^3}=394.1\ \text{MPa},\quad n_y=\frac{760}{\sqrt{394.1^2+3(16.4)^2}}=1.92\]</div><span class="no">(46)</span></div>
+  <div class="eq"><div>\[\text{With fit pressure }(p_{max}=85):\ \ n_y=\frac{760}{\sqrt{(394.1+2\cdot85)^2+3(16.4)^2}}=\frac{760}{564.8}=1.35\]</div><span class="no">(47)</span></div>
+  <p>Bearing over 10 mm of hub wall: 520.1/(6.35 × 10) = 8.19 MPa, n = 92.8. Axial retention μpπd<sub>p</sub>L<sub>e</sub> = 0.10(40)π(6.35)(10) = 798 N. Catalog breaking-load ratio 32 027/(2 × 520.1) = 30.8 (ultimate check, not a yield factor). A 3/16 in pin would reach about 935 MPa bending under the same bound and fails.</p>
+  <div class="eq"><div>\[C_{pin}=\$4.69\]</div><span class="no">(48)</span></div>
+</section>
+
+<!-- ============ STEP 14 ============ -->
+<section class="step" id="s14">
+  <h2><span class="n">14</span>Retaining rings (Hardware item 4)</h2>
+  <p><span class="tag d">D3</span><button type="button" class="ref" data-f="rings">Two McMaster 93576A210</button> 18-8 single-turn spiral rings, 0.025 ± 0.002 in thick, catalog thrust 4950 lbf. Both checked for the full thrust.</p>
+  <div class="eq"><div>\[\frac{\text{capacity}}{N}=\frac{4950(4.448)}{203.62}=\frac{22\,019}{203.62}=108\]</div><span class="no">(49)</span></div>
+  <h3>Groove wall and end margin</h3>
+  <div class="eq"><div>\[t_{min}=\frac{37.9984-37.0840}{2}=0.4572\ \text{mm},\quad \text{flat}=0.4572-0.254=0.2032\ \text{mm}\]</div><span class="no">(50)</span></div>
+  <div class="eq"><div>\[n_{groove}=\frac{S_y\,\pi d\,(\text{flat})}{N}=\frac{606.7\,\pi(37.0586)(0.2032)}{203.62}=70\]</div><span class="no">(51)</span></div>
+  <div class="eq"><div>\[\text{Top end margin}=303.5-(300.1+0.8382)=2.56\ \text{mm}\ \ge\ 3t_{max}=1.56\ \text{mm}\]</div><span class="no">(52)</span></div>
+  <p>End-lip shear and lip bending factors exceed 500 and 700. The ring must bear on the rotating inner race (radial width 0.088 ± 0.004 in). The grooves leave about 0.50 mm total axial float; no preload.</p>
+  <div class="eq"><div>\[C_{rings}=2\Big(\frac{\$10.26}{5}\Big)=\$4.10\]</div><span class="no">(53)</span></div>
+</section>
+
+<!-- ============ STEP 15 ============ -->
+<section class="step" id="s15">
+  <h2><span class="n">15</span>Drawing (DP2-SHAFT-01, Rev P2)</h2>
+  <p>All positions measured from the bottom end (y = −250.5). Files: <code>output/pdf/DP2_shaft_drawing_PROVISIONAL.pdf</code> and <code>DP2/solution/cad/DP2_shaft_P2.dxf</code>.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Feature</th><th>Dimension and tolerance</th><th class="num">y</th></tr></thead>
+    <tbody>
+      <tr data-f="shaft"><td>Overall length</td><td>554.00 ± 0.10 mm; ends C0.25 × 45°, square within 0.05</td><td class="num">−250.5 to 303.5</td></tr>
+      <tr data-f="shaft"><td>Stock OD</td><td>37.9984–38.1000 mm (1.500 +0/−0.004 in), as supplied</td><td class="num">—</td></tr>
+      <tr data-f="pinhole"><td>Pin hole</td><td>Ø6.363 +0.012/−0 thru at 70.50 ± 0.10, ⟂ to keyseat plane ±1°</td><td class="num">−180.0</td></tr>
+      <tr data-f="keyseat"><td>Keyseat</td><td>Centre 214.50 ± 0.10; 22.45 ± 0.05 long; 9.525 +0.0254/−0 wide; 4.7625 ± 0.0254 deep; floor R0.13–0.25</td><td class="num">−36.0</td></tr>
+      <tr data-f="groove-l"><td>Lower groove</td><td>Near wall 249.6126 ± 0.05; root Ø37.0586–37.0840; width 0.7874–0.8382; root R0.2489–0.2540</td><td class="num">−0.89 to −0.05</td></tr>
+      <tr data-f="groove-u"><td>Upper groove</td><td>Near wall 550.6000 ± 0.05; same section as the lower groove</td><td class="num">+300.1 to +300.94</td></tr>
+    </tbody></table></div>
+  <p class="src">Notes on the sheet: preserve supplied OD; Ra ≤ 3.2 µm on grooves and hole; no extra grooves or keyways; paint exposed surfaces under the $100 allowance; inspect groove root, radius, edge margins, hole clearance and keyseat location.</p>
+</section>
+
+<!-- ============ STEP 16 ============ -->
+<section class="step" id="s16">
+  <h2><span class="n">16</span>Bill of materials and cost</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Item</th><th>McMaster</th><th>Quantity</th><th class="num">Cost</th></tr></thead>
+    <tbody>
+      <tr data-f="shaft"><td>1566 HRC25 precision rotary shaft, Ø1.500 × 24 in</td><td>1346K534</td><td>1 stick, cut to 554 mm</td><td class="num">$112.69</td></tr>
+      <tr data-f="rings"><td>18-8 single-turn spiral ring, 1.500 in</td><td>93576A210</td><td>2 (pack of 5)</td><td class="num">$4.10</td></tr>
+      <tr data-f="pin"><td>416 dowel pin, 1/4 × 3 in</td><td>98380A556</td><td>1</td><td class="num">$4.69</td></tr>
+      <tr data-f="screw"><td>18-8 flat-tip set screw, 1/4"-20 × 1/4 in</td><td>94355A533</td><td>1 (pack of 25)</td><td class="num">$0.19</td></tr>
+      <tr data-f="key"><td>18-8 key stock, 3/8 in square, cut 1/2 in</td><td>92530A319</td><td>0.50 in of 36 in</td><td class="num">$0.39</td></tr>
+      <tr><td>Coating and inspection allowance (non-stainless)</td><td>Req. 5</td><td>1</td><td class="num">$100.00</td></tr>
+      <tr class="hl"><td colspan="3"><b>Total</b> (machining of grooves, hole and keyseat is $0 per Req. 6)</td><td class="num"><b>$222.07</b></td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- ============ STEP 17 ============ -->
+<section class="step" id="s17">
+  <h2><span class="n">17</span>Requirement audit</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Rev2 requirement</th><th>Evidence</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Shaft yield n ≥ 3.0</td><td>3.63 Eq. 7-15 (keyseat); 3.08 strict K<sub>t</sub> (lower groove)</td><td><span class="tag ok">Pass</span></td></tr>
+      <tr><td>Shaft fatigue n ≥ 1.2, infinite life</td><td>1.44 at keyseat (conservative model)</td><td><span class="tag ok">Pass</span></td></tr>
+      <tr><td>Hardware n ≥ 1.2</td><td>Key 23.5; screw 1.27; pin 1.35; rings 70</td><td><span class="tag ok">Pass</span></td></tr>
+      <tr><td>McMaster parts, eligible materials</td><td>1566 rotary shaft (HRC25, at the cap); 18-8 key, screw, rings; 416 pin</td><td><span class="tag ok">Pass</span></td></tr>
+      <tr><td>No chrome; $100 if not stainless</td><td>Uncoated 1566, $100 included</td><td><span class="tag ok">Pass</span></td></tr>
+      <tr><td>Approved shaft properties</td><td>S<sub>y</sub> = 88 ksi, on the Piazza-approved list</td><td><span class="tag ok">Pass</span></td></tr>
+      <tr><td>Separate CAD PDF and BOM</td><td>Drawing PDF + DXF; BOM above</td><td><span class="tag ok">Done</span></td></tr>
+      <tr><td>Each rubric section on consecutive pages</td><td>Shaft, hardware, drawing + BOM, cost</td><td><span class="tag ok">Planned</span></td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- ============ STEP 18 ============ -->
+<section class="step" id="s18">
+  <h2><span class="n">18</span>What changes in your report</h2>
+  <ul class="flat">
+    <li>Table 1: bearing midplanes move to y = 6.35 and 293.65 (face-to-face reading, A2); pin moves from −170 to −180; add the groove, keyseat and shaft ends.</li>
+    <li>Item 1: reactions become (−192.88, −1562.93) and (31.63, 989.59) N; thrust 203.62 N with W<sub>sh</sub> = 48.62 N.</li>
+    <li>Item 2: groove K<sub>t</sub> comes from Fig. A-15-16 for the actual groove (3.5), not the Table 7-1 first estimate (5.0). The broken "Equation:" lines are rebuilt as real equations.</li>
+    <li>Item 3: groove M = 280.5 N·m, T = 0; keyseat (upper end y = −24.75) M = 266.5 N·m, T = 19.63 N·m.</li>
+    <li>Shaft: McMaster 1346K534 (1566, HRC25), S<sub>y</sub> = 606.7 MPa approved, S<sub>ut</sub> = 860.2 MPa. Key 1/2 in long; keyseat 22.45 mm; n<sub>f</sub> = 1.44, n<sub>y</sub> = 3.63 (Eq. 7-15) / 3.08 (strict). Total cost $222.07.</li>
+    <li>Item 4 and the hardware, drawing/BOM and cost sections are written from Steps 6–17.</li>
+    <li>Figures to insert: <code>DP2/solution/figures/load_map.png</code> and <code>moments.png</code>.</li>
+  </ul>
+</section>
+</main>
+<aside class="bench" id="bench" aria-label="3D model of the rotor shaft">
+  <div class="bench-top">
+    <span class="stepno" id="stepNo">R</span>
+    <label for="stepSel" class="src" hidden>Step</label>
+    <select id="stepSel" aria-label="Jump to step"></select>
+    <button class="ib" id="prevStep" type="button" aria-label="Previous step">◀</button>
+    <button class="ib" id="nextStep" type="button" aria-label="Next step">▶</button>
+    <button class="ib mobile-toggle" id="minBench" type="button" aria-pressed="false">Hide 3D</button>
+  </div>
+  <div class="progress"><i id="prog"></i></div>
+  <div class="stage" id="stage">
+    <canvas id="c3d" aria-label="Interactive 3D view; drag to orbit, scroll to zoom, click a part or force"></canvas>
+    <div class="labels" id="labels"></div>
+    <div class="hint" id="hint">Drag to orbit · scroll to zoom · click a force or part</div>
+    <div class="views">
+      <button class="ib" type="button" data-view="iso">Iso</button>
+      <button class="ib" type="button" data-view="front">Front x-y</button>
+      <button class="ib" type="button" data-view="side">Side z-y</button>
+      <button class="ib" type="button" data-view="top">Top</button>
+      <button class="ib" type="button" id="fitAll">Fit all</button>
+    </div>
+    <div class="cutbox" id="cutBox" hidden>
+      <div class="cutrow"><label for="cutY">Cut at y</label><input type="range" id="cutY" min="-250" max="303.5" step="0.25" value="-0.49"><output id="cutOut" for="cutY">−0.49 mm</output></div>
+      <div class="cutrow presets">
+        <button class="ib" type="button" data-cut="-0.49">groove</button><button class="ib" type="button" data-cut="6.35">R<sub>L</sub></button><button class="ib" type="button" data-cut="-24.75">keyseat</button><button class="ib" type="button" data-cut="-50">chain</button><button class="ib" type="button" data-cut="-176.81">pin hole</button>
+      </div>
+      <div class="cuteq" id="cutEq"></div>
+    </div>
+    <div class="info" id="info" hidden>
+      <button class="x" id="infoX" type="button" aria-label="Close">×</button>
+      <h4 id="infoT"></h4>
+      <div class="v" id="infoV"></div>
+      <p id="infoD"></p>
+      <div class="row" id="infoRow"></div>
+    </div>
+  </div>
+  <div class="toggles">
+    <button class="ib" type="button" id="tFollow" aria-pressed="true">Follow steps</button>
+    <button class="ib" type="button" id="tLabels" aria-pressed="true">Labels</button>
+    <button class="ib" type="button" id="tDiag" aria-pressed="false">M and T diagrams</button>
+    <button class="ib" type="button" id="tDims" aria-pressed="false">Dimensions</button>
+    <button class="ib" type="button" id="tCut" aria-pressed="false">Cut at y</button>
+    <button class="ib" type="button" id="tRotor" aria-pressed="true">Rotor and supports</button>
+    <button class="ib" type="button" id="tClear">Clear highlight</button>
+  </div>
+  <div class="legend">
+    <span><i style="background:var(--c-water)"></i>water loads</span>
+    <span><i style="background:var(--c-chain)"></i>chain</span>
+    <span><i style="background:var(--c-weight)"></i>weights</span>
+    <span><i style="background:var(--c-react)"></i>reactions</span>
+    <span><i style="background:var(--c-feat)"></i>stress raisers</span>
+    <span><i style="background:var(--c-hw)"></i>hardware</span>
+  </div>
+</aside>
+</div>
+<script>
+(function(){
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const NS='http://www.w3.org/2000/svg';
+  const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+  const txt=(p,x,y,s,a)=>{const e=el('text',Object.assign({x,y,'font-size':12,'font-family':'Source Sans 3, sans-serif',fill:'var(--muted)'},a||{}),p);e.textContent=s;return e};
+
+  // ---- model (N, mm) ----
+  const D=560, Fx=161.2485, Fz=13.3477, yL=6.35, yU=293.65, RU=990.09;
+  function M(y){ // N*mm, resultant
+    if(y<-150) return 560*(y+500); // inside hub, cantilever envelope (shown dashed)
+    if(y<-50) return 560*(y+500);
+    if(y<=yL){const mx=560*(y+500)+Fz*(y+50), mz=Fx*(y+50); return Math.hypot(mx,mz);}
+    if(y<=yU) return RU*(yU-y);
+    return 0;
+  }
+  const T=y=>(y>=-180&&y<=-24.75)?19.63:0;
+
+  function drawMT(){
+    const s=document.getElementById('mtSvg'); s.innerHTML='';
+    const L=60,R=700,y0=-260,y1=310, X=y=>L+(y-y0)/(y1-y0)*(R-L);
+    // M panel
+    const mt=20,mb=190, Mmax=300, YM=m=>mb-(m/Mmax)*(mb-mt);
+    // T panel
+    const tt=230,tb=300, YT=t=>tb-(t/25)*(tb-tt);
+    // hub shading
+    el('rect',{x:X(-250),y:mt,width:X(-150)-X(-250),height:tb-mt,fill:'var(--slate-soft)'},s);
+    txt(s,X(-200),mt+12,'rotor hub',{'text-anchor':'middle'});
+    // grid + axes
+    for(const m of [0,100,200,300]){el('line',{x1:L,x2:R,y1:YM(m),y2:YM(m),stroke:'var(--rule)'},s);txt(s,L-6,YM(m)+4,m,{'text-anchor':'end'});}
+    for(const t of [0,10,20]){el('line',{x1:L,x2:R,y1:YT(t),y2:YT(t),stroke:'var(--rule)'},s);txt(s,L-6,YT(t)+4,t,{'text-anchor':'end'});}
+    for(const y of [-250,-200,-150,-100,-50,0,50,100,150,200,250,300]){txt(s,X(y),tb+16,y,{'text-anchor':'middle'});}
+    txt(s,(L+R)/2,tb+28,'y (mm)',{'text-anchor':'middle'});
+    txt(s,14,(mt+mb)/2,'M (N·m)',{transform:`rotate(-90 14 ${(mt+mb)/2})`,'text-anchor':'middle'});
+    txt(s,14,(tt+tb)/2,'T (N·m)',{transform:`rotate(-90 14 ${(tt+tb)/2})`,'text-anchor':'middle'});
+    // bearings
+    for(const y of [yL,yU]){el('line',{x1:X(y),x2:X(y),y1:mt,y2:tb,stroke:'var(--muted)','stroke-dasharray':'2 3'},s);}
+    txt(s,X(yL)+4,mt+12,'lower brg');txt(s,X(yU)-4,mt+12,'upper brg',{'text-anchor':'end'});
+    // M curve
+    let d='';for(let y=-250.5;y<=303.5;y+=0.5){d+=(d?'L':'M')+X(y).toFixed(1)+','+YM(M(y)/1000).toFixed(1);}
+    el('path',{d:d+`L${X(303.5)},${YM(0)}L${X(-250.5)},${YM(0)}Z`,fill:'var(--blue-soft)',stroke:'none'},s);
+    el('path',{d,fill:'none',stroke:'var(--blue)','stroke-width':2},s);
+    // T curve
+    let dt='';for(let y=-250.5;y<=303.5;y+=0.5){dt+=(dt?'L':'M')+X(y).toFixed(1)+','+YT(T(y)).toFixed(1);}
+    el('path',{d:dt,fill:'none',stroke:'var(--amber)','stroke-width':2},s);
+    // markers
+    const pts=[[-0.49,'groove 280.5'],[-24.75,'keyseat 266.5'],[-176.8,'pin hole 181.0']];
+    for(const [y,l] of pts){const m=M(y)/1000;el('circle',{cx:X(y),cy:YM(m),r:4,fill:'var(--sheet)',stroke:'var(--ink)','stroke-width':1.5},s);
+      txt(s,X(y)+(y<-100?-6:6),YM(m)-8,l,{'text-anchor':y<-100?'end':'start',fill:'var(--ink)','font-weight':600});}
+    el('circle',{cx:X(yL),cy:YM(M(yL)/1000),r:4,fill:'var(--blue)'},s);
+    txt(s,X(yL)+8,YM(M(yL)/1000)+14,'max 284.5',{fill:'var(--blue)','font-weight':600});
+    txt(s,X(-100),YT(19.63)-6,'19.63 (pin → key)',{'text-anchor':'middle',fill:'var(--amber)','font-weight':600});
+  }
+
+  function drawMap(){
+    const s=document.getElementById('mapSvg'); s.innerHTML='';
+    const L=30,R=700,y0=-520,y1=320, X=y=>L+(y-y0)/(y1-y0)*(R-L), cy=95, h=14;
+    // shaft
+    el('rect',{x:X(-250.5),y:cy-h/2,width:X(303.5)-X(-250.5),height:h,fill:'var(--slate-soft)',stroke:'var(--ink)','stroke-width':1.2},s);
+    el('line',{x1:X(-500),x2:X(-250.5),y1:cy,y2:cy,stroke:'var(--muted)','stroke-dasharray':'4 4'},s);
+    // hub
+    el('rect',{x:X(-250),y:cy-26,width:X(-150)-X(-250),height:52,fill:'none',stroke:'var(--slate)','stroke-width':1.2},s);
+    // sprocket
+    el('rect',{x:X(-53.6),y:cy-34,width:X(-46.4)-X(-53.6),height:68,fill:'var(--slate)'},s);
+    el('rect',{x:X(-46.4),y:cy-20,width:X(-25)-X(-46.4),height:40,fill:'none',stroke:'var(--slate)'},s);
+    // bearings
+    for(const [a,b] of [[0,12.7],[287.3,300]]) el('rect',{x:X(a),y:cy-22,width:X(b)-X(a),height:44,fill:'var(--blue-soft)',stroke:'var(--blue)'},s);
+    // features
+    el('line',{x1:X(-0.49),x2:X(-0.49),y1:cy-h/2,y2:cy+h/2,stroke:'var(--bad)','stroke-width':2.5},s);
+    el('line',{x1:X(300.5),x2:X(300.5),y1:cy-h/2,y2:cy+h/2,stroke:'var(--bad)','stroke-width':2.5},s);
+    el('rect',{x:X(-47.25),y:cy-h/2,width:X(-24.75)-X(-47.25),height:4,fill:'var(--amber)'},s);
+    el('circle',{cx:X(-180),cy:cy,r:3.5,fill:'var(--amber)'},s);
+    // loads
+    const arrow=(y,lab,up)=>{const x=X(y);el('line',{x1:x,x2:x,y1:up?cy+60:cy-60,y2:up?cy+26:cy-38,stroke:'var(--ink)','stroke-width':1.5},s);
+      el('path',{d:up?`M${x-4},${cy+32}L${x},${cy+24}L${x+4},${cy+32}Z`:`M${x-4},${cy-44}L${x},${cy-36}L${x+4},${cy-44}Z`,fill:'var(--ink)'},s);
+      txt(s,x,up?cy+74:cy-66,lab,{'text-anchor':'middle',fill:'var(--ink)'});};
+    arrow(-500,'drag 560 N (+z)',false); arrow(-50,'chain 161.8 N',false); arrow(-350,'rotor 120 N',true);
+    // axis
+    for(const y of [-500,-350,-250,-180,-150,-50,0,300]){el('line',{x1:X(y),x2:X(y),y1:cy+h/2+2,y2:cy+h/2+6,stroke:'var(--muted)'},s);}
+    const lab=[[-500,'−500'],[-350,'−350'],[-250,'−250'],[-180,'−180'],[-150,'−150'],[-50,'−50'],[0,'0'],[300,'300']];
+    for(const [y,l] of lab) txt(s,X(y),cy+h/2+18,l,{'text-anchor':'middle'});
+    txt(s,X(6),cy-30,'lower brg',{'text-anchor':'middle'});txt(s,X(294),cy-30,'upper brg',{'text-anchor':'middle'});
+    txt(s,X(-200),cy+40,'hub',{'text-anchor':'middle'});txt(s,X(-40),cy+46,'sprocket',{'text-anchor':'middle'});
+    txt(s,X(150),cy+30,'groove (red) · keyseat (amber) · pin (amber dot)',{'text-anchor':'middle'});
+    txt(s,R,220,'y (mm), to scale',{'text-anchor':'end'});
+  }
+
+  // ---- S_y sensitivity ----
+  const secs=[
+    {f:'groove-l',n:'Lower ring groove',vt:197.146,vf:153.339,nf:1.448},
+    {f:'keyseat',n:'Keyseat upper end',vt:166.980,vf:166.980,nf:1.436},
+    {f:'pinhole',n:'Pin hole',vt:109.660,vf:109.660,nf:2.199},
+    {f:'plain',n:'Plain section at lower bearing',vt:52.990,vf:52.990,nf:4.949},
+    {f:'groove-u',n:'Upper ring groove',vt:0.6607,vf:0.6607,nf:1301.89}
+  ];
+  function table(sy){
+    const tb=document.querySelector('#secTbl tbody'); tb.innerHTML='';
+    const minT=Math.min(...secs.map(s=>sy/s.vt));
+    for(const s of secs){
+      const a=sy/s.vt,b=sy/s.vf, ok=a>=3&&s.nf>=1.2, okKf=b>=3&&s.nf>=1.2;
+      const tr=document.createElement('tr'); if(a===minT) tr.className='hl'; tr.dataset.f=s.f; tr.tabIndex=0;
+      const st= ok?'<span class="pass">Pass</span>':(okKf?'<span class="fail">Fails strict</span> · passes Eq. 7-15':'<span class="fail">Fails</span>');
+      tr.innerHTML=`<td>${s.n}</td><td class="num">${s.vt.toFixed(2)}</td><td class="num">${a>999?'>999':a.toFixed(2)}</td><td class="num">${b>999?'>999':b.toFixed(2)}</td><td class="num">${s.nf>999?'>999':s.nf.toFixed(2)}</td><td>${st}</td>`;
+      tb.appendChild(tr);
+    }
+  }
+  const sl=document.getElementById('sy'), out=document.getElementById('syOut');
+  const set=v=>{sl.value=v;out.textContent=v+' MPa';table(+v);};
+  sl.addEventListener('input',()=>set(sl.value));
+  document.querySelectorAll('[data-sy]').forEach(b=>b.addEventListener('click',()=>set(b.dataset.sy)));
+  set(607); drawMT(); drawMap();
+})();
+</script>
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------------- what each clickable item is ---------------- */
+const F = {
+  drag:{t:'Drag, D',v:'560 N in +z',d:'Water stream on the rotor, acting at the centre of pressure y = −500 mm. Its 506 mm lever arm to the lower bearing makes it the load that sizes the shaft.',s:'s2',c:'--c-water',chip:'Drag',val:'560 N'},
+  chain:{t:'Chain force, F_c',v:'161.8 N at −4.732° → (161.25, 0, +13.35) N',d:'Tight span at the chain line, y = −50 mm. Eqs. (1)–(2). The +z part adds to the drag (conservative sign).',s:'s2',c:'--c-chain',chip:'Chain force',val:'161.8 N'},
+  wr:{t:'Rotor + blade weight',v:'120 N down',d:'At the rotor CG, y = −350 mm. Carried into the shaft by the pin; the shaft hangs from the upper ring.',s:'s2',c:'--c-weight',chip:'Rotor weight',val:'120 N'},
+  ws:{t:'Sprocket weight',v:'35 N down',d:'Held by the key and set screw through friction: n_slip = 0.10(459.8)/35 = 1.31.',s:'s12',c:'--c-weight',chip:'Sprocket weight',val:'35 N'},
+  wsh:{t:'Shaft self-weight',v:'48.62 N down',d:'ρg(πD²/4)L for the 554 mm shaft, Eq. (3). Drawn at mid-length.',s:'s2',c:'--c-weight',chip:'Shaft weight',val:'48.6 N'},
+  tw:{t:'Water torque',v:'19.63 N·m about +y',d:'Enters the shaft at the pin, y = −180 mm. Only the stretch from the pin up to the key is twisted.',s:'s2',c:'--c-water',chip:'Water torque',val:'19.63 N·m'},
+  tc:{t:'Chain torque',v:'19.63 N·m, opposite',d:'Leaves the shaft through the key into the sprocket. ΣM_y = 0, so the bearings carry no torque.',s:'s2',c:'--c-chain',chip:'Chain torque',val:'19.63 N·m'},
+  rl:{t:'Lower bearing reaction, R_L',v:'(−192.88, 0, −1562.93) N · |R_L| = 1574.8 N',d:'At the lower bearing midplane, y = 6.35 mm. Pushes upstream at 2.8 times the drag because of the overhang. Eqs. (6), (8).',s:'s3',c:'--c-react',chip:'R_L',val:'1574.8 N'},
+  ru:{t:'Upper bearing reaction, R_U',v:'(+31.63, 0, +989.59) N · |R_U| = 990.1 N',d:'At the upper bearing midplane, y = 293.65 mm. Pulls downstream to stop the shaft tipping. Eqs. (5), (7).',s:'s3',c:'--c-react',chip:'R_U',val:'990.1 N'},
+  thrust:{t:'Axial thrust on the upper ring',v:'N = 203.62 N up',d:'The upper bearing pushes up on the upper ring; all three weights hang below it. Eq. (4). Both rings are checked for it.',s:'s3',c:'--c-react',chip:'Ring thrust',val:'203.6 N'},
+  'groove-l':{t:'Lower ring groove (critical)',v:'M = 280.5 N·m, T = 0 · n_y = 3.08 (K_t), 3.96 (Eq 7-15), n_f = 1.45',d:'Root Ø37.06 mm, R 0.25 mm, K_t = 3.5 (Fig. A-15-16). Highest stress in the shaft; governs yield.',s:'s9',c:'--c-feat',chip:'Lower groove',val:'n_y 3.08'},
+  'groove-u':{t:'Upper ring groove',v:'M = 0, T = 0',d:'Same groove section. Carries the 203.6 N thrust; 2.56 mm of shaft above it (≥ 3t = 1.56 mm).',s:'s14',c:'--c-feat',chip:'Upper groove',val:'M = 0'},
+  keyseat:{t:'Keyseat (closed slot)',v:'22.45 × 9.525 × 4.76 deep, y −47.25 to −24.75',d:'Upper end: M = 266.5 N·m, T = 19.63 N·m. Conservative K_t 3.0, K_ts 4.0 plus key pressure. n_f = 1.44 (governs fatigue), n_y = 3.63.',s:'s9',c:'--c-feat',chip:'Keyseat',val:'n_f 1.44'},
+  pinhole:{t:'Pin hole, Ø6.37 mm',v:'M = 181.0 N·m, T = 19.63 N·m · n_y = 5.53, n_f = 2.20',d:'Transverse hole, a/D = 0.168. Table A-16: K_t 2.114 (A 0.732), K_ts 1.606 (A 0.856).',s:'s9',c:'--c-feat',chip:'Pin hole',val:'n_f 2.20'},
+  plain:{t:'Plain section at the lower bearing',v:'M = 284.5 N·m · n_y = 11.5, n_f = 4.95',d:'Largest moment on the shaft but no notch, ground surface.',s:'s9',c:'--c-feat',chip:'Plain section',val:'n_f 4.95'},
+  key:{t:'Key, 18-8, 3/8 × 3/8 × 1/2 in',v:'F = 1033.2 N · n_shear = 27.5, n_bearing = 23.5',d:'Cut 12.70 mm from 92530A319; longer than it is wide. Centred at y = −36 under the set screw.',s:'s11',c:'--c-hw',chip:'Key',val:'1/2 in'},
+  screw:{t:'Set screw, 1/4"-20 × 1/4 in flat tip',v:'Clamp 460–808 N · n_slip = 1.31, n_y = 1.27',d:'94355A533, 18-8. Through the sprocket hub, presses on the key. 0.73–0.77 N·m.',s:'s12',c:'--c-hw',chip:'Set screw',val:'n 1.27'},
+  pin:{t:'Pin, 416 stainless, 1/4 × 3 in',v:'R = 520.1 N per shear plane · n_y = 1.35 (with fit)',d:'98380A556 at y = −180, spanning the 3 in hub. Clearance in the shaft, interference in one hub wall.',s:'s13',c:'--c-hw',chip:'Pin',val:'n 1.35'},
+  'ring-l':{t:'Lower retaining ring',v:'93576A210 · 4950 lbf rating',d:'18-8 single-turn spiral ring below the lower bearing. Unloaded in normal operation, still checked for 203.6 N.',s:'s14',c:'--c-hw',chip:'Lower ring',val:''},
+  'ring-u':{t:'Upper retaining ring',v:'93576A210 · capacity/N = 108',d:'Sits on the upper bearing and carries the whole 203.6 N thrust.',s:'s14',c:'--c-hw',chip:'Upper ring',val:'×108'},
+  'bearing-l':{t:'Lower bearing',v:'12.7 mm wide, midplane y = 6.35',d:'Assumption A2: the 300 mm runs between the outer bearing faces, so the midplanes are 287.3 mm apart.',s:'s1',c:'--c-steel',chip:'Lower bearing',val:''},
+  'bearing-u':{t:'Upper bearing',v:'12.7 mm wide, midplane y = 293.65',d:'Assumption A2. Supports the shaft radially; the upper ring rests on it.',s:'s1',c:'--c-steel',chip:'Upper bearing',val:''},
+  sprocket:{t:'Sprocket',v:'1.125 in wide, 0.284 in teeth, hub OD 76.2 mm',d:'Tooth midplane on the chain line y = −50; the un-toothed hub (−46.39 to −25.03) holds the key and set screw.',s:'s11',c:'--c-part',chip:'Sprocket',val:''},
+  hub:{t:'Rotor hub',v:'100 mm long (y −250 to −150), OD 76.2 mm at the pin',d:'Carries the drag into the shaft by contact; the pin carries torque and weight (A4).',s:'s1',c:'--c-part',chip:'Rotor hub',val:''},
+  shaft:{t:'Shaft, McMaster 1346K534',v:'1566 HRC25, Ø1.500 in × 554 mm from 24 in stock · $112.69',d:'Approved S_y 88 ksi = 606.7 MPa; S_ut = 3.4(253) = 860.2 MPa. Runs from y = −250.5 to +303.5.',s:'s6',c:'--c-steel',chip:'Shaft',val:'Ø1.5 in'},
+  cg:{t:'Rotor centre of gravity',v:'y = −350 mm',d:'Where the 120 N rotor weight acts.',s:'s2',c:'--c-weight',chip:'CG',val:''},
+  cop:{t:'Centre of pressure',v:'y = −500 mm',d:'Where the 560 N drag acts.',s:'s2',c:'--c-water',chip:'COP',val:''},
+  mdiag:{t:'Bending moment diagram',v:'Peak 284.5 N·m at the lower bearing midplane',d:'Drawn on the −x side, scaled to the resultant M = √(M_x² + M_z²). Eqs. (9)–(11).',s:'s4',c:'--c-water',chip:'M diagram',val:'284.5 N·m'},
+  tdiag:{t:'Torque diagram',v:'19.63 N·m from the pin (y −180) to the keyseat top (y −24.75)',d:'Drawn on the +x side. Zero at both bearings and both grooves.',s:'s4',c:'--c-chain',chip:'T diagram',val:'19.63 N·m'}
+};
+const ALIAS = { rings:['ring-l','ring-u'], applied:['drag','chain','wr','ws','wsh','tw','tc'], reactions:['rl','ru','thrust'] };
+const expand = ids => [].concat(...ids.map(i=>ALIAS[i]||[i]));
+
+const CHIPS = {
+  s1:['bearing-l','bearing-u','hub','pin','thrust'],
+  s2:['drag','chain','wr','ws','wsh','tw','tc','cg','cop'],
+  s3:['rl','ru','thrust','drag','chain'],
+  s4:['mdiag','tdiag','groove-l','keyseat','pinhole','plain'],
+  s5:['groove-l','keyseat','pinhole','groove-u'],
+  s6:['shaft'], s7:['groove-l','ring-l'], s8:['groove-l'],
+  s9:['groove-l','keyseat','pinhole','plain','groove-u'],
+  s10:['shaft'], s11:['key','keyseat','sprocket'], s12:['screw','key','ws'],
+  s13:['pin','pinhole','tw','wr'], s14:['ring-u','ring-l','thrust','groove-u'],
+  s15:['shaft','groove-l','groove-u','keyseat','pinhole'], s16:['shaft','rings','pin','screw','key']
+};
+const SCENE = {
+  review:{f:[],view:'iso'}, s1:{f:['bearing-l','bearing-u','hub','pin'],view:'iso',all:true},
+  s2:{f:['applied'],view:'iso',all:true,dims:true}, s3:{f:['rl','ru','thrust','drag','chain'],view:'front',all:true,dims:true,levers:true},
+  s4:{f:['mdiag','tdiag'],view:'front',diag:true,dims:true,cut:true}, s5:{f:['groove-l','keyseat','pinhole'],view:'front',diag:true,dims:true,cut:true},
+  s6:{f:['shaft'],view:'iso'}, s7:{f:['groove-l','ring-l'],view:'iso'}, s8:{f:['groove-l'],view:'iso'},
+  s9:{f:['groove-l','keyseat','pinhole','plain'],view:'front'}, s10:{f:['shaft'],view:'iso'},
+  s11:{f:['key','keyseat'],view:'iso'}, s12:{f:['screw','key'],view:'iso'}, s13:{f:['pin'],view:'iso'},
+  s14:{f:['ring-l','ring-u','thrust'],view:'iso'}, s15:{f:['groove-l','groove-u','keyseat','pinhole'],view:'front',dims:true},
+  s16:{f:['shaft','rings','pin','screw','key'],view:'iso'}, s17:{f:[],view:'iso'}, s18:{f:[],view:'iso'}
+};
+
+/* ---------------- geometry (mm), Rev P2 ---------------- */
+const G = {r:19.05,yBot:-250.5,yTop:303.5,yL:6.35,yU:293.65,bw:12.7,gL:-0.49,gU:300.52,gW:0.81,
+  ks0:-47.25,ks1:-24.75,k0:-42.35,k1:-29.65,ksD:4.7625,ksW:9.525,yS:-36,
+  sT0:-53.61,sT1:-46.39,sH1:-25.03,Rp:121.3,hub0:-250,hub1:-150,yPin:-180,yCG:-350,yCOP:-500,rot0:-255,rot1:-720,rotR:185};
+function Mres(y){ // resultant bending moment, N·mm
+  if (y>G.yU) return 0;
+  if (y>=G.yL) return 990.09*(G.yU-y);
+  if (y>=-50){ const mx=560*(y+500)+13.3477*(y+50), mz=161.2485*(y+50); return Math.hypot(mx,mz); }
+  return 560*(y+500);
+}
+const Tor = y => (y>=G.yPin && y<=G.ks1) ? 19.63 : 0;
+
+/* ---------------- three.js scene ---------------- */
+const stage=$('stage'), labelsEl=$('labels');
+if (!window.THREE || !THREE.OrbitControls){ stage.innerHTML='<p style="padding:16px">The 3D view needs three.js from cdnjs, which did not load. The walkthrough still works.</p>'; return; }
+const renderer=new THREE.WebGLRenderer({canvas:$('c3d'),antialias:true,alpha:false});
+renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(30,1,2,30000);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true; controls.dampingFactor=.1;
+scene.add(new THREE.HemisphereLight(0xffffff,0x777766,.9));
+const dl=new THREE.DirectionalLight(0xffffff,.6); dl.position.set(700,900,900); scene.add(dl);
+const dl2=new THREE.DirectionalLight(0xffffff,.25); dl2.position.set(-700,-300,-600); scene.add(dl2);
+
+let root=null, meshes=[], labels=[], focusSet=new Set(), opts={labels:true,diag:false,rotor:true,dims:false,levers:false,cut:false,cutY:-0.49};
+const col = n => new THREE.Color(css(n)||'#888');
+const BLACK=new THREE.Color(0,0,0);
+
+function reg(obj,fid,o){ o=o||{}; obj.traverse(m=>{ if(!m.isMesh && !m.isLine) return; m.userData.fid=fid; m.userData.base=o.op!=null?o.op:1; m.userData.ctx=!!o.ctx; m.userData.pri=o.pri||1; m.userData.grp=o.grp||''; m.userData.only=!!o.only; m.userData.keep=!!o.keep; meshes.push(m); }); root.add(obj); return obj; }
+function mat(c,o){ o=o||{}; const M=o.basic?THREE.MeshBasicMaterial:THREE.MeshStandardMaterial; const p={color:col(c),transparent:true,opacity:o.op!=null?o.op:1,side:THREE.DoubleSide}; if(!o.basic){p.metalness=o.metal!=null?o.metal:.25;p.roughness=.55;} return new M(p); }
+function annulus(Ro,Ri,h,gap){ const s=new THREE.Shape();
+  if (gap){ s.absarc(0,0,Ro,gap/2,Math.PI*2-gap/2,false); s.absarc(0,0,Ri,Math.PI*2-gap/2,gap/2,true); }
+  else { s.absarc(0,0,Ro,0,Math.PI*2,false); const hp=new THREE.Path(); hp.absarc(0,0,Ri,0,Math.PI*2,true); s.holes.push(hp); }
+  const g=new THREE.ExtrudeGeometry(s,{depth:h,bevelEnabled:false,curveSegments:56}); g.rotateX(-Math.PI/2); return g; }
+function sprocketGeo(Ro,Rr,n,Ri,h){ const s=new THREE.Shape(), st=Math.PI*2/n;
+  for (let i=0;i<n;i++){ const a=i*st; [[Rr,a],[Ro,a+.3*st],[Ro,a+.55*st],[Rr,a+.85*st]].forEach((p,j)=>{ const x=p[0]*Math.cos(p[1]), y=p[0]*Math.sin(p[1]); (i===0&&j===0)?s.moveTo(x,y):s.lineTo(x,y); }); }
+  const hp=new THREE.Path(); hp.absarc(0,0,Ri,0,Math.PI*2,true); s.holes.push(hp);
+  const g=new THREE.ExtrudeGeometry(s,{depth:h,bevelEnabled:false,curveSegments:24}); g.rotateX(-Math.PI/2); return g; }
+function label(text,pos,fid,cvar,always,extra){ const el=document.createElement('div'); el.className='lbl'+(extra&&extra.cls?' '+extra.cls:''); el.innerHTML=text; if(cvar) el.style.setProperty('--lc','var('+cvar+')'); labelsEl.appendChild(el); const L=Object.assign({el,pos:new THREE.Vector3(...pos),fid,always},extra||{}); labels.push(L); return L; }
+function arrowObj(tail,dir,len,rad,c){ const g=new THREE.Group(), m=mat(c,{basic:true}); const hl=Math.min(len*.35,rad*7);
+  const sh=new THREE.Mesh(new THREE.CylinderGeometry(rad,rad,len-hl,12),m); sh.position.y=(len-hl)/2;
+  const hd=new THREE.Mesh(new THREE.ConeGeometry(rad*2.6,hl,18),m); hd.position.y=len-hl/2; g.add(sh,hd);
+  g.position.copy(tail); g.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.clone().normalize()); return g; }
+const aLen = Fv => 6.4*Math.sqrt(Fv);
+function force(fid,tail,v,c,text,headAt){ // headAt: arrow ends at tail point (pushes on it)
+  const Fv=Math.hypot(...v), dir=new THREE.Vector3(...v).normalize(), len=aLen(Fv);
+  const t=new THREE.Vector3(...tail); const start=headAt?t.clone().sub(dir.clone().multiplyScalar(len)):t;
+  reg(arrowObj(start,dir,len,3.2,c),fid,{pri:3});
+  const lp=headAt?start.clone().sub(dir.clone().multiplyScalar(12)):start.clone().add(dir.clone().multiplyScalar(len+12));
+  label(text,[lp.x,lp.y,lp.z],fid,c,true);
+}
+function torque(fid,y,R,sign,c,text){ const g=new THREE.Group(), m=mat(c,{basic:true}); const arc=1.5*Math.PI;
+  const tor=new THREE.Mesh(new THREE.TorusGeometry(R,2.6,8,80,arc),m); tor.rotation.x=-Math.PI/2; g.add(tor);
+  const cone=new THREE.Mesh(new THREE.ConeGeometry(7.5,20,16),m); const ex=R*Math.cos(arc), ez=-R*Math.sin(arc);
+  cone.position.set(ex,0,ez); cone.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(-Math.sin(arc),0,-Math.cos(arc))); g.add(cone);
+  g.position.set(0,y,0); if (sign<0) g.scale.z=-1; reg(g,fid,{pri:3});
+  label(text,[-R*.72,y+14,(sign<0?-1:1)*R*.72],fid,c,true); }
+
+function build(){
+  if (root){ scene.remove(root); root.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose(); }); }
+  labels.forEach(l=>l.el.remove()); labels=[]; meshes=[];
+  root=new THREE.Group(); scene.add(root); scene.background=col('--stage');
+  const r=G.r;
+  // shaft
+  const sh=new THREE.Mesh(new THREE.CylinderGeometry(r,r,G.yTop-G.yBot,64,1),mat('--c-steel',{metal:.45}));
+  sh.position.y=(G.yTop+G.yBot)/2; reg(sh,'shaft',{ctx:true,pri:1});
+  // plain-section marker and cut discs (only when focused)
+  const cut=(fid,y)=>{ const d=new THREE.Mesh(new THREE.RingGeometry(r*1.15,r*1.6,48),mat('--glow',{basic:true,op:.5})); d.rotation.x=-Math.PI/2; d.position.y=y; reg(d,fid,{only:true,op:.5,pri:0}); };
+  cut('plain',G.yL); cut('groove-l',G.gL); cut('keyseat',G.ks1); cut('pinhole',-176.81);
+  // grooves (dark bands) and rings
+  [['groove-l',G.gL],['groove-u',G.gU]].forEach(([f,y])=>{ const b=new THREE.Mesh(new THREE.CylinderGeometry(r+.15,r+.15,Math.max(G.gW,1.4),48,1,true),mat('--c-feat',{metal:.1})); b.position.y=y; reg(b,f,{pri:2}); });
+  [['ring-l',G.gL],['ring-u',G.gU]].forEach(([f,y])=>{ const m=new THREE.Mesh(annulus(r+3.4,r-.5,.9,.45),mat('--c-hw',{metal:.5})); m.position.y=y-.45; reg(m,f,{pri:2}); });
+  // keyseat slot (+x side), key, set screw
+  const ksLen=G.ks1-G.ks0;
+  const ks=new THREE.Mesh(new THREE.BoxGeometry(G.ksD+.4,ksLen,G.ksW),mat('--c-feat',{metal:.1})); ks.position.set(r-G.ksD/2+.2,(G.ks0+G.ks1)/2,0); reg(ks,'keyseat',{pri:2});
+  const key=new THREE.Mesh(new THREE.BoxGeometry(G.ksW,G.k1-G.k0,G.ksW),mat('--c-hw',{metal:.4})); key.position.set(r,(G.k0+G.k1)/2,0); reg(key,'key',{pri:2});
+  const scr=new THREE.Mesh(new THREE.CylinderGeometry(3.17,3.17,6.35,20),mat('--c-hw',{metal:.5})); scr.rotation.z=Math.PI/2; scr.position.set(r+G.ksW/2+3.2,G.yS,0); reg(scr,'screw',{pri:2});
+  // sprocket
+  const spr=new THREE.Group();
+  const teeth=new THREE.Mesh(sprocketGeo(G.Rp+4,G.Rp-7,60,r+.4,G.sT1-G.sT0),mat('--c-part',{op:.35})); teeth.position.y=G.sT0; spr.add(teeth);
+  const shub=new THREE.Mesh(annulus(2*r,r+.4,G.sH1-G.sT1),mat('--c-part',{op:.3})); shub.position.y=G.sT1; spr.add(shub);
+  reg(spr,'sprocket',{op:.32,pri:1});
+  // rotor hub and pin (pin axis along z)
+  const hub=new THREE.Mesh(annulus(2*r,r+.4,G.hub1-G.hub0),mat('--c-part',{op:.3})); hub.position.y=G.hub0; reg(hub,'hub',{op:.3,pri:1});
+  const pin=new THREE.Mesh(new THREE.CylinderGeometry(3.175,3.175,76.2,20),mat('--c-hw',{metal:.5})); pin.rotation.x=Math.PI/2; pin.position.set(0,G.yPin,0); reg(pin,'pin',{pri:2});
+  const ph=new THREE.Mesh(new THREE.CylinderGeometry(3.6,3.6,2*r+1,20),mat('--c-feat',{op:.55})); ph.rotation.x=Math.PI/2; ph.position.set(0,G.yPin,0); reg(ph,'pinhole',{op:.0,pri:0,only:true});
+  // bearings and support plates
+  [['bearing-l',0],['bearing-u',287.3]].forEach(([f,y0])=>{ const b=new THREE.Mesh(annulus(2.1*r,r+.3,G.bw),mat('--c-steel',{metal:.6,op:.85})); b.position.y=y0; reg(b,f,{op:.85,pri:1}); });
+  const sup=new THREE.Group(); const pw=190, pt=20;
+  [[-pt,0],[300,0]].forEach(([y0])=>{ const s=new THREE.Shape(); s.moveTo(-pw/2,-pw/2); s.lineTo(pw/2,-pw/2); s.lineTo(pw/2,pw/2); s.lineTo(-pw/2,pw/2); s.lineTo(-pw/2,-pw/2);
+    const hp=new THREE.Path(); hp.absarc(0,0,2.1*r+1,0,Math.PI*2,true); s.holes.push(hp);
+    const g=new THREE.ExtrudeGeometry(s,{depth:pt,bevelEnabled:false,curveSegments:40}); g.rotateX(-Math.PI/2); const m=new THREE.Mesh(g,mat('--c-part',{op:.12})); m.position.y=y0; sup.add(m); });
+  sup.userData.grp='rotor'; reg(sup,'supports',{op:.12,pri:0,grp:'rotor'});
+  // rotor (schematic) + CG/COP
+  const rot=new THREE.Group(); const rm=()=>mat('--c-part',{op:.1});
+  const tp=new THREE.Mesh(annulus(G.rotR,2*r,4),rm()); tp.position.y=G.rot0-4; rot.add(tp);
+  const bt=new THREE.Mesh(annulus(G.rotR,.01,4),rm()); bt.position.y=G.rot1; rot.add(bt);
+  for (let i=0;i<4;i++){ const b=new THREE.Mesh(new THREE.BoxGeometry(G.rotR-2*r-6,G.rot0-G.rot1-8,4),rm()); const a=i*Math.PI/2+Math.PI/4, rr=(G.rotR+2*r)/2; b.position.set(rr*Math.cos(a),(G.rot0+G.rot1)/2,rr*Math.sin(a)); b.rotation.y=-a; rot.add(b); }
+  reg(rot,'rotor',{op:.1,pri:0,grp:'rotor'});
+  const lev=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,G.hub0,0),new THREE.Vector3(0,G.yCOP,0)]),new THREE.LineDashedMaterial({color:col('--muted'),dashSize:8,gapSize:6,transparent:true}));
+  lev.computeLineDistances(); reg(lev,'rotor',{op:.8,pri:0,grp:'rotor'});
+  [['cg',G.yCG,'--c-weight'],['cop',G.yCOP,'--c-water']].forEach(([f,y,c])=>{ const m=new THREE.Mesh(new THREE.SphereGeometry(7,18,12),mat(c,{basic:true})); m.position.set(0,y,0); reg(m,f,{pri:2}); label(f.toUpperCase(),[12,y-10,0],f,c,true); });
+  // forces
+  const RL=[-192.88,0,-1562.93], RU=[31.63,0,989.59];
+  force('drag',[0,G.yCOP,0],[0,0,560],'--c-water','Drag 560 N');
+  force('chain',[G.Rp+6,-50,0],[161.25,0,13.35],'--c-chain','Chain 161.8 N');
+  force('wr',[0,G.yCG,0],[0,-120,0],'--c-weight','W rotor 120 N');
+  force('ws',[-70,-36,0],[0,-35,0],'--c-weight','W sprocket 35 N');
+  force('wsh',[-34,26.5,0],[0,-48.62,0],'--c-weight','W shaft 48.6 N');
+  force('rl',[0,G.yL,2.1*r],RL,'--c-react','R<sub>L</sub> 1574.8 N',true);
+  force('ru',[0,G.yU,-2.1*r],RU,'--c-react','R<sub>U</sub> 990.1 N',true);
+  force('thrust',[r+8,G.gU-1,0],[0,203.62,0],'--c-react','Thrust 203.6 N',true);
+  torque('tw',G.yPin,62,1,'--c-water','T<sub>water</sub> 19.63 N·m');
+  torque('tc',-50,G.Rp+24,-1,'--c-chain','T<sub>chain</sub> 19.63 N·m');
+  // M and T diagrams (planar ribbons in z = 0)
+  const ribbon=(fid,fn,x0,k,y0,y1,c,sgn)=>{ const pos=[], n=260; for(let i=0;i<n;i++){ const ya=y0+(y1-y0)*i/n, yb=y0+(y1-y0)*(i+1)/n, a=fn(ya), b=fn(yb);
+      pos.push(x0,ya,0, x0+sgn*k*a,ya,0, x0+sgn*k*b,yb,0,  x0,ya,0, x0+sgn*k*b,yb,0, x0,yb,0); }
+    const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+    const m=new THREE.Mesh(g,mat(c,{basic:true,op:.35})); const grp=new THREE.Group(); grp.add(m);
+    const ln=[]; for(let i=0;i<=n;i++){ const y=y0+(y1-y0)*i/n; ln.push(new THREE.Vector3(x0+sgn*k*fn(y),y,0)); }
+    grp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(ln),new THREE.LineBasicMaterial({color:col(c),transparent:true})));
+    reg(grp,fid,{op:.6,pri:1,grp:'diag'}); };
+  ribbon('mdiag',y=>Mres(y)/1000,-(r+14),0.45,G.yBot,G.yTop,'--c-water',-1);
+  ribbon('tdiag',Tor,2*r+8,3.0,G.yBot,G.yTop,'--c-chain',1);
+  label('M<sub>max</sub> 284.5 N·m',[-(r+14)-0.45*284.5-6,G.yL,0],'mdiag','--c-water',false);
+  label('T 19.63 N·m',[2*r+8+3*19.63+8,-100,0],'tdiag','--c-chain',false);
+  // part labels
+  label('upper bearing',[2.1*r+10,G.yU,0],'bearing-u','--c-steel',false); label('lower bearing',[2.1*r+10,G.yL,0],'bearing-l','--c-steel',false);
+  label('keyseat + key',[r+14,G.ks1+8,0],'keyseat','--c-feat',false); label('key 1/2 in',[r+12,G.k0,10],'key','--c-hw',false);
+  label('set screw',[r+20,G.yS,0],'screw','--c-hw',false); label('pin',[0,G.yPin-8,40],'pin','--c-hw',false);
+  label('pin hole',[r+8,G.yPin+8,0],'pinhole','--c-feat',false);
+  label('lower groove',[-(r+8),G.gL-6,0],'groove-l','--c-feat',false); label('upper groove',[-(r+8),G.gU+6,0],'groove-u','--c-feat',false);
+  label('lower ring',[r+6,G.gL-8,0],'ring-l','--c-hw',false); label('upper ring',[r+6,G.gU+8,0],'ring-u','--c-hw',false);
+  label('plain section',[-(2.2*r),G.yL+8,0],'plain','--c-feat',false);
+  label('sprocket',[G.Rp+8,G.sT1+14,0],'sprocket','--c-part',false); label('rotor hub',[2*r+10,G.hub1-12,0],'hub','--c-part',false);
+  label('shaft Ø1.500',[-(r+6),180,0],'shaft','--c-steel',false);
+  buildDims(); buildCut();
+  // axes triad
+  const ax=new THREE.Vector3(-330,230,-170);
+  [['x',[1,0,0]],['y',[0,1,0]],['z',[0,0,1]]].forEach(([n,v])=>{ const a=arrowObj(ax,new THREE.Vector3(...v),60,1.4,'--ink'); root.add(a); label(n,[ax.x+v[0]*72,ax.y+v[1]*72,ax.z+v[2]*72],null,'--ink',true); });
+  paint();
+}
+
+/* ---------------- dimensions: station ruler, lever arms, cut tool ---------------- */
+const V=(x,y,z)=>new THREE.Vector3(x,y,z||0);
+const lineGeo=pts=>new THREE.BufferGeometry().setFromPoints(pts);
+const fmtN=(v,dp)=>{ const t=Math.abs(v).toFixed(dp==null?2:dp).replace(/\B(?=(\d{3})+(?!\d))/g,' '); return (v<0?'−':'')+t; };
+function dimV(grp,x,y0,y1,text,c,ext,z,left){ z=z||0; const g=new THREE.Group(); const lm=new THREE.LineBasicMaterial({color:col(c||'--ink'),transparent:true});
+  g.add(new THREE.Line(lineGeo([V(x,y0,z),V(x,y1,z)]),lm));
+  [y0,y1].forEach(y=>g.add(new THREE.Line(lineGeo([V(x-7,y,z),V(x+7,y,z)]),lm)));
+  if (ext!=null){ const em=new THREE.LineDashedMaterial({color:col(c||'--ink'),dashSize:4,gapSize:4,transparent:true,opacity:.6});
+    [y0,y1].forEach(y=>{ const l=new THREE.Line(lineGeo([V(ext,y,z),V(x,y,z)]),em); l.computeLineDistances(); g.add(l); }); }
+  const cm=mat(c||'--ink',{basic:true}), dir=Math.sign(y1-y0)||1, hl=Math.min(9,Math.abs(y1-y0)/3);
+  if (hl>2){ [[y1,dir],[y0,-dir]].forEach(([y,d])=>{ const cn=new THREE.Mesh(new THREE.ConeGeometry(2.6,hl,10),cm); cn.position.set(x,y-d*hl/2,z); if(d<0) cn.rotation.z=Math.PI; g.add(cn); }); }
+  reg(g,grp,{grp,keep:true,pri:0});
+  label(text,[left?x-9:x+9,(y0+y1)/2,z],null,c,true,{grp,cls:'dim',left:!!left});
+  return g; }
+function buildDims(){
+  const RX=250, r=G.r;
+  const st=[[303.5,'303.5 top'],[300,'300 brg face'],[293.65,'293.65 R<sub>U</sub>'],[6.35,'6.35 R<sub>L</sub>'],[0,'0 brg face'],
+    [-24.75,'−24.75 keyseat'],[-50,'−50 chain'],[-150,'−150 hub top'],[-180,'−180 pin'],[-250,'−250 shaft end'],[-350,'−350 CG'],[-500,'−500 COP']];
+  const g=new THREE.Group(), lm=new THREE.LineBasicMaterial({color:col('--muted'),transparent:true});
+  g.add(new THREE.Line(lineGeo([V(RX,-500),V(RX,303.5)]),lm));
+  const gm=new THREE.LineDashedMaterial({color:col('--muted'),dashSize:3,gapSize:5,transparent:true,opacity:.55});
+  st.forEach(([y,t])=>{ g.add(new THREE.Line(lineGeo([V(RX-6,y),V(RX+6,y)]),lm));
+    const gl=new THREE.Line(lineGeo([V(RX,y),V(r,y)]),gm); gl.computeLineDistances(); g.add(gl);
+    label(t,[RX,y,0],null,'--muted',true,{grp:'dims',lane:'ruler',cls:'dim ruler'}); });
+  const pad=new THREE.Mesh(new THREE.BoxGeometry(2,2,2),mat('--muted',{basic:true,op:0})); pad.position.set(RX+110,0,0); g.add(pad);
+  const padL=pad.clone(); padL.material=pad.material; padL.position.set(-360,0,0); g.add(padL);
+  reg(g,'dims',{grp:'dims',keep:true,pri:0}); pad.material.opacity=0; pad.userData.base=0;
+  // lever arms used in Eqs. (5)-(8): measured from the lower bearing midplane
+  dimV('levers',-90,G.yL,G.yU,'L = 287.30','--c-react',-r,0,true);
+  dimV('levers',-90,-50,G.yL,'56.35 (chain → R<sub>L</sub>)','--c-chain',-r,0,true);
+  dimV('levers',-170,G.yCOP,G.yL,'506.35 (drag → R<sub>L</sub>)','--c-water',-r,0,true);
+}
+let cutGrp=null;
+function buildCut(){ if(cutGrp){ root.remove(cutGrp); meshes=meshes.filter(m=>!cutGrp.getObjectById(m.id)); cutGrp.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose(); });
+    labels=labels.filter(l=>{ if(l.grp==='cut'){ l.el.remove(); return false; } return true; }); }
+  const y=opts.cutY, r=G.r; cutGrp=new THREE.Group();
+  const ring=new THREE.Mesh(new THREE.RingGeometry(r*1.15,r*2.6,48),mat('--glow',{basic:true,op:.6})); ring.rotation.x=-Math.PI/2; ring.position.y=y; cutGrp.add(ring);
+  const m=Mres(y)/1000; const dot=new THREE.Mesh(new THREE.SphereGeometry(4.5,14,10),mat('--glow',{basic:true})); dot.position.set(-(r+14)-0.45*m,y,0); cutGrp.add(dot);
+  cutGrp.add(new THREE.Line(lineGeo([V(-(r+14)-0.45*m,y),V(r*2.6,y)]),new THREE.LineBasicMaterial({color:col('--glow')})));
+  root.add(cutGrp); reg(cutGrp,'cut',{grp:'cut',keep:true,pri:0});
+  // lever arms from the cut down to each load below it
+  const arms=[[G.yCOP,'y+500 = '+fmtN(y+500),'--c-water',-250]];
+  if (y>-50) arms.push([-50,'y+50 = '+fmtN(y+50),'--c-chain',-215]);
+  if (y>G.yL) arms.push([G.yL,'y−6.35 = '+fmtN(y-G.yL),'--c-react',-180]);
+  arms.forEach(([yb,t,c,x])=>{ const g=dimV('cut',x,yb,y,t,c,-(r+14)-0.45*m,0,true); cutGrp.add(g); });
+  label('cut y = '+fmtN(y),[-(r+14)-0.45*m-6,y+10,0],null,'--glow',true,{grp:'cut',cls:'dim'});
+}
+function setCut(y){ y=Math.max(-250,Math.min(303.5,y)); opts.cutY=y; $('cutY').value=y; $('cutOut').textContent=fmtN(y)+' mm';
+  if(root){ buildCut(); paint(); }
+  const Fz=13.35, Fx=161.25; let html;
+  if (y>G.yU) html='Above the upper bearing nothing is below the cut that is not balanced: <b>M = 0</b>.';
+  else if (y>=G.yL){ const M=990.09*(G.yU-y); html='Between the bearings (Eq. 11):<br>M = |R<sub>U</sub>|(293.65 − y) = 990.09('+fmtN(G.yU-y)+') = '+fmtN(M,0)+' N·mm<br><b>M = '+fmtN(M/1000)+' N·m</b>'; }
+  else if (y>=-50){ const a=y+500,b=y+50, mx=560*a+Fz*b, mz=Fx*b, M=Math.hypot(mx,mz);
+    html='Chain to lower bearing (Eq. 10):<br>|M<sub>x</sub>| = 560('+fmtN(a)+') + 13.35('+fmtN(b)+') = '+fmtN(mx,0)+'<br>|M<sub>z</sub>| = 161.25('+fmtN(b)+') = '+fmtN(mz,0)+'<br><b>M = √(M<sub>x</sub>² + M<sub>z</sub>²) = '+fmtN(M/1000)+' N·m</b>'; }
+  else { const a=y+500, M=560*a; html=(y<-150?'Inside the hub, cantilever envelope (Eq. 9):':'Hub top to chain (Eq. 9):')+'<br>|M<sub>x</sub>| = 560('+fmtN(a)+') = '+fmtN(M,0)+' N·mm, M<sub>z</sub> = 0<br><b>M = '+fmtN(M/1000)+' N·m</b>'; }
+  const T=Tor(y); html+='<br>T = '+(T?'19.63 N·m (between pin and key)':'0');
+  $('cutEq').innerHTML=html; }
+
+/* ---------------- highlighting ---------------- */
+let preview=null;
+function paint(){
+  const set=preview||focusSet; const any=set.size>0; const glow=col('--glow');
+  meshes.forEach(m=>{ const u=m.userData, f=u.fid, M=m.material;
+    let vis=true;
+    if (u.only) vis=set.has(f);
+    if (u.grp==='diag') vis=opts.diag||set.has(f);
+    if (u.grp==='rotor') vis=opts.rotor;
+    if (u.grp==='dims') vis=opts.dims; if (u.grp==='levers') vis=opts.levers; if (u.grp==='cut') vis=opts.cut;
+    m.visible=vis; if(!vis) return;
+    let op=u.base;
+    if (u.keep){ M.opacity=op; M.transparent=op<.999; return; }
+    if (u.only) op=Math.max(u.base,.5);
+    if (any && !set.has(f)) op = u.ctx ? .38 : (u.pri===3 ? .07 : Math.min(u.base,.9)*.16);
+    if (any && set.has(f)) op = Math.max(u.base,.92);
+    M.opacity=op; M.transparent=op<.999; M.depthWrite=op>.5;
+    if (M.emissive){ M.emissive.copy(any&&set.has(f)?glow:BLACK); M.emissiveIntensity=any&&set.has(f)?.38:0; }
+  });
+  labels.forEach(l=>{ if(l.grp){ l.show=!!opts[l.grp]; return; } const on=l.fid&&set.has(l.fid);
+    const show = on || (!any && opts.labels && l.always) || (!l.fid && opts.labels);
+    l.show=show && (l.fid!=='mdiag'&&l.fid!=='tdiag' || opts.diag || on);
+    l.el.classList.toggle('on',!!on); });
+  document.querySelectorAll('[data-f]').forEach(e=>{ const ids=expand(e.dataset.f.split(',')); e.classList.toggle('on', ids.some(i=>focusSet.has(i))); });
+}
+const SECY={'groove-l':-0.49,'keyseat':-24.75,'pinhole':-176.81,'plain':6.35,'groove-u':300.5,'chain':-50,'mdiag':null};
+function setFocus(ids,o){ o=o||{}; focusSet=new Set(expand(ids)); preview=null; if(opts.cut && ids.length && SECY[ids[0]]!=null) setCut(SECY[ids[0]]); paint();
+  if (o.fly!==false && focusSet.size) fly([...focusSet],o.view);
+  if (o.info) showInfo(ids[0]); else if(!o.keepInfo) hideInfo(); }
+
+/* ---------------- camera ---------------- */
+const VIEWS={iso:[.62,.3,.72],front:[0,0,1],side:[-1,0,0],top:[0,1,0.0001]};
+let tween=null;
+function boxOf(ids){ const b=new THREE.Box3(); let has=false;
+  meshes.forEach(m=>{ if(ids.includes(m.userData.fid) && (m.visible||m.userData.only||m.userData.grp==='diag')){ const bb=new THREE.Box3().setFromObject(m); if(!bb.isEmpty()){ b.union(bb); has=true; } } });
+  return has?b:null; }
+function fly(ids,view){ const b=boxOf(ids)||boxOf(['shaft']); const c=b.getCenter(new THREE.Vector3());
+  const dir = view ? new THREE.Vector3(...VIEWS[view]).normalize() : camera.position.clone().sub(controls.target).normalize();
+  const up = view==='top' ? new THREE.Vector3(0,0,-1) : new THREE.Vector3(0,1,0);
+  const right=new THREE.Vector3().crossVectors(up,dir).normalize(), upv=new THREE.Vector3().crossVectors(dir,right).normalize();
+  let hw=30,hh=30,hd=0; [b.min,b.max].forEach(px=>[b.min,b.max].forEach(py=>[b.min,b.max].forEach(pz=>{ const v=new THREE.Vector3(px.x,py.y,pz.z).sub(c);
+    hw=Math.max(hw,Math.abs(v.dot(right))); hh=Math.max(hh,Math.abs(v.dot(upv))); hd=Math.max(hd,Math.abs(v.dot(dir))); })));
+  const t=Math.tan(camera.fov*Math.PI/360); const dist=Math.max(hh/t, hw/(t*camera.aspect))*1.12+hd;
+  moveTo(c.clone().add(dir.multiplyScalar(dist)),c,up); }
+function fitAll(view){ const ids=[...new Set(meshes.filter(m=>m.visible && m.userData.grp!=='diag' && m.userData.grp!=='cut').map(m=>m.userData.fid))]; fly(ids,view||'iso'); }
+let instant=true;
+function moveTo(pos,tgt,up){ camera.up.copy(up||new THREE.Vector3(0,1,0));
+  if (reduce||instant){ camera.position.copy(pos); controls.target.copy(tgt); controls.update(); return; }
+  tween={t0:performance.now(),dur:650,p0:camera.position.clone(),q0:controls.target.clone(),p1:pos,q1:tgt}; }
+function stepTween(now){ if(!tween) return; let k=Math.min(1,(now-tween.t0)/tween.dur); k=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+  camera.position.lerpVectors(tween.p0,tween.p1,k); controls.target.lerpVectors(tween.q0,tween.q1,k); if(k>=1) tween=null; }
+
+/* ---------------- labels + render ---------------- */
+const v3=new THREE.Vector3();
+function placeLabels(){ const w=stage.clientWidth,h=stage.clientHeight; const lanes={};
+  labels.forEach(l=>{ if(!l.show){ l.el.style.display='none'; return; } v3.copy(l.pos).project(camera);
+    if (v3.z>1||v3.z<-1){ l.el.style.display='none'; return; } l.el.style.display='';
+    l.sx=(v3.x*.5+.5)*w; l.sy=(-v3.y*.5+.5)*h;
+    if (l.lane){ (lanes[l.lane]=lanes[l.lane]||[]).push(l); return; }
+    l.el.style.transform=l.left?'translate(calc('+(l.sx-4)+'px - 100%),'+(l.sy-10)+'px)':'translate('+(l.sx+4)+'px,'+(l.sy-10)+'px)'; });
+  Object.values(lanes).forEach(arr=>{ arr.sort((a,b)=>a.sy-b.sy); let last=-1e9;
+    arr.forEach(l=>{ const y=Math.max(l.sy,last+15); last=y;
+      l.el.style.transform='translate('+(l.sx+8)+'px,'+(y-8)+'px)'; }); }); }
+function resize(){ const w=stage.clientWidth||1,h=stage.clientHeight||1; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(stage);
+function loop(now){ requestAnimationFrame(loop); stepTween(now||performance.now()); controls.update(); renderer.render(scene,camera); placeLabels(); }
+
+/* ---------------- picking ---------------- */
+const ray=new THREE.Raycaster(), ptr=new THREE.Vector2(); let down=null;
+renderer.domElement.addEventListener('pointerdown',e=>{ down=[e.clientX,e.clientY]; $('hint').hidden=true; });
+renderer.domElement.addEventListener('pointerup',e=>{ if(!down) return; const moved=Math.hypot(e.clientX-down[0],e.clientY-down[1]); down=null; if(moved>5) return;
+  const r=renderer.domElement.getBoundingClientRect(); ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
+  ray.setFromCamera(ptr,camera); const hits=ray.intersectObjects(meshes.filter(m=>m.visible&&m.isMesh&&F[m.userData.fid]),false);
+  if(!hits.length){ return; }
+  hits.sort((a,b)=>(b.object.userData.pri-a.object.userData.pri)||(a.distance-b.distance));
+  const f=hits[0].object.userData.fid; setFocus([f],{fly:false,info:true}); });
+
+/* ---------------- info card ---------------- */
+function showInfo(f){ const d=F[f]; if(!d){ hideInfo(); return; }
+  $('infoT').textContent=d.t; $('infoV').textContent=d.v; $('infoD').textContent=d.d; $('info').style.setProperty('--ic','var('+d.c+')');
+  const row=$('infoRow'); row.innerHTML='';
+  const sec=document.getElementById(d.s); if(sec){ const b=document.createElement('button'); b.className='ib'; b.type='button'; b.textContent='Read in step '+(sec.querySelector('.n')||{}).textContent+' →'; b.onclick=()=>{ suppress=performance.now()+1500; sec.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'}); }; row.appendChild(b); }
+  const z=document.createElement('button'); z.className='ib'; z.type='button'; z.textContent='Zoom to it'; z.onclick=()=>fly(expand([f])); row.appendChild(z);
+  $('info').hidden=false; }
+function hideInfo(){ $('info').hidden=true; }
+$('infoX').onclick=hideInfo;
+
+/* ---------------- text ↔ 3D wiring ---------------- */
+const sections=[...document.querySelectorAll('section.step')];
+sections.forEach(sec=>{ const ids=CHIPS[sec.id]; if(!ids) return;
+  const bar=document.createElement('div'); bar.className='chips'; bar.innerHTML='<span class="lead">Show in 3D</span>';
+  ids.forEach(i=>{ const d=F[i]||F[(ALIAS[i]||[])[0]]; const b=document.createElement('button'); b.type='button'; b.className='chip'; b.dataset.f=i;
+    b.style.setProperty('--cc','var('+d.c+')'); b.innerHTML=(i==='rings'?'Rings (2)':d.chip)+(d.val&&i!=='rings'?'<small>'+d.val+'</small>':''); bar.appendChild(b); });
+  const after=sec.querySelector('.sub')||sec.querySelector('h2'); after.insertAdjacentElement('afterend',bar); });
+document.querySelectorAll('.ref[data-f]').forEach(b=>{ const d=F[expand([b.dataset.f.split(',')[0]])[0]]; if(d) b.style.setProperty('--cc','var('+d.c+')'); });
+document.addEventListener('click',e=>{ const t=e.target.closest('[data-f]'); if(!t||t.closest('.bench')) return;
+  const ids=t.dataset.f.split(','); if(lastClick===t.dataset.f && t.classList.contains('on') && t.matches('.chip,.ref')){ lastClick=null; setFocus([]); return; }
+  lastClick=t.dataset.f; setFocus(ids,{info:true}); if(innerWidth<=1000) $('bench').classList.remove('min'); });
+document.addEventListener('pointerover',e=>{ const t=e.target.closest('.chip[data-f],.ref[data-f],tr[data-f]'); if(!t||t.closest('.bench')) return; preview=new Set(expand(t.dataset.f.split(','))); paint(); });
+document.addEventListener('pointerout',e=>{ const t=e.target.closest('.chip[data-f],.ref[data-f],tr[data-f]'); if(!t) return; if(e.relatedTarget&&t.contains(e.relatedTarget)) return; preview=null; paint(); });
+document.addEventListener('keydown',e=>{ const t=e.target.closest&&e.target.closest('tr[data-f]'); if(t&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); t.click(); } });
+document.querySelectorAll('tr[data-f]').forEach(t=>t.tabIndex=0);
+
+/* ---------------- step tracking ---------------- */
+const sel=$('stepSel');
+sections.forEach(s=>{ const o=document.createElement('option'); o.value=s.id; const n=(s.querySelector('h2 .n')||{}).textContent||''; o.textContent=(n?n+'  ':'')+s.querySelector('h2').textContent.replace(n,'').trim(); sel.appendChild(o); });
+let active=null, suppress=0, follow=true, lastClick=null;
+function activate(id){ if(id===active) return; active=id;
+  sections.forEach(s=>s.classList.toggle('active',s.id===id));
+  sel.value=id; const s=document.getElementById(id); $('stepNo').textContent=(s.querySelector('h2 .n')||{}).textContent||'';
+  $('prog').style.width=(100*sections.findIndex(x=>x.id===id)/(sections.length-1))+'%';
+  if(follow) applyScene(id); }
+function applyScene(id){ const sc=SCENE[id]; if(!sc) return;
+  setDiag(!!sc.diag); setFlag('dims',!!sc.dims); setFlag('levers',!!sc.levers); setFlag('cut',!!sc.cut);
+  focusSet=new Set(expand(sc.f)); preview=null; paint(); hideInfo();
+  if (sc.all || !sc.f.length) fitAll(sc.view); else fly([...focusSet].concat(sc.dims?['dims']:[]),sc.view); }
+function current(){ const line=innerWidth<=1000 ? innerHeight*.62 : innerHeight*.35; let c=sections[0];
+  for (const s of sections){ if (s.getBoundingClientRect().top<line) c=s; } return c.id; }
+let ticking=false, settle=null;
+addEventListener('scroll',()=>{ if(ticking) return; ticking=true; requestAnimationFrame(()=>{ ticking=false;
+  clearTimeout(settle); if(performance.now()<suppress){ settle=setTimeout(()=>activate(current()),1600); return; } activate(current()); }); },{passive:true});
+sel.addEventListener('change',()=>{ const s=document.getElementById(sel.value); s.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'}); });
+const go=d=>{ const i=sections.findIndex(x=>x.id===active); const n=sections[Math.max(0,Math.min(sections.length-1,i+d))]; n.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'}); };
+$('prevStep').onclick=()=>go(-1); $('nextStep').onclick=()=>go(1);
+
+/* ---------------- toolbar ---------------- */
+function tog(id,fn){ const b=$(id); b.addEventListener('click',()=>{ const v=b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',v); fn(v); }); }
+function setDiag(v){ opts.diag=v; $('tDiag').setAttribute('aria-pressed',v); paint(); }
+tog('tFollow',v=>{ follow=v; if(v&&active) applyScene(active); });
+tog('tLabels',v=>{ opts.labels=v; paint(); });
+tog('tDiag',v=>{ opts.diag=v; paint(); if(v) fly(['mdiag','tdiag'],'front'); });
+tog('tRotor',v=>{ opts.rotor=v; paint(); });
+function setFlag(k,v){ opts[k]=v; const id={dims:'tDims',cut:'tCut'}[k]; if(id) $(id).setAttribute('aria-pressed',v);
+  if(k==='cut'){ $('cutBox').hidden=!v; stage.classList.toggle('cuton',v); $('hint').hidden=v||$('hint').hidden; if(v) setCut(opts.cutY); } paint(); }
+tog('tDims',v=>{ setFlag('dims',v); setFlag('levers',v); });
+tog('tCut',v=>{ setFlag('cut',v); if(v){ setDiag(true); fly(['mdiag','tdiag','dims'],'front'); } });
+$('cutY').addEventListener('input',e=>setCut(+e.target.value));
+document.querySelectorAll('[data-cut]').forEach(b=>b.addEventListener('click',()=>setCut(+b.dataset.cut)));
+$('tClear').onclick=()=>{ setFocus([]); };
+document.querySelectorAll('.views [data-view]').forEach(b=>b.addEventListener('click',()=>{ focusSet.size?fly([...focusSet],b.dataset.view):fitAll(b.dataset.view); }));
+$('fitAll').onclick=()=>fitAll(null);
+tog('minBench',v=>{ $('bench').classList.toggle('min',v); $('minBench').textContent=v?'Show 3D':'Hide 3D'; setTimeout(resize,50); });
+
+/* ---------------- theme ---------------- */
+const rethem=()=>{ build(); };
+try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',rethem); }catch(e){}
+new MutationObserver(rethem).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+build(); resize();
+camera.position.set(900,250,1000); controls.target.set(0,-150,0); controls.update(); fitAll('iso'); instant=false;
+requestAnimationFrame(loop);
+activate(current());
+setInterval(()=>{ if(performance.now()>suppress) activate(current()); },900);
+window.__bench={setFocus,fly,F};
+})();
+</script>

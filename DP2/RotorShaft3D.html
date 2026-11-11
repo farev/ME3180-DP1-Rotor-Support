@@ -1,0 +1,944 @@
+<title>Rotor Shaft 3D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="ME 3180 DP2: every force on the rotor shaft in 3D, the bearing reactions with their working, internal-load diagrams along the shaft and where the stress peaks.">
+<style>
+/* Layout: the fabianarevalo.com research-note system used for the DP1 viewer. A 47rem mono column on warm paper,
+   serif headings, hairlines, zero radius, hard offset shadows. Colour carries meaning only: weights, water (drag and
+   water torque), chain, bearing reactions, ring thrust; in the diagrams, teal = z-plane (drag) and amber = x-plane (chain). */
+:root{
+  --paper:#F5F4EF; --ink:#000000; --soft:#6E6E67; --faint:#A3A29A; --rule:#D5D3CB; --card:#FFFFFF; --hard:#000000;
+  --c-weight:#4a5fc1; --c-water:#0f9478; --c-chain:#c58a00; --c-react:#bf3f86; --c-ring:#dd5a26;
+  --ten:#c8322b; --com:#2f6fd0; --neutral:#E4E2DA; --steel:#9aa0a6; --part:#b9b6aa;
+  --pass:#1d7f43; --fail:#c8322b; --fail-bg:#fbe9e7;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --paper:#12120F;--ink:#F2F1EA;--soft:#93928A;--faint:#5F5E57;--rule:#312F2A;--card:#1B1A17;--hard:#4A483F;
+  --c-weight:#8594ee;--c-water:#35c4a0;--c-chain:#e6ad2c;--c-react:#e46cad;--c-ring:#f2804d;
+  --ten:#ff6f61;--com:#6a9ff0;--neutral:#3a3934;--steel:#7d838a;--part:#5d5b53;
+  --pass:#4fcb7f;--fail:#ff6f61;--fail-bg:#3a1d1a;color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --paper:#12120F;--ink:#F2F1EA;--soft:#93928A;--faint:#5F5E57;--rule:#312F2A;--card:#1B1A17;--hard:#4A483F;
+  --c-weight:#8594ee;--c-water:#35c4a0;--c-chain:#e6ad2c;--c-react:#e46cad;--c-ring:#f2804d;
+  --ten:#ff6f61;--com:#6a9ff0;--neutral:#3a3934;--steel:#7d838a;--part:#5d5b53;
+  --pass:#4fcb7f;--fail:#ff6f61;--fail-bg:#3a1d1a;color-scheme:dark; }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--mono);font-size:14px;line-height:20px;font-variant-ligatures:none;-webkit-font-smoothing:antialiased}
+::selection{background:var(--ink);color:var(--paper)}
+.wrap{max-width:78rem;margin:0 auto;padding-block:2rem 6rem;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+@media (min-width:48rem){.wrap{padding-block:3rem 8rem;padding-left:max(3rem, env(safe-area-inset-left, 0px));padding-right:max(3rem, env(safe-area-inset-right, 0px))}}
+.col{max-width:47rem;margin-left:auto;margin-right:auto}
+.mast{display:flex;flex-wrap:wrap;align-items:baseline;gap:1rem;justify-content:space-between;margin-bottom:2.6rem}
+.wordmark{font-family:var(--serif);font-size:1.75rem;line-height:1.2;letter-spacing:-.01em;color:var(--ink);text-decoration:none}
+.kicker{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin:0}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(1.7rem,5.2vw,2.5rem);line-height:1.16;letter-spacing:-.015em;margin:.6rem 0 .8rem;text-wrap:balance}
+.byline{color:var(--soft);font-size:12px;line-height:18px;margin:0 0 2rem}
+section{margin-top:3.4rem;scroll-margin-top:1.5rem}
+h2{font-family:var(--serif);font-weight:400;font-size:1.42rem;line-height:1.25;letter-spacing:-.01em;margin:0 0 1rem;padding-top:.9rem;border-top:1px solid var(--rule);text-wrap:balance}
+h2 .no{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:.5rem}
+h3{font-size:14px;font-weight:600;margin:2rem 0 .6rem;letter-spacing:.01em}
+p{margin:0 0 1.05rem}
+a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;text-decoration-color:var(--faint)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+strong,b{font-weight:600}
+ul,ol{margin:0 0 1.05rem;padding-left:1.5rem}
+li{margin:.4rem 0}
+li::marker{color:var(--faint)}
+.soft{color:var(--soft)}
+sub,sup{font-size:.72em;line-height:0}
+var{font-family:var(--serif);font-style:italic;font-size:1.06em}
+.plain{font-family:var(--serif);font-size:1.16rem;line-height:1.62}
+.plain p{margin:0 0 1rem}
+.plain .lead{font-size:1.3rem;line-height:1.5}
+.plainlabel{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--paper);background:var(--ink);padding:.25em .6em;margin-bottom:1.1rem}
+figure{margin:1.8rem 0;padding:0}
+.panel{background:var(--card);border:1px solid var(--ink);box-shadow:3px 3px 0 var(--hard)}
+figcaption{margin-top:.7rem;font-size:12px;line-height:18px;color:var(--soft)}
+figcaption b{color:var(--ink);font-weight:600}
+.lab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft)}
+button.btn{font-family:var(--mono);font-size:12px;line-height:1;padding:.5em .75em;background:var(--card);color:var(--ink);border:1px solid var(--ink);border-radius:0;cursor:pointer;box-shadow:2px 2px 0 var(--hard)}
+button.btn:hover{box-shadow:3px 3px 0 var(--hard)}
+button.btn:active{box-shadow:0 0 0 var(--hard);transform:translate(2px,2px)}
+button.btn[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+button.btn.sm{font-size:11px;padding:.4em .55em}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--ink);box-shadow:2px 2px 0 var(--hard);background:var(--card)}
+.seg button{font-family:var(--mono);font-size:12px;line-height:1;padding:.5em .7em;background:var(--card);color:var(--ink);border:0;border-left:1px solid var(--ink);cursor:pointer;border-radius:0}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+select{font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--card);border:1px solid var(--ink);border-radius:0;padding:.35em .4em;width:100%;min-width:0}
+input[type=checkbox]{margin:0}
+.val{font-size:12px;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap;letter-spacing:0;text-transform:none}
+canvas{display:block;width:100%}
+
+/* explorer */
+.dbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.9rem 1.1rem;padding:.9rem;border-bottom:1px solid var(--ink)}
+@media (max-width:1100px){.dbar{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:640px){.dbar{grid-template-columns:minmax(0,1fr)}}
+.ctl{display:grid;gap:.35rem;align-content:start;min-width:0}
+.ctl .hintline{font-size:11px;line-height:15px;color:var(--soft)}
+.ctl .seg{justify-self:start}
+.status{display:flex;flex-wrap:wrap;align-items:stretch;border-bottom:1px solid var(--ink)}
+.status > div{padding:.6rem .9rem;border-right:1px solid var(--rule);display:grid;gap:.1rem;min-width:0}
+.status > div:last-child{border-right:0}
+.status .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+.status .v{font-family:var(--serif);font-size:1.35rem;line-height:1.2;font-variant-numeric:tabular-nums}
+.status .v small{font-family:var(--mono);font-size:11px;color:var(--soft)}
+.bench{display:grid;grid-template-columns:minmax(0,1fr) 22rem}
+@media (max-width:980px){.bench{grid-template-columns:minmax(0,1fr)}}
+.stage{position:relative;height:min(76vh,700px);min-height:440px;touch-action:none;border-right:1px solid var(--ink)}
+@media (max-width:980px){.stage{border-right:0;border-bottom:1px solid var(--ink);height:62vh;min-height:380px}}
+.stage canvas{height:100%}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;left:0;top:0;white-space:nowrap;font-size:11px;line-height:14px;padding:1px 5px;background:var(--card);color:var(--ink);border:1px solid var(--rule);border-left:3px solid var(--lc,var(--ink))}
+.lbl.re{border-style:dashed;border-left-style:solid}
+.lbl.dim{opacity:.18}
+.lbl.tag{border:0;background:transparent;color:var(--soft);font-size:10.5px;padding:0}
+.lbl.cut{background:var(--ink);color:var(--paper);border:0}
+.stage .views{position:absolute;left:.7rem;top:.7rem}
+.stage .hint{position:absolute;right:.7rem;bottom:.6rem;font-size:11px;color:var(--faint);pointer-events:none}
+@media (max-width:600px){.stage .hint{display:none}}
+.heatkey{position:absolute;left:.7rem;bottom:.7rem;display:grid;gap:3px;font-size:10.5px;color:var(--soft);background:var(--card);border:1px solid var(--rule);padding:.4rem .5rem}
+.heatkey i{display:block;width:170px;height:8px;background:linear-gradient(90deg,var(--com),var(--neutral),var(--ten))}
+.heatkey .ends{display:flex;justify-content:space-between;gap:.5rem}
+.side{padding:.9rem;display:grid;gap:.9rem;align-content:start;min-width:0;max-height:min(76vh,700px);overflow:auto}
+@media (max-width:980px){.side{max-height:none}}
+.toggles{display:flex;flex-wrap:wrap;gap:.45rem}
+.fhead{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);padding:.6rem .25rem .3rem;border-bottom:1px solid var(--ink);display:flex;justify-content:space-between;align-items:end;gap:.5rem}
+.lrow{display:grid;grid-template-columns:auto 8px minmax(0,1fr) auto;gap:.5rem;align-items:start;padding:.4rem .25rem;border-bottom:1px solid var(--rule);cursor:default}
+.lrow:hover{background:var(--paper)}
+.lrow input{margin-top:2px}
+.lrow .sw{width:8px;height:8px;margin-top:4px;background:var(--lc)}
+.lrow .t{font-size:12px;line-height:16px;min-width:0}
+.lrow .t small{display:block;font-size:11px;line-height:15px;color:var(--soft)}
+.lrow .r{text-align:right;font-size:11.5px;line-height:16px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lrow .r small{display:block;color:var(--soft);font-size:10.5px}
+.lrow.off .t,.lrow.off .r{color:var(--faint)}
+.readout{margin:.6rem 0 0;font-size:12px;line-height:18px;color:var(--soft);font-variant-numeric:tabular-nums}
+.readout b{color:var(--ink);font-weight:600}
+.good{color:var(--pass)}
+
+/* working */
+.stmt{margin:1.4rem 0;padding:.95rem 1rem;border:1px solid var(--rule);border-left:3px solid var(--cc,var(--rule));background:var(--card)}
+.stmt .label{display:flex;justify-content:space-between;gap:.6rem;flex-wrap:wrap;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-bottom:.55rem}
+.stmt .label .res{letter-spacing:.02em;text-transform:none;color:var(--ink);font-weight:600;font-size:12px}
+.stmt p{font-size:13px;line-height:19px}
+.stmt p:last-child{margin-bottom:0}
+.work{overflow-x:auto;margin:.7rem 0;padding:.4rem 0 .4rem .9rem;border-left:1px solid var(--ink);-webkit-overflow-scrolling:touch}
+.work div{white-space:nowrap;font-size:12.5px;line-height:22px}
+.work div.c{color:var(--soft)}
+.src{font-size:11px;line-height:16px;color:var(--soft);margin:0}
+.tw{overflow-x:auto;margin:1.4rem 0;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:12px;line-height:18px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-weight:400;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);padding:0 1.1rem .45rem 0;border-bottom:1px solid var(--ink);white-space:nowrap}
+td{padding:.5rem 1.1rem .5rem 0;border-bottom:1px solid var(--rule);vertical-align:top}
+td.n,th.n{text-align:right;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tr.gov td{font-weight:600}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--paper)}
+.sw2{display:inline-block;width:8px;height:8px;background:var(--lc);margin-right:.45rem}
+
+/* diagrams */
+.dwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.dgrid{display:grid;grid-template-columns:120px repeat(4,minmax(150px,1fr));min-width:760px;border-bottom:1px solid var(--ink)}
+.dcol{border-right:1px solid var(--rule);min-width:0}
+.dcol:last-child{border-right:0}
+.dcol h4{margin:0;padding:.55rem .6rem .45rem;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:400;color:var(--soft);border-bottom:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:.2rem .6rem;height:3.9rem;overflow:hidden;align-content:flex-start}
+.dcol h4 .key{display:inline-flex;align-items:center;gap:.3rem;text-transform:none;letter-spacing:0;font-size:11px;color:var(--ink)}
+.dcol h4 .key i{display:inline-block;width:12px;height:2px;background:var(--lc)}
+.dcol canvas{height:520px;cursor:crosshair;touch-action:pan-x}
+.dread{padding:.7rem .9rem;font-size:12px;line-height:18px;color:var(--soft);font-variant-numeric:tabular-nums;min-height:3.4rem}
+.dread b{color:var(--ink);font-weight:600}
+footer{margin-top:4rem;padding-top:1.1rem;border-top:1px solid var(--rule);color:var(--soft);font-size:12px;line-height:18px}
+footer p{margin:0 0 .8rem}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+
+<div class="wrap">
+<div class="col">
+<header class="mast">
+  <a class="wordmark" href="https://www.fabianarevalo.com/">Fabian Arevalo</a>
+</header>
+<p class="kicker">ME 3180 · Design Problem 2 · Rotor shaft</p>
+<h1>Every force on the rotor shaft</h1>
+<p class="byline">
+  Loads and dimensions from the DP2 assignment (Rev 2, Figure 2). First-pass statics with the shaft diameter not yet chosen. Due 13 November 2026, 11:59 pm.
+</p>
+
+<section id="plain" style="margin-top:2.4rem">
+<span class="plainlabel">Start here</span>
+<div class="plain">
+<p class="lead">The rotor shaft is a vertical steel rod held by two bearings 300 mm apart. Below the lower bearing it carries the sprocket, then the rotor hub, and the river pushes on the rotor 500 mm down.</p>
+<p>That 560 N push, about the weight of a 57 kg person, acts on a long lever. The lower bearing has to push back with about 1.5 kN, and the upper bearing pulls the other way with about 0.94 kN to stop the shaft tipping. Compared with that, the 19.6 N·m of torque is small, and it only travels the 120 mm of shaft between the pin in the hub and the key in the sprocket.</p>
+<p>The shaft spins at 285 rpm while the river always pushes the same way, so every point on its surface is stretched and squeezed once per turn. That is fatigue loading. The worst place is the retaining-ring groove just under the lower bearing, where the bending is largest and the groove concentrates stress the most.</p>
+</div>
+</section>
+</div>
+
+<figure id="fig3d">
+  <div class="panel">
+    <div class="dbar">
+      <div class="ctl">
+        <span class="lab">What the 300 mm spans</span>
+        <div class="seg" id="spanSeg" role="group" aria-label="Reading of the 300 mm dimension">
+          <button data-v="centres" aria-pressed="true">Bearing centres</button><button data-v="faces" aria-pressed="false">Plate faces</button>
+        </div>
+        <span class="hintline" id="spanHint"></span>
+      </div>
+      <div class="ctl">
+        <span class="lab">Chain force z-component</span>
+        <div class="seg" id="chainSeg" role="group" aria-label="Sign of the chain z-component">
+          <button data-v="1" aria-pressed="true">+z (adds to drag)</button><button data-v="-1" aria-pressed="false">−z</button>
+        </div>
+        <span class="hintline">−4.732° about y turns x̂ toward +z.</span>
+      </div>
+      <div class="ctl">
+        <span class="lab">How the hub passes the drag</span>
+        <div class="seg" id="hubSeg" role="group" aria-label="Hub load-transfer model">
+          <button data-v="line" aria-pressed="true">Conservative</button><button data-v="edge" aria-pressed="false">Edge contact</button>
+        </div>
+        <span class="hintline" id="hubHint"></span>
+      </div>
+      <div class="ctl">
+        <label class="lab" for="dSel">Shaft diameter (trial)</label>
+        <select id="dSel">
+          <option value="25.4">1 in (25.4 mm)</option>
+          <option value="31.75">1-1/4 in (31.75 mm)</option>
+          <option value="34.925">1-3/8 in (34.93 mm)</option>
+          <option value="38.1" selected>1-1/2 in (38.1 mm)</option>
+          <option value="44.45">1-3/4 in (44.45 mm)</option>
+          <option value="50.8">2 in (50.8 mm)</option>
+          <option value="30">30 mm</option>
+          <option value="35">35 mm</option>
+          <option value="40">40 mm</option>
+        </select>
+        <span class="hintline">Changes the drawing, shaft weight and nominal stresses only. The reactions don't depend on it.</span>
+      </div>
+      <div class="ctl">
+        <span class="lab">Arrow length</span>
+        <div class="seg" id="scaleSeg" role="group" aria-label="Arrow length scale">
+          <button data-v="sqrt" aria-pressed="true">Readable (√F)</button><button data-v="true" aria-pressed="false">To scale</button>
+        </div>
+        <span class="hintline">To scale, the 13 N chain z-part is 2 mm long.</span>
+      </div>
+    </div>
+    <div class="status" id="status" aria-live="polite"></div>
+    <div class="bench">
+      <div class="stage" id="stage">
+        <canvas id="c" aria-label="3D model of the rotor shaft with force and torque arrows"></canvas>
+        <div id="labels"></div>
+        <div class="seg views" role="group" aria-label="Camera view">
+          <button data-view="iso" aria-pressed="true">Iso</button><button data-view="front" aria-pressed="false">Front x–y</button><button data-view="side" aria-pressed="false">Side z–y</button><button data-view="top" aria-pressed="false">Top x–z</button>
+        </div>
+        <div class="heatkey" id="heatKey" hidden><span>bending stress on the surface (nominal, no Kt)</span><i></i><span class="ends"><span id="hkMin">compression</span><span>0</span><span id="hkMax">tension</span></span></div>
+        <div class="hint">drag to orbit · right-drag to pan · scroll to zoom</div>
+      </div>
+      <div class="side">
+        <div class="seg" role="tablist" aria-label="Panel">
+          <button id="tab-forces" role="tab" aria-pressed="true" aria-selected="true">Forces</button><button id="tab-stress" role="tab" aria-pressed="false" aria-selected="false">Spin &amp; stress</button>
+        </div>
+        <div id="pane-forces" role="tabpanel" aria-labelledby="tab-forces">
+          <div class="toggles">
+            <button class="btn sm" id="tApplied" aria-pressed="true">Applied</button>
+            <button class="btn sm" id="tReactions" aria-pressed="true">Reactions</button>
+            <button class="btn sm" id="tTorque" aria-pressed="true">Torques</button>
+            <button class="btn sm" id="tComp" aria-pressed="false">x/z parts</button>
+            <button class="btn sm" id="tXray" aria-pressed="true">See-through</button>
+          </div>
+          <div class="fhead"><span>Applied to the rotating assembly</span><span>|F| · vector</span></div>
+          <div id="listA"></div>
+          <div class="fhead"><span>Reactions from the supports</span><span></span></div>
+          <div id="listR"></div>
+          <p class="readout" id="eqok"></p>
+        </div>
+        <div id="pane-stress" role="tabpanel" aria-labelledby="tab-stress" hidden>
+          <div class="toggles">
+            <button class="btn sm" id="tSpin" aria-pressed="false">Spin</button>
+            <button class="btn sm" id="tHeat" aria-pressed="true">Stress colour</button>
+          </div>
+          <p class="readout">The colours are fixed in space because the loads are. The shaft turns through them, so the black stripe (one line of material) sweeps from tension to compression and back every revolution: 285 times a minute.</p>
+          <div>
+            <div class="fhead"><span>Stripe fibre at the lower ring groove</span><span id="fibreNow"></span></div>
+            <canvas id="fibre" height="130" aria-label="Bending stress at the marked fibre over one revolution"></canvas>
+            <p class="readout" id="fibreTxt"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption class="col" style="margin-top:.9rem"><b>The rotating assembly, to scale.</b> The free body is the shaft with the sprocket, key, pin, hub and rotor on it, cut free at the two bearings, the upper retaining ring and the chain. Hover a row to pick out its arrow. The bearing supports, rotor and sprocket hub are drawn as schematics.</figcaption>
+</figure>
+
+<div class="col">
+<section id="coords">
+  <h2><span class="no">Section 1</span>Coordinates and where everything sits</h2>
+  <p>The origin is on the shaft axis at the lower bearing line of Figure 2, with y up along the shaft, x to the right in Figure 1 (the chain pulls almost exactly along +x) and z downstream, the direction of the drag. Every position below is a y-coordinate on the axis, in mm.</p>
+  <div class="tw"><table id="tGeo"></table></div>
+  <p class="src">Sprocket: overall width 1.125 in (28.6 mm), toothed part 0.284 in (7.2 mm) centred on the chain line, hub on the upper side (Req. 9 and Figure 1). Hub: 100 mm long, pin in the upper 40 mm, OD 2d (Req. 10). Bearings ≤ 1/2 in wide (Req. 8).</p>
+</section>
+
+<section id="loads">
+  <h2><span class="no">Section 2</span>Applied loads</h2>
+  <p>Everything that acts on the rotating assembly from outside, before the supports react. The weights act along the shaft axis, so they produce no bending; only the drag and the chain bend the shaft.</p>
+  <div class="tw"><table id="tLoads"></table></div>
+  <div class="stmt" style="--cc:var(--c-chain)">
+    <span class="label"><span>Chain force components</span><span class="res" id="chainRes"></span></span>
+    <p>A rotation by θ about +y takes x̂ to (cos θ, 0, −sin θ). With θ = −4.732°, the chain force points slightly toward +z.</p>
+    <div class="work" id="wChain"></div>
+  </div>
+</section>
+
+<section id="reactions">
+  <h2><span class="no">Section 3</span>Bearing reactions (rubric item 1)</h2>
+  <p>The bearings are short, so each is a simple support: radial force only, no moment. With the lower bearing L at y<sub>L</sub> and the upper bearing U at y<sub>U</sub>, each horizontal direction is a beam on two supports with an overhang. Take moments about L, then sum forces.</p>
+  <div id="work"></div>
+  <div class="tw"><table id="tReactTab"></table></div>
+</section>
+
+<section id="internal">
+  <h2><span class="no">Section 4</span>Internal loads along the shaft</h2>
+  <p>Cut the shaft at height y and keep the part below the cut. V is the sum of the horizontal forces below the cut, M is their moment about the cut, T is the torque that has entered below the cut and not yet left, and N is the axial tension from the weight hanging below. The diagrams run vertically, the same way as the shaft.</p>
+</div>
+<figure>
+  <div class="panel">
+    <div class="dwrap">
+      <div class="dgrid" id="dgrid">
+        <div class="dcol"><h4>Shaft</h4><canvas id="dS" aria-label="Shaft schematic with feature heights"></canvas></div>
+        <div class="dcol"><h4>Shear <span class="key" style="--lc:var(--c-chain)"><i></i>V<sub>x</sub></span><span class="key" style="--lc:var(--c-water)"><i></i>V<sub>z</sub></span></h4><canvas id="dV" aria-label="Shear force diagram"></canvas></div>
+        <div class="dcol"><h4>Bending <span class="key" style="--lc:var(--c-water)"><i></i>M<sub>x</sub></span><span class="key" style="--lc:var(--c-chain)"><i></i>M<sub>z</sub></span><span class="key" style="--lc:var(--ink)"><i></i>|M|</span></h4><canvas id="dM" aria-label="Bending moment diagram"></canvas></div>
+        <div class="dcol"><h4>Torque <span class="key" style="--lc:var(--c-water)"><i></i>T</span></h4><canvas id="dT" aria-label="Torque diagram"></canvas></div>
+        <div class="dcol"><h4>Axial <span class="key" style="--lc:var(--c-weight)"><i></i>N (+ tension)</span></h4><canvas id="dN" aria-label="Axial force diagram"></canvas></div>
+      </div>
+    </div>
+    <div class="dread" id="dread"></div>
+  </div>
+  <figcaption class="col" style="margin-top:.9rem"><b>Hover or drag on any diagram to move the cut.</b> The same cut appears as a black disc on the 3D shaft. M<sub>x</sub> comes from the z-forces (mostly the drag) and M<sub>z</sub> from the x-forces (the chain). Their resultant |M| is what bends a round shaft. Units: N and N·m.</figcaption>
+</figure>
+<div class="col">
+<section id="critical">
+  <h2><span class="no">Section 5</span>Where the stress peaks (rubric items 2 and 3)</h2>
+  <p>The shaft has one constant diameter, so the stress raisers are only the features machined into it: two ring grooves, the keyway and the cross hole for the pin. The table combines the internal loads at each feature with Shigley's first-iteration stress-concentration factors. Click a row to put the cut there.</p>
+  <div class="tw"><table id="tCrit"></table></div>
+  <p class="src" id="critNote"></p>
+  <div class="stmt" style="--cc:var(--ink)">
+    <span class="label"><span>Reading the table</span><span class="res" id="critRes"></span></span>
+    <p>The bending stress is fully reversed (σ<sub>m</sub> ≈ 0, σ<sub>a</sub> = K<sub>f</sub>·32M/πd³) because the loads stay fixed while the shaft turns. The torque is steady (τ<sub>a</sub> = 0, τ<sub>m</sub> = K<sub>fs</sub>·16T/πd³). The weight adds a tiny steady tension. These numbers rank the sections; the shaft design itself uses K<sub>f</sub> = 1 + q(K<sub>t</sub> − 1) with the real notch radii, the Marin factors and DE-Goodman (Shigley Eq. 7-8).</p>
+  </div>
+</section>
+
+<section id="eq">
+  <h2><span class="no">Section 6</span>Equilibrium check</h2>
+  <p>All applied loads and reactions summed about the origin. Every residual should be zero to rounding.</p>
+  <div class="tw"><table id="tEq"></table></div>
+</section>
+
+<section id="assume">
+  <h2><span class="no">Section 7</span>Assumptions to state in the report</h2>
+  <ul id="assumeList"></ul>
+</section>
+
+<footer>
+  <p>References: Budynas and Nisbett, <i>Shigley's Mechanical Engineering Design</i>: Table 7-1 (first-iteration K<sub>t</sub> for keyseats and retaining-ring grooves), Figs. A-15-10 and A-15-11 (shaft with a transverse hole), Eq. 7-8 (DE-Goodman). ME 3180 DP2 assignment, Fall 2026 Rev 2 (Figure 2, Requirements 8 to 10). Shaft speed 285 rpm from DP1.</p>
+  <p>Model: rigid-body statics of the rotating assembly, simple supports at the bearings, all axial load at the upper ring. Everything recomputes in the page; nothing is fitted or looked up.</p>
+  <p><a href="https://www.fabianarevalo.com/">fabianarevalo.com</a></p>
+</footer>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+"use strict";
+/* ============================== constants (mm, N, N·mm) ============================== */
+const C = {
+  Wr:120, Ws:35, D:560, Tq:19.63, Fc:161.8, angDeg:-4.732, rho:7900, g:9.81,
+  bw:12.7, tr:1.6, topMargin:8,
+  yF:-50, hubTop:-150, hubBot:-250, yPin:-170, yCG:-350, yCOP:-500,
+  sprTeeth:7.2136, sprW:28.575, Rp:121.3, rotorTop:-250, rotorBot:-750, rotorR:250, rpm:285
+};
+const P = {span:'centres', chain:1, hub:'line', d:38.1, scale:'sqrt', xray:true, comps:false,
+           showA:true, showR:true, showT:true, spin:false, heat:true, tab:'forces', cutY:null};
+
+const $ = id => document.getElementById(id);
+const fmt = (v,dp=1) => { if (!isFinite(v)) return '—'; const s=(Math.abs(v)<0.5*Math.pow(10,-dp)?0:v).toFixed(dp); return s.replace('-','−'); };
+const sgn = (v,dp=1) => (v>=0?'+':'−')+Math.abs(v).toFixed(dp);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const inch = mm => (mm/25.4);
+
+/* ============================== statics ============================== */
+let S = null;
+function solve(){
+  const d=P.d, r=d/2;
+  const yL = P.span==='centres' ? 0 : C.bw/2;
+  const yU = P.span==='centres' ? 300 : 300 - C.bw/2;
+  const yGL = yL - C.bw/2 - C.tr/2, yGU = yU + C.bw/2 + C.tr/2;
+  const yTop = yGU + C.tr/2 + C.topMargin, yBot = C.hubBot;
+  const Lsh = yTop - yBot, A = Math.PI*d*d/4, I = Math.PI*Math.pow(d,4)/64, J = 2*I;
+  const w = C.rho*C.g*A*1e-9;            // N per mm
+  const Wsh = w*Lsh, yShCG = (yTop+yBot)/2;
+  const th = C.angDeg*Math.PI/180;
+  const Fcx = C.Fc*Math.cos(th);
+  const Fcz = P.chain * C.Fc*Math.abs(Math.sin(th));
+  const yS0 = C.yF - C.sprTeeth/2, yS1 = yS0 + C.sprW;     // sprocket and key span
+  const yKeyMid = (yS0+yS1)/2;
+  const span = yU - yL;
+  // lateral applied loads (resultant positions)
+  const lat = [{y:C.yCOP, x:0, z:C.D},{y:C.yF, x:Fcx, z:Fcz}];
+  let sx=0,sz=0,mx=0,mz=0;
+  lat.forEach(p=>{ sx+=p.x; sz+=p.z; mx+=p.x*(p.y-yL); mz+=p.z*(p.y-yL); });
+  const RUx = -mx/span, RUz = -mz/span, RLx = -sx-RUx, RLz = -sz-RUz;
+  const Wtot = C.Wr + C.Ws + Wsh;
+  // hub contact forces for the edge model
+  const Fb = C.D*(C.hubTop - C.yCOP)/(C.hubTop - C.hubBot), Ft = C.D - Fb;
+  S = {d,r,yL,yU,yGL,yGU,yTop,yBot,Lsh,A,I,J,w,Wsh,yShCG,Fcx,Fcz,th,yS0,yS1,yKeyMid,span,RUx,RUz,RLx,RLz,Wtot,Fb,Ft};
+  // shaft-entry transverse point loads (depends on hub model)
+  const pts = [];
+  if (P.hub==='line') pts.push({y:C.yCOP, x:0, z:C.D});
+  else { pts.push({y:C.hubTop, x:0, z:Ft}); pts.push({y:C.hubBot, x:0, z:Fb}); }
+  pts.push({y:C.yF, x:Fcx, z:Fcz});
+  pts.push({y:yL, x:RLx, z:RLz});
+  pts.push({y:yU, x:RUx, z:RUz});
+  S.pts = pts;
+  // load list (for arrows, table and equilibrium)
+  S.loads = [
+    {id:'wr', grp:'A', kind:'F', col:'--c-weight', name:'Rotor + blade weight', sub:'at the CG, carried into the shaft by the pin', p:[0,C.yCG,0], v:[0,-C.Wr,0]},
+    {id:'ws', grp:'A', kind:'F', col:'--c-weight', name:'Sprocket weight', sub:'held up by the key and set screw', p:[0,C.yF,0], v:[0,-C.Ws,0]},
+    {id:'wsh', grp:'A', kind:'F', col:'--c-weight', name:'Shaft weight', sub:'ρ = 7900 kg/m³, length '+fmt(Lsh,0)+' mm', p:[0,yShCG,0], v:[0,-Wsh,0]},
+    {id:'drag', grp:'A', kind:'F', col:'--c-water', name:'Drag', sub:'water stream on the rotor, at the COP', p:[0,C.yCOP,0], v:[0,0,C.D]},
+    {id:'tw', grp:'A', kind:'T', col:'--c-water', name:'Water torque', sub:'enters the shaft at the pin', p:[0,C.yPin,0], v:[0,C.Tq,0]},
+    {id:'fc', grp:'A', kind:'F', col:'--c-chain', name:'Chain force', sub:'161.8 N at −4.732° about y, chain line', p:[0,C.yF,0], v:[Fcx,0,Fcz]},
+    {id:'tc', grp:'A', kind:'T', col:'--c-chain', name:'Chain torque', sub:'leaves the shaft through the key', p:[0,C.yF,0], v:[0,-C.Tq,0]},
+    {id:'rl', grp:'R', kind:'F', col:'--c-react', name:'Lower bearing, R_L', sub:'y = '+fmt(yL,2)+' mm', p:[0,yL,0], v:[RLx,0,RLz]},
+    {id:'ru', grp:'R', kind:'F', col:'--c-react', name:'Upper bearing, R_U', sub:'y = '+fmt(yU,2)+' mm', p:[0,yU,0], v:[RUx,0,RUz]},
+    {id:'ra', grp:'R', kind:'F', col:'--c-ring', name:'Upper ring thrust', sub:'ring bears on the upper bearing', p:[0,yGU,0], v:[0,Wtot,0]}
+  ];
+  // equilibrium residuals about the origin
+  let F=[0,0,0], M=[0,0,0];
+  S.loads.forEach(L=>{
+    if (L.kind==='F'){ F[0]+=L.v[0];F[1]+=L.v[1];F[2]+=L.v[2];
+      const [px,py,pz]=L.p,[fx,fy,fz]=L.v; M[0]+=py*fz-pz*fy; M[1]+=pz*fx-px*fz; M[2]+=px*fy-py*fx; }
+    else { M[0]+=L.v[0]*1000;M[1]+=L.v[1]*1000;M[2]+=L.v[2]*1000; }
+  });
+  S.resF=F; S.resM=M;
+  // sample internal loads
+  S.samp = []; const n=1400;
+  for (let i=0;i<=n;i++){ const y=yBot+(yTop-yBot)*i/n; S.samp.push(internal(y)); }
+  // critical sections
+  const eps=0.01;
+  S.crit = [
+    {name:'Lower ring groove', y:yGL, Kt:5.0, Kts:3.0, src:'Table 7-1, ring groove'},
+    {name:'Keyway, upper end', y:yS1-eps, Kt:2.14, Kts:3.0, src:'Table 7-1, end-mill keyseat'},
+    {name:'Keyway, lower end', y:yS0+eps, Kt:2.14, Kts:3.0, src:'Table 7-1, end-mill keyseat'},
+    {name:'Pin hole (just above pin)', y:C.yPin+eps, Kt:2.0, Kts:1.7, src:'≈ Fig. A-15-10/11, pin ≈ d/4'},
+    {name:'Upper ring groove', y:yGU-eps, Kt:5.0, Kts:3.0, src:'Table 7-1, ring groove'}
+  ].map(c=>{
+    const q=internal(c.y);
+    const sb=32*q.M/(Math.PI*d*d*d), tau=16*Math.abs(q.T)/(Math.PI*d*d*d), sax=q.N/A;
+    const peak=Math.sqrt(Math.pow(c.Kt*sb+sax,2)+3*Math.pow(c.Kts*tau,2));
+    return Object.assign(c,{q,sb,tau,sax,peak});
+  });
+  const worst = S.crit.reduce((a,b)=>b.peak>a.peak?b:a);
+  S.worst = worst;
+  if (P.cutY===null || P.cutY<yBot || P.cutY>yTop) P.cutY = yGL;
+}
+function internal(y){
+  let Vx=0,Vz=0,Mx=0,Mz=0;
+  for (const p of S.pts){ if (p.y<y){ Vx+=p.x; Vz+=p.z; const ry=p.y-y; Mx+=ry*p.z; Mz+=-ry*p.x; } }
+  let T=0;
+  if (y>C.yPin) T+=C.Tq*1000;
+  const f=Math.min(1,Math.max(0,(y-S.yS0)/(S.yS1-S.yS0)));
+  T-=C.Tq*1000*f;
+  let N=S.w*(y-S.yBot) + (y>C.yPin?C.Wr:0) + (y>S.yKeyMid?C.Ws:0) - (y>S.yGU?S.Wtot:0);
+  return {y,Vx,Vz,Mx,Mz,M:Math.hypot(Mx,Mz),T,N};
+}
+function sigmaAt(q,phi){ // bending stress at surface angle phi (x = r cos, z = r sin), MPa
+  const x=S.r*Math.cos(phi), z=S.r*Math.sin(phi);
+  return (q.Mx*z - q.Mz*x)/S.I;
+}
+
+/* ============================== tables and working ============================== */
+function vec(v,dp=1){ return '('+v.map(a=>fmt(a,dp)).join(', ')+')'; }
+function renderText(){
+  const s=S;
+  $('spanHint').textContent = P.span==='centres' ? 'y_L = 0, y_U = 300 mm (span 300).' : 'Bearings flush with the plate faces: y_L = 6.35, y_U = 293.65 (span 287.3).';
+  $('hubHint').textContent = P.hub==='line' ? 'Moment carried all the way to the hub bottom (upper bound inside the hub).' : 'Rigid hub bears on the shaft at its top and bottom edges: '+fmt(s.Ft,0)+' N and +'+fmt(s.Fb,0)+' N.';
+  // status
+  const RL=Math.hypot(s.RLx,s.RLz), RU=Math.hypot(s.RUx,s.RUz);
+  const qG=internal(s.yGL);
+  $('status').innerHTML =
+    stat('Lower bearing |R_L|', fmt(RL,0)+' <small>N</small>')+
+    stat('Upper bearing |R_U|', fmt(RU,0)+' <small>N</small>')+
+    stat('Ring thrust', fmt(s.Wtot,0)+' <small>N</small>')+
+    stat('M at lower groove', fmt(qG.M/1000,1)+' <small>N·m, T = 0</small>')+
+    stat('Torque, pin → key', fmt(C.Tq,2)+' <small>N·m</small>')+
+    stat('Highest peak stress', s.worst.name+' <small>'+fmt(s.worst.peak,0)+' MPa at d = '+fmt(s.d,1)+'</small>');
+  // geometry
+  const geo=[
+    ['Shaft top (upper groove + '+C.topMargin+' mm margin, placeholder)', s.yTop],
+    ['Upper retaining-ring groove', s.yGU],
+    ['Upper bearing U (centre)', s.yU],
+    ['Lower bearing L (centre)', s.yL],
+    ['Lower retaining-ring groove', s.yGL],
+    ['Sprocket hub top = key upper end', s.yS1],
+    ['Chain line (toothed part centre)', C.yF],
+    ['Sprocket bottom = key lower end', s.yS0],
+    ['Top of rotor hub', C.hubTop],
+    ['Pin (assumed middle of the upper 40 mm)', C.yPin],
+    ['Bottom of hub = shaft bottom', C.hubBot],
+    ['Rotor CG', C.yCG],
+    ['Centre of pressure (COP)', C.yCOP]
+  ];
+  $('tGeo').innerHTML='<thead><tr><th>Feature</th><th class="n">y (mm)</th></tr></thead><tbody>'+geo.map(g=>'<tr><td>'+g[0]+'</td><td class="n">'+fmt(g[1],2)+'</td></tr>').join('')+
+    '</tbody><tfoot><tr><td>Shaft length (top to bottom)</td><td class="n">'+fmt(s.Lsh,1)+' mm = '+fmt(inch(s.Lsh),2)+' in</td></tr></tfoot>';
+  // loads table
+  const A=s.loads.filter(l=>l.grp==='A');
+  $('tLoads').innerHTML='<thead><tr><th>Load</th><th class="n">Point y (mm)</th><th class="n">x</th><th class="n">y</th><th class="n">z</th><th>Unit</th></tr></thead><tbody>'+
+    A.map(l=>'<tr><td><span class="sw2" style="--lc:var('+l.col+')"></span>'+l.name+'<br><span class="soft" style="font-size:11px">'+l.sub+'</span></td><td class="n">'+fmt(l.p[1],1)+'</td>'+l.v.map(a=>'<td class="n">'+fmt(a,2)+'</td>').join('')+'<td>'+(l.kind==='F'?'N':'N·m')+'</td></tr>').join('')+'</tbody>';
+  $('chainRes').textContent='F_c = ('+fmt(s.Fcx,2)+', 0, '+fmt(s.Fcz,2)+') N';
+  $('wChain').innerHTML=
+    '<div><var>F</var><sub>cx</sub> = <var>F</var> cos θ = 161.8 × cos(4.732°) = 161.8 × '+Math.cos(s.th).toFixed(5)+' = <b>'+fmt(s.Fcx,2)+' N</b></div>'+
+    '<div><var>F</var><sub>cz</sub> = −<var>F</var> sin θ = −161.8 × sin(−4.732°) = 161.8 × '+Math.abs(Math.sin(s.th)).toFixed(5)+' = <b>'+(P.chain>0?'+':'−')+fmt(Math.abs(s.Fcz),2)+' N</b>'+(P.chain<0?' <span class="soft">(sign flipped by the toggle above)</span>':'')+'</div>';
+  // reactions working
+  const a=s.yL, L=s.span;
+  const lev=(y)=>'('+fmt(y,2)+' − '+fmt(a,2)+')';
+  $('work').innerHTML=
+    stmt('--c-react','Step 1 · ΣM<sub>x</sub> about L (the z-forces)','R<sub>Uz</sub> = '+fmt(s.RUz,1)+' N',
+      '<p>A z-force at height y has moment (y − y<sub>L</sub>)·F<sub>z</sub> about the x-axis through L.</p>',
+      ['<var>R</var><sub>Uz</sub>(<var>y</var><sub>U</sub> − <var>y</var><sub>L</sub>) + <var>D</var>(<var>y</var><sub>COP</sub> − <var>y</var><sub>L</sub>) + <var>F</var><sub>cz</sub>(<var>y</var><sub>F</sub> − <var>y</var><sub>L</sub>) = 0',
+       '<var>R</var><sub>Uz</sub> = −[560 × '+lev(C.yCOP)+' + '+fmt(s.Fcz,2)+' × '+lev(C.yF)+'] / '+fmt(L,2),
+       '<var>R</var><sub>Uz</sub> = −['+fmt(C.D*(C.yCOP-a),0)+' + '+fmt(s.Fcz*(C.yF-a),1)+'] / '+fmt(L,2)+' = <b>'+fmt(s.RUz,1)+' N</b>']) +
+    stmt('--c-react','Step 2 · ΣF<sub>z</sub>','R<sub>Lz</sub> = '+fmt(s.RLz,1)+' N','',
+      ['<var>R</var><sub>Lz</sub> = −<var>D</var> − <var>F</var><sub>cz</sub> − <var>R</var><sub>Uz</sub> = −560 − '+fmt(s.Fcz,2)+' − '+fmt(s.RUz,1)+' = <b>'+fmt(s.RLz,1)+' N</b>']) +
+    stmt('--c-react','Step 3 · ΣM<sub>z</sub> about L (the x-forces)','R<sub>Ux</sub> = '+fmt(s.RUx,1)+' N',
+      '<p>Only the chain pulls in x.</p>',
+      ['<var>R</var><sub>Ux</sub>(<var>y</var><sub>U</sub> − <var>y</var><sub>L</sub>) + <var>F</var><sub>cx</sub>(<var>y</var><sub>F</sub> − <var>y</var><sub>L</sub>) = 0',
+       '<var>R</var><sub>Ux</sub> = −'+fmt(s.Fcx,2)+' × '+lev(C.yF)+' / '+fmt(L,2)+' = <b>'+fmt(s.RUx,1)+' N</b>']) +
+    stmt('--c-react','Step 4 · ΣF<sub>x</sub>','R<sub>Lx</sub> = '+fmt(s.RLx,1)+' N','',
+      ['<var>R</var><sub>Lx</sub> = −<var>F</var><sub>cx</sub> − <var>R</var><sub>Ux</sub> = −'+fmt(s.Fcx,2)+' − '+fmt(s.RUx,1)+' = <b>'+fmt(s.RLx,1)+' N</b>']) +
+    stmt('--c-ring','Step 5 · ΣF<sub>y</sub> (axial)','R<sub>ring</sub> = '+fmt(s.Wtot,1)+' N',
+      '<p>The weights pull the shaft down, so the ring above the upper bearing presses on that bearing. The ring below the lower bearing carries nothing.</p>',
+      ['<var>W</var><sub>shaft</sub> = ρ<var>g</var>(π<var>d</var>²/4)<var>L</var> = 7900 × 9.81 × (π × '+fmt(s.d,2)+'²/4) × '+fmt(s.Lsh,1)+' × 10⁻⁹ = '+fmt(s.Wsh,1)+' N',
+       '<var>R</var><sub>ring</sub> = <var>W</var><sub>r</sub> + <var>W</var><sub>s</sub> + <var>W</var><sub>shaft</sub> = 120 + 35 + '+fmt(s.Wsh,1)+' = <b>'+fmt(s.Wtot,1)+' N</b>']) +
+    stmt('--c-water','Step 6 · ΣM<sub>y</sub> (torque)','balanced','<p>The water torque in at the pin equals the chain torque out at the key: +19.63 − 19.63 = 0. The bearings carry no torque (friction neglected).</p>',[]);
+  $('tReactTab').innerHTML='<thead><tr><th>Reaction</th><th class="n">x (N)</th><th class="n">y (N)</th><th class="n">z (N)</th><th class="n">|R| (N)</th></tr></thead><tbody>'+
+    '<tr><td>Lower bearing, R<sub>L</sub></td><td class="n">'+fmt(s.RLx,1)+'</td><td class="n">0</td><td class="n">'+fmt(s.RLz,1)+'</td><td class="n">'+fmt(RL,1)+'</td></tr>'+
+    '<tr><td>Upper bearing, R<sub>U</sub></td><td class="n">'+fmt(s.RUx,1)+'</td><td class="n">0</td><td class="n">'+fmt(s.RUz,1)+'</td><td class="n">'+fmt(RU,1)+'</td></tr>'+
+    '<tr><td>Upper ring (axial)</td><td class="n">0</td><td class="n">'+fmt(s.Wtot,1)+'</td><td class="n">0</td><td class="n">'+fmt(s.Wtot,1)+'</td></tr></tbody>';
+  // critical table
+  $('tCrit').innerHTML='<thead><tr><th>Section</th><th class="n">y</th><th class="n">M (N·m)</th><th class="n">T (N·m)</th><th class="n">N (N)</th><th class="n">σ<sub>b</sub> nom.</th><th class="n">τ nom.</th><th class="n">K<sub>t</sub> / K<sub>ts</sub></th><th class="n">peak σ′</th></tr></thead><tbody>'+
+    s.crit.map((c,i)=>'<tr class="click'+(c===s.worst?' gov':'')+'" data-y="'+c.y+'"><td>'+c.name+'<br><span class="soft" style="font-size:11px;font-weight:400">'+c.src+'</span></td><td class="n">'+fmt(c.y,1)+'</td><td class="n">'+fmt(c.q.M/1000,1)+'</td><td class="n">'+fmt(Math.abs(c.q.T)/1000,2)+'</td><td class="n">'+fmt(c.q.N,0)+'</td><td class="n">'+fmt(c.sb,1)+'</td><td class="n">'+fmt(c.tau,2)+'</td><td class="n">'+c.Kt.toFixed(2)+' / '+c.Kts.toFixed(1)+'</td><td class="n">'+fmt(c.peak,0)+' MPa</td></tr>').join('')+'</tbody>';
+  $('critNote').innerHTML='Stresses in MPa at d = '+fmt(s.d,2)+' mm ('+fmt(inch(s.d),3)+' in), on the gross section. Peak σ′ = √[(K<sub>t</sub>σ<sub>b</sub> + N/A)² + 3(K<sub>ts</sub>τ)²] uses K<sub>t</sub> in place of K<sub>f</sub>, so it is an upper bound for ranking only. The pin-hole factors are a rough chart read for a pin of about d/4; reread Figs. A-15-10/11 for the actual pin. The keyway is assumed to run the full 28.6 mm sprocket width, with the torque handed over uniformly along it, so T is near zero at its upper end.';
+  $('critRes').textContent=s.worst.name+' governs';
+  document.querySelectorAll('#tCrit tr.click').forEach(tr=>tr.addEventListener('click',()=>{ P.cutY=+tr.dataset.y; drawDiagrams(); updateCut(); document.getElementById('internal').scrollIntoView({behavior:'smooth'}); }));
+  // equilibrium
+  $('tEq').innerHTML='<thead><tr><th>Sum</th><th class="n">x</th><th class="n">y</th><th class="n">z</th></tr></thead><tbody>'+
+    '<tr><td>ΣF (N)</td>'+s.resF.map(v=>'<td class="n">'+Math.abs(v).toExponential(1)+'</td>').join('')+'</tr>'+
+    '<tr><td>ΣM about origin (N·m)</td>'+s.resM.map(v=>'<td class="n">'+Math.abs(v/1000).toExponential(1)+'</td>').join('')+'</tr></tbody>';
+  const ok = Math.max(...s.resF.map(Math.abs))<1e-6 && Math.max(...s.resM.map(Math.abs))<1e-3;
+  $('eqok').innerHTML = ok ? '<b class="good">Balanced.</b> ΣF and ΣM about the origin are zero to rounding (Section 6).' : '<b>Not balanced</b>, check the model.';
+  // assumptions
+  const as=[
+    'The 300 mm dimension is read as '+(P.span==='centres'?'<b>bearing centre to bearing centre</b>; the other reading (plate faces with 1/2 in bearings flush) moves the reactions by about 4 % and the groove moment by under 2 %.':'<b>plate face to plate face</b>, with 1/2 in bearings flush with the faces, so the centres are 287.3 mm apart.')+' Confirm on Piazza.',
+    'The bearings are simple supports: radial force only, no moment, no friction torque. Bearing width ≤ 1/2 in (Req. 8).',
+    'The chain force and torque act at the chain line (y = −50 mm) and are replaced by a force on the axis plus a couple about y. The z-component is taken as '+(P.chain>0?'+13.35 N (adds to the drag, conservative).':'−13.35 N.'),
+    'The rotor loads reach the shaft through the hub. '+(P.hub==='line'?'Conservative model: the drag moment is carried unrelieved to the bottom of the hub, so inside the hub M = 560 N × (distance to the COP).':'Edge-contact model: a rigid hub bears on the shaft at its top and bottom edges, '+fmt(S.Ft,0)+' N and +'+fmt(S.Fb,0)+' N.')+' The reactions are the same in both models.',
+    'The pin carries the water torque and the rotor weight (120 N axial). The drag goes into the hub bore as bearing pressure, not through the pin.',
+    'The pin sits at y = −170 mm, the middle of the hub\'s upper 40 mm (Req. 10).',
+    'The key runs the full sprocket width (28.6 mm, y = '+fmt(S.yS0,1)+' to '+fmt(S.yS1,1)+' mm) and hands the torque over uniformly along its length.',
+    'All axial load goes to the upper retaining ring; the lower ring is unloaded in operation. Both rings are identical (Req.), so size both for '+fmt(S.Wtot,0)+' N.',
+    'Ring thickness 1.6 mm (0.062 in) and an 8 mm end margin above the upper groove are placeholders until the ring is chosen.',
+    'The rotor turns about +y at 285 rpm (DP1), so the water torque on the shaft is +19.63 N·m ŷ. The bending stress is fully reversed and the torque is steady.'
+  ];
+  $('assumeList').innerHTML=as.map(t=>'<li>'+t+'</li>').join('');
+  renderLists();
+}
+function stat(k,v){ return '<div><span class="k">'+k+'</span><span class="v">'+v+'</span></div>'; }
+function stmt(cc,label,res,intro,lines){
+  return '<div class="stmt" style="--cc:var('+cc+')"><span class="label"><span>'+label+'</span><span class="res">'+res+'</span></span>'+intro+
+    (lines.length?'<div class="work">'+lines.map(l=>'<div>'+l+'</div>').join('')+'</div>':'')+'</div>';
+}
+function renderLists(){
+  const row=l=>{
+    const mag=Math.hypot(...l.v);
+    const on = l.grp==='A' ? (l.kind==='T'?P.showT:P.showA) : P.showR;
+    return '<div class="lrow'+(on?'':' off')+'" data-id="'+l.id+'" style="--lc:var('+l.col+')"><span></span><span class="sw"></span><span class="t">'+l.name+'<small>'+l.sub+'</small></span><span class="r">'+fmt(mag,l.kind==='T'?2:1)+' '+(l.kind==='F'?'N':'N·m')+'<small>'+vec(l.v,l.kind==='T'?2:1)+'</small></span></div>';
+  };
+  $('listA').innerHTML=S.loads.filter(l=>l.grp==='A').map(row).join('');
+  $('listR').innerHTML=S.loads.filter(l=>l.grp==='R').map(row).join('');
+  document.querySelectorAll('.lrow').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ hiId=el.dataset.id; applyHighlight(); });
+    el.addEventListener('mouseleave',()=>{ hiId=null; applyHighlight(); });
+  });
+}
+
+/* ============================== diagrams ============================== */
+const DG = {
+  V:{id:'dV', ser:[{k:'Vx',c:'--c-chain'},{k:'Vz',c:'--c-water'}], f:1, u:'N'},
+  M:{id:'dM', ser:[{k:'Mx',c:'--c-water'},{k:'Mz',c:'--c-chain'},{k:'M',c:'--ink',w:2}], f:1e-3, u:'N·m'},
+  T:{id:'dT', ser:[{k:'T',c:'--c-water',abs:true}], f:1e-3, u:'N·m'},
+  N:{id:'dN', ser:[{k:'N',c:'--c-weight'}], f:1, u:'N'}
+};
+const PAD={t:14,b:14};
+function yToPx(y,h){ return PAD.t + (S.yTop - y)/(S.yTop - S.yBot)*(h-PAD.t-PAD.b); }
+function pxToY(px,h){ return S.yTop - (px-PAD.t)/(h-PAD.t-PAD.b)*(S.yTop-S.yBot); }
+function prep(cv){
+  const dpr=Math.min(2,window.devicePixelRatio||1), W=cv.clientWidth, H=cv.clientHeight;
+  if (cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){ cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); }
+  const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H); return {g,W,H};
+}
+function features(){
+  return [
+    {y:S.yU,t:'upper bearing',k:'b'},{y:S.yGU,t:'ring groove',k:'g'},
+    {y:S.yL,t:'lower bearing',k:'b'},{y:S.yGL,t:'ring groove',k:'g'},
+    {y:S.yS1,t:'key top',k:'k'},{y:C.yF,t:'chain line',k:'c'},{y:S.yS0,t:'key bottom',k:'k'},
+    {y:C.hubTop,t:'hub top',k:'h'},{y:C.yPin,t:'pin',k:'p'}
+  ];
+}
+function drawShaftCol(){
+  const cv=$('dS'); const {g,W,H}=prep(cv);
+  const ink=css('--ink'), soft=css('--soft'), rule=css('--rule'), part=css('--part'), steel=css('--steel');
+  const cx=W-34, hw=9;
+  // hub
+  g.fillStyle=part; g.globalAlpha=.55;
+  g.fillRect(cx-hw*2,yToPx(C.hubTop,H),hw*4,yToPx(C.hubBot,H)-yToPx(C.hubTop,H));
+  // sprocket
+  g.fillRect(cx-hw*2,yToPx(S.yS1,H),hw*4,yToPx(S.yS0+C.sprTeeth,H)-yToPx(S.yS1,H));
+  g.fillRect(cx-28,yToPx(S.yS0+C.sprTeeth,H),56,yToPx(S.yS0,H)-yToPx(S.yS0+C.sprTeeth,H));
+  g.globalAlpha=1;
+  // bearings
+  [S.yL,S.yU].forEach(y=>{ const t=yToPx(y+C.bw/2,H), b=yToPx(y-C.bw/2,H); g.strokeStyle=ink; g.lineWidth=1; g.strokeRect(cx-hw-12,t,10,b-t); g.strokeRect(cx+hw+2,t,10,b-t);
+    g.beginPath(); g.moveTo(cx-hw-12,t); g.lineTo(cx-hw-2,b); g.moveTo(cx-hw-2,t); g.lineTo(cx-hw-12,b); g.moveTo(cx+hw+2,t); g.lineTo(cx+hw+12,b); g.moveTo(cx+hw+12,t); g.lineTo(cx+hw+2,b); g.stroke(); });
+  // shaft
+  g.fillStyle=steel; g.fillRect(cx-hw,yToPx(S.yTop,H),hw*2,yToPx(S.yBot,H)-yToPx(S.yTop,H));
+  // grooves
+  [S.yGL,S.yGU].forEach(y=>{ g.fillStyle=ink; g.fillRect(cx-hw-6,yToPx(y,H)-1.5,hw*2+12,3); });
+  // key
+  g.fillStyle=ink; g.globalAlpha=.8; g.fillRect(cx+hw-3,yToPx(S.yS1,H),5,yToPx(S.yS0,H)-yToPx(S.yS1,H)); g.globalAlpha=1;
+  // pin
+  g.fillStyle=css('--c-react'); g.fillRect(cx-hw*2,yToPx(C.yPin,H)-2,hw*4,4);
+  // labels
+  g.font='10px '+css('--mono'); g.textAlign='left'; g.textBaseline='middle';
+  const used=[];
+  features().forEach(f=>{ let py=yToPx(f.y,H); for(const u of used){ if (Math.abs(u-py)<11) py=u+11; } used.push(py); g.fillStyle=soft; g.fillText(f.t,4,py); });
+  cursor(g,W,H);
+}
+function drawPlot(key){
+  const D=DG[key], cv=$(D.id); const {g,W,H}=prep(cv);
+  const rule=css('--rule'), soft=css('--soft'), ink=css('--ink'), faint=css('--faint');
+  let lo=0, hi=0;
+  S.samp.forEach(q=>D.ser.forEach(s=>{ const v=(s.abs?Math.abs(q[s.k]):q[s.k])*D.f; lo=Math.min(lo,v); hi=Math.max(hi,v); }));
+  if (hi-lo<1e-9){ hi=1; }
+  const padx=10; const span=hi-lo; lo-=span*.08; hi+=span*.08;
+  const xp=v=>padx+(v-lo)/(hi-lo)*(W-2*padx);
+  // feature guides
+  g.strokeStyle=rule; g.lineWidth=1; g.setLineDash([2,3]);
+  features().forEach(f=>{ const py=Math.round(yToPx(f.y,H))+.5; g.beginPath(); g.moveTo(0,py); g.lineTo(W,py); g.stroke(); });
+  g.setLineDash([]);
+  // zero axis
+  g.strokeStyle=faint; g.beginPath(); g.moveTo(Math.round(xp(0))+.5,PAD.t); g.lineTo(Math.round(xp(0))+.5,H-PAD.b); g.stroke();
+  // series
+  D.ser.forEach(s=>{
+    const col=css(s.c);
+    g.beginPath();
+    S.samp.forEach((q,i)=>{ const v=(s.abs?Math.abs(q[s.k]):q[s.k])*D.f; const X=xp(v), Y=yToPx(q.y,H); i?g.lineTo(X,Y):g.moveTo(X,Y); });
+    g.strokeStyle=col; g.lineWidth=s.w||1.5; g.stroke();
+    if (s.w){ // fill under resultant
+      g.lineTo(xp(0),yToPx(S.yTop,H)); g.lineTo(xp(0),yToPx(S.yBot,H)); g.closePath(); g.globalAlpha=.07; g.fillStyle=col; g.fill(); g.globalAlpha=1;
+    }
+  });
+  // peak label
+  const main=D.ser[D.ser.length-1];
+  let pk=S.samp[0]; S.samp.forEach(q=>{ if (Math.abs(q[main.k])>Math.abs(pk[main.k])) pk=q; });
+  const pv=(main.abs?Math.abs(pk[main.k]):pk[main.k])*D.f;
+  g.font='10.5px '+css('--mono'); g.fillStyle=ink; g.textBaseline='middle';
+  const lx=xp(pv), ly=yToPx(pk.y,H);
+  g.beginPath(); g.arc(lx,ly,2.5,0,Math.PI*2); g.fill();
+  const txt=fmt(pv,key==='M'||key==='T'?1:0);
+  g.textAlign = lx>W/2 ? 'right':'left'; g.fillText(txt, lx+(lx>W/2?-6:6), ly-9);
+  // axis ends
+  g.fillStyle=soft; g.textAlign='left'; g.fillText(fmt(lo,0),2,H-5); g.textAlign='right'; g.fillText(fmt(hi,0),W-2,H-5);
+  cursor(g,W,H);
+}
+function cursor(g,W,H){
+  if (P.cutY===null) return;
+  const py=Math.round(yToPx(P.cutY,H))+.5;
+  g.strokeStyle=css('--ink'); g.lineWidth=1; g.beginPath(); g.moveTo(0,py); g.lineTo(W,py); g.stroke();
+}
+function drawDiagrams(){
+  drawShaftCol(); Object.keys(DG).forEach(drawPlot);
+  const q=internal(P.cutY);
+  const sb=32*q.M/(Math.PI*Math.pow(S.d,3)), tau=16*Math.abs(q.T)/(Math.PI*Math.pow(S.d,3));
+  $('dread').innerHTML='Cut at <b>y = '+fmt(P.cutY,1)+' mm</b> · V<sub>x</sub> '+fmt(q.Vx,1)+' N · V<sub>z</sub> '+fmt(q.Vz,1)+' N · M<sub>x</sub> '+fmt(q.Mx/1000,1)+' · M<sub>z</sub> '+fmt(q.Mz/1000,1)+' · <b>|M| '+fmt(q.M/1000,1)+' N·m</b> · <b>T '+fmt(Math.abs(q.T)/1000,2)+' N·m</b> · N '+fmt(q.N,1)+' N'+
+    '<br>Nominal at d = '+fmt(S.d,2)+' mm: σ<sub>b</sub> = 32M/πd³ = '+fmt(sb,1)+' MPa (fully reversed), τ = 16T/πd³ = '+fmt(tau,2)+' MPa (steady), N/A = '+fmt(q.N/S.A,2)+' MPa.';
+}
+function bindDiagrams(){
+  ['dS','dV','dM','dT','dN'].forEach(id=>{
+    const cv=$(id);
+    const mv=e=>{ const r=cv.getBoundingClientRect(); const y=pxToY(e.clientY-r.top,r.height); P.cutY=Math.max(S.yBot,Math.min(S.yTop,y)); drawDiagrams(); updateCut(); };
+    cv.addEventListener('pointermove',mv); cv.addEventListener('pointerdown',mv);
+  });
+}
+
+/* ============================== 3D ============================== */
+let renderer, scene, camera, controls, root, spinG, cutMesh, shaftMesh, shaftGeo, stripe;
+let arrows=[], labels=[], hiId=null, spinAng=0;
+const stage=$('stage'), labelsEl=$('labels');
+function initThree(){
+  renderer=new THREE.WebGLRenderer({canvas:$('c'),antialias:true});
+  renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+  scene=new THREE.Scene();
+  camera=new THREE.PerspectiveCamera(32,1,5,20000);
+  controls=new THREE.OrbitControls(camera,renderer.domElement);
+  controls.enableDamping=true; controls.dampingFactor=.09;
+  scene.add(new THREE.HemisphereLight(0xffffff,0x888877,.85));
+  const dl=new THREE.DirectionalLight(0xffffff,.65); dl.position.set(600,900,800); scene.add(dl);
+  const dl2=new THREE.DirectionalLight(0xffffff,.25); dl2.position.set(-700,-200,-500); scene.add(dl2);
+  setView('iso');
+  new ResizeObserver(resize).observe(stage); resize();
+  animate();
+}
+function resize(){ const w=stage.clientWidth,h=stage.clientHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+const TARGET=new THREE.Vector3(0,-190,0);
+function setView(v){
+  const d=2300;
+  const pos={iso:[d*.55,d*.28,d*.78], front:[0,0,d], side:[-d,0,0], top:[0,d,0]}[v];
+  camera.position.set(TARGET.x+pos[0],TARGET.y+pos[1],TARGET.z+pos[2]);
+  camera.up.set(0,1,0); if (v==='top') camera.up.set(0,0,-1);
+  controls.target.copy(TARGET); camera.lookAt(TARGET); controls.update();
+  document.querySelectorAll('.views button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v));
+}
+function col(n){ return new THREE.Color(css(n)); }
+function partMat(n,op){ const t=P.xray; return new THREE.MeshStandardMaterial({color:col(n),metalness:.25,roughness:.6,transparent:t,opacity:t?(op||.3):1,depthWrite:!t,side:THREE.DoubleSide}); }
+function annulus(Ro,Ri,h,gap){
+  const s=new THREE.Shape();
+  if (gap){ s.absarc(0,0,Ro,gap/2,Math.PI*2-gap/2,false); s.absarc(0,0,Ri,Math.PI*2-gap/2,gap/2,true); }
+  else { s.absarc(0,0,Ro,0,Math.PI*2,false); const hp=new THREE.Path(); hp.absarc(0,0,Ri,0,Math.PI*2,true); s.holes.push(hp); }
+  const g=new THREE.ExtrudeGeometry(s,{depth:h,bevelEnabled:false,curveSegments:48}); g.rotateX(-Math.PI/2); return g;
+}
+function plateGeo(w,h,Ri){
+  const s=new THREE.Shape(); s.moveTo(-w/2,-w/2); s.lineTo(w/2,-w/2); s.lineTo(w/2,w/2); s.lineTo(-w/2,w/2); s.lineTo(-w/2,-w/2);
+  const hp=new THREE.Path(); hp.absarc(0,0,Ri,0,Math.PI*2,true); s.holes.push(hp);
+  const g=new THREE.ExtrudeGeometry(s,{depth:h,bevelEnabled:false,curveSegments:40}); g.rotateX(-Math.PI/2); return g;
+}
+function sprocketGeo(Ro,Rr,n,Ri,h){
+  const s=new THREE.Shape(), st=Math.PI*2/n;
+  for (let i=0;i<n;i++){ const a=i*st; const pts=[[Rr,a],[Ro,a+.3*st],[Ro,a+.55*st],[Rr,a+.85*st]];
+    pts.forEach((p,j)=>{ const x=p[0]*Math.cos(p[1]), y=p[0]*Math.sin(p[1]); (i===0&&j===0)?s.moveTo(x,y):s.lineTo(x,y); }); }
+  const hp=new THREE.Path(); hp.absarc(0,0,Ri,0,Math.PI*2,true); s.holes.push(hp);
+  const g=new THREE.ExtrudeGeometry(s,{depth:h,bevelEnabled:false,curveSegments:24}); g.rotateX(-Math.PI/2); return g;
+}
+function keyWidth(dmm){ const d=dmm/25.4; const t=[[0.4375,3/32],[0.5625,1/8],[0.875,3/16],[1.25,1/4],[1.375,5/16],[1.75,3/8],[2.25,1/2],[2.75,5/8],[3.25,3/4]];
+  for (const r of t) if (d<=r[0]) return r[1]*25.4; return 0.875*25.4; }
+function build(){
+  if (root){ scene.remove(root); root.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose(); }); }
+  root=new THREE.Group(); scene.add(root);
+  spinG=new THREE.Group(); root.add(spinG);
+  labels.forEach(l=>l.el.remove()); labels=[]; arrows=[];
+  const s=S, r=s.r, d=s.d;
+  // bearing supports: two plates + two side walls (schematic)
+  const plateT=22, pw=170, bOD=1.9*d;
+  [s.yL,s.yU].forEach((y,i)=>{
+    const m=new THREE.Mesh(plateGeo(pw,plateT,bOD/2+1),partMat('--part',.22));
+    m.position.y = i===0 ? y - C.bw/2 : y + C.bw/2 - plateT; root.add(m);
+  });
+  const wallH=(s.yU+C.bw/2)-(s.yL-C.bw/2);
+  [-1,1].forEach(sx=>{ const m=new THREE.Mesh(new THREE.BoxGeometry(10,wallH,pw),partMat('--part',.12)); m.position.set(sx*(pw/2-5),(s.yU+C.bw/2+s.yL-C.bw/2)/2,0); root.add(m); });
+  // bearings
+  [s.yL,s.yU].forEach(y=>{ const m=new THREE.Mesh(annulus(bOD/2,r+.4,C.bw),new THREE.MeshStandardMaterial({color:col('--steel'),metalness:.5,roughness:.4})); m.position.y=y-C.bw/2; root.add(m);
+    const race=new THREE.Mesh(annulus(bOD/2-4,r+6,C.bw+.6),new THREE.MeshStandardMaterial({color:col('--ink'),metalness:.2,roughness:.7})); race.position.y=y-C.bw/2-.3; root.add(race); });
+  // retaining rings
+  [s.yGL,s.yGU].forEach(y=>{ const m=new THREE.Mesh(annulus(r+0.16*d,r-0.6,C.tr,0.5),new THREE.MeshStandardMaterial({color:col('--ink'),metalness:.3,roughness:.5})); m.position.y=y-C.tr/2; spinG.add(m); });
+  // shaft with stress colours
+  const segH=Math.ceil(s.Lsh/2);
+  shaftGeo=new THREE.CylinderGeometry(r,r,s.Lsh,72,segH,false);
+  shaftGeo.translate(0,(s.yTop+s.yBot)/2,0);
+  const cols=new Float32Array(shaftGeo.attributes.position.count*3);
+  shaftGeo.setAttribute('color',new THREE.BufferAttribute(cols,3));
+  shaftMesh=new THREE.Mesh(shaftGeo,new THREE.MeshStandardMaterial({color:0xffffff,vertexColors:true,metalness:.25,roughness:.45,transparent:P.xray&&!heatOn(),opacity:P.xray&&!heatOn()?.55:1,depthWrite:!(P.xray&&!heatOn())}));
+  root.add(shaftMesh); colourShaft();
+  stripe=new THREE.Mesh(new THREE.BoxGeometry(1.6,s.Lsh,1.6),new THREE.MeshBasicMaterial({color:col('--ink')}));
+  stripe.position.set(r+.5,(s.yTop+s.yBot)/2,0); spinG.add(stripe); stripe.visible=heatOn();
+  // sprocket: toothed part + hub
+  const tooth=new THREE.Mesh(sprocketGeo(C.Rp+4,C.Rp-6,60,r+.3,C.sprTeeth),partMat('--part',.35));
+  tooth.position.y=s.yS0; spinG.add(tooth);
+  const shub=new THREE.Mesh(annulus(d,r+.3,s.yS1-(s.yS0+C.sprTeeth)),partMat('--part',.3));
+  shub.position.y=s.yS0+C.sprTeeth; spinG.add(shub);
+  // key and set screw (+x side)
+  const kw=keyWidth(d);
+  const key=new THREE.Mesh(new THREE.BoxGeometry(kw,C.sprW,kw),new THREE.MeshStandardMaterial({color:col('--c-chain'),metalness:.3,roughness:.5}));
+  key.position.set(r,(s.yS0+s.yS1)/2,0); spinG.add(key);
+  const ssLen=d-(r+kw/2); const ss=new THREE.Mesh(new THREE.CylinderGeometry(Math.max(2.5,d/10),Math.max(2.5,d/10),ssLen,16),new THREE.MeshStandardMaterial({color:col('--ink'),metalness:.4,roughness:.5}));
+  ss.rotation.z=Math.PI/2; ss.position.set(r+kw/2+ssLen/2,(s.yS0+C.sprTeeth+s.yS1)/2,0); spinG.add(ss);
+  // hub and pin
+  const hub=new THREE.Mesh(annulus(d,r+.3,C.hubTop-C.hubBot),partMat('--part',.32)); hub.position.y=C.hubBot; spinG.add(hub);
+  const pin=new THREE.Mesh(new THREE.CylinderGeometry(d/8,d/8,2*d,20),new THREE.MeshStandardMaterial({color:col('--c-react'),metalness:.3,roughness:.5}));
+  pin.rotation.z=Math.PI/2; pin.position.set(0,C.yPin,0); spinG.add(pin);
+  // rotor (schematic): two end discs and four blades
+  const rm=partMat('--part',.12);
+  const top=new THREE.Mesh(annulus(C.rotorR,d,4),rm); top.position.y=C.rotorTop-4; spinG.add(top);
+  const bot=new THREE.Mesh(annulus(C.rotorR,0.01,4),rm); bot.position.y=C.rotorBot; spinG.add(bot);
+  for (let i=0;i<4;i++){ const b=new THREE.Mesh(new THREE.BoxGeometry(C.rotorR-d-6,C.rotorTop-C.rotorBot-8,4),rm); const a=i*Math.PI/2+Math.PI/4, rr=(C.rotorR+d)/2;
+    b.position.set(rr*Math.cos(a),(C.rotorTop+C.rotorBot)/2,rr*Math.sin(a)); b.rotation.y=-a; spinG.add(b); }
+  // CG, COP markers and the lever line to the COP
+  [[C.yCG,'--c-weight'],[C.yCOP,'--c-water']].forEach(([y,c])=>{ const m=new THREE.Mesh(new THREE.SphereGeometry(7,18,12),new THREE.MeshBasicMaterial({color:col(c)})); m.position.set(0,y,0); root.add(m); });
+  const lg=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,C.hubBot,0),new THREE.Vector3(0,C.yCOP,0)]);
+  const ll=new THREE.Line(lg,new THREE.LineDashedMaterial({color:col('--soft'),dashSize:8,gapSize:6})); ll.computeLineDistances(); root.add(ll);
+  // water flow hint
+  for (let i=-1;i<=1;i++){ addArrowRaw(new THREE.Vector3(i*120,C.yCOP+i*90,-C.rotorR-230),new THREE.Vector3(0,0,1),140,1.6,col('--faint')); }
+  addTag('water flow, +z',[0,C.yCOP+150,-C.rotorR-170]);
+  // axes triad
+  const ax=new THREE.Vector3(-300,40,-160);
+  [['x',[1,0,0]],['y',[0,1,0]],['z',[0,0,1]]].forEach(([n,v])=>{ addArrowRaw(ax,new THREE.Vector3(...v),70,1.3,col('--ink')); addTag(n,[ax.x+v[0]*84,ax.y+v[1]*84,ax.z+v[2]*84]); });
+  // feature tags
+  addTag('upper bearing',[pw/2+8,s.yU,0]); addTag('lower bearing',[pw/2+8,s.yL,0]);
+  addTag('ring grooves',[-pw/2-8,s.yGU+6,0],true); addTag('',[0,0,0]);
+  addTag('sprocket + key',[C.Rp+14,s.yS1+4,0]); addTag('rotor hub + pin',[d+14,C.hubTop-10,0]);
+  addTag('CG',[14,C.yCG,0]); addTag('COP',[14,C.yCOP-14,0]); addTag('rotor (schematic)',[C.rotorR+12,C.rotorBot+40,0]);
+  // cut disc
+  cutMesh=new THREE.Mesh(new THREE.CylinderGeometry(r*1.9,r*1.9,1.2,48),new THREE.MeshBasicMaterial({color:col('--ink'),transparent:true,opacity:.55,depthWrite:false}));
+  root.add(cutMesh);
+  cutLabel=mkLabel('cut','lbl cut');
+  // force and torque arrows
+  buildArrows();
+  updateCut(); applyHighlight();
+  $('heatKey').hidden=!(P.heat && P.tab==='stress');
+}
+let cutLabel=null;
+function mkLabel(text,cls,lc){ const el=document.createElement('div'); el.className=cls; el.innerHTML=text; if(lc) el.style.setProperty('--lc','var('+lc+')'); labelsEl.appendChild(el); return el; }
+function addTag(text,p,left){ if(!text) return; const el=mkLabel(text,'lbl tag'); labels.push({el,pos:new THREE.Vector3(...p),id:null,left}); }
+function addArrowRaw(o,dir,len,rad,color){
+  const m=new THREE.MeshBasicMaterial({color}); const g=new THREE.Group();
+  const hl=Math.min(len*.4,rad*7.5);
+  const sh=new THREE.Mesh(new THREE.CylinderGeometry(rad,rad,len-hl,10),m); sh.position.y=(len-hl)/2;
+  const hd=new THREE.Mesh(new THREE.ConeGeometry(rad*2.7,hl,16),m); hd.position.y=len-hl/2;
+  g.add(sh,hd); g.position.copy(o); g.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.clone().normalize()); root.add(g); return {g,m};
+}
+function aLen(F){ return P.scale==='sqrt' ? 6.6*Math.sqrt(F) : Math.max(4,0.17*F); }
+function buildArrows(){
+  S.loads.forEach(L=>{
+    const on = L.grp==='A' ? (L.kind==='T'?P.showT:P.showA) : P.showR;
+    if (!on) return;
+    const color=col(L.col); const p=new THREE.Vector3(...L.p);
+    if (L.kind==='F'){
+      const parts = (P.comps && (L.id==='rl'||L.id==='ru'||L.id==='fc')) ? [[L.v[0],0,0],[0,0,L.v[2]]] : [L.v];
+      parts.forEach((v,k)=>{
+        const F=Math.hypot(...v); if (F<1e-6) return;
+        const dir=new THREE.Vector3(...v).normalize(), len=aLen(F);
+        const a=addArrowRaw(p,dir,len,3.2,color); arrows.push({id:L.id,a});
+        const tip=p.clone().add(dir.clone().multiplyScalar(len+14));
+        const txt=(L.id==='rl'?'R<sub>L</sub>':L.id==='ru'?'R<sub>U</sub>':shortName(L))+' '+fmt(F,F<100?1:0)+' N';
+        const el=mkLabel(txt,'lbl'+(L.grp==='R'?' re':''),L.col); labels.push({el,pos:tip,id:L.id});
+      });
+    } else {
+      const R = L.id==='tw' ? S.d*1.6+22 : C.Rp+26;
+      const g=new THREE.Group(); const m=new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide});
+      const arc=1.55*Math.PI;
+      const tor=new THREE.Mesh(new THREE.TorusGeometry(R,3,8,72,arc),m); tor.rotation.x=-Math.PI/2; g.add(tor);
+      const cone=new THREE.Mesh(new THREE.ConeGeometry(8.5,24,16),m);
+      const ex=R*Math.cos(arc), ez=-R*Math.sin(arc);
+      cone.position.set(ex,0,ez); cone.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(-Math.sin(arc),0,-Math.cos(arc)));
+      g.add(cone); g.position.copy(p); if (L.v[1]<0) g.scale.z=-1; root.add(g);
+      arrows.push({id:L.id,a:{g,m}});
+      const lp=p.clone().add(new THREE.Vector3(R*Math.cos(arc*.5)+10,14,(L.v[1]<0?1:-1)*R*Math.sin(arc*.5)));
+      const el=mkLabel(shortName(L)+' '+fmt(Math.abs(L.v[1]),2)+' N·m','lbl',L.col); labels.push({el,pos:lp,id:L.id});
+    }
+  });
+}
+function shortName(L){ return {wr:'W rotor',ws:'W sprocket',wsh:'W shaft',drag:'Drag',fc:'Chain',tw:'Water torque',tc:'Chain torque',ra:'Ring thrust'}[L.id]||L.name; }
+function applyHighlight(){
+  arrows.forEach(o=>{ o.a.m.transparent=true; o.a.m.opacity = (!hiId||o.id===hiId)?1:.12; });
+  labels.forEach(l=>{ if (l.id) l.el.classList.toggle('dim', !!hiId && l.id!==hiId); });
+}
+function heatOn(){ return P.heat && P.tab==='stress'; }
+function colourShaft(){
+  if (!shaftGeo) return;
+  const pos=shaftGeo.attributes.position, c=shaftGeo.attributes.color;
+  const steel=col('--steel'), ten=col('--ten'), com=col('--com'), neu=col('--neutral');
+  let smax=0; S.samp.forEach(q=>{ smax=Math.max(smax,q.M*S.r/S.I); });
+  $('hkMin').textContent='−'+fmt(smax,0)+' MPa'; $('hkMax').textContent='+'+fmt(smax,0)+' MPa';
+  const tmp=new THREE.Color(); let lastY=null, q=null;
+  for (let i=0;i<pos.count;i++){
+    const x=pos.getX(i), y=pos.getY(i), z=pos.getZ(i);
+    if (!heatOn()){ c.setXYZ(i,steel.r,steel.g,steel.b); continue; }
+    if (y!==lastY){ q=internal(Math.min(S.yTop-1e-6,Math.max(S.yBot+1e-6,y))); lastY=y; }
+    const rr=Math.hypot(x,z); let sig=0; if (rr>1e-6) sig=(q.Mx*z-q.Mz*x)/S.I;
+    const t=Math.max(-1,Math.min(1,sig/smax));
+    if (t>=0) tmp.copy(neu).lerp(ten,Math.pow(t,.8)); else tmp.copy(neu).lerp(com,Math.pow(-t,.8));
+    c.setXYZ(i,tmp.r,tmp.g,tmp.b);
+  }
+  c.needsUpdate=true;
+}
+function updateCut(){
+  if (!cutMesh) return; cutMesh.position.y=P.cutY;
+  if (cutLabel) { labels=labels.filter(l=>l.el!==cutLabel); labels.push({el:cutLabel,pos:new THREE.Vector3(-S.r*1.9-6,P.cutY,0),id:null,left:true}); cutLabel.textContent='cut y = '+fmt(P.cutY,1); }
+}
+const vtmp=new THREE.Vector3();
+function placeLabels(){
+  const w=stage.clientWidth,h=stage.clientHeight;
+  labels.forEach(l=>{ vtmp.copy(l.pos).project(camera);
+    if (vtmp.z>1){ l.el.style.display='none'; return; }
+    l.el.style.display=''; const x=(vtmp.x*.5+.5)*w, y=(-vtmp.y*.5+.5)*h;
+    l.el.style.transform='translate('+(l.left?'calc('+x+'px - 100%)':x+'px')+','+(y-8)+'px)'; });
+}
+let lastT=performance.now();
+function animate(t){
+  requestAnimationFrame(animate); t=t||performance.now();
+  const dt=Math.min(.05,(t-lastT)/1000); lastT=t;
+  if (P.spin && !matchMedia('(prefers-reduced-motion: reduce)').matches){ spinAng+=dt*0.9; if (spinG) spinG.rotation.y=spinAng; if (P.tab==='stress') drawFibre(); }
+  controls.update(); renderer.render(scene,camera); placeLabels();
+}
+function setBg(){ if (scene) scene.background=col('--card'); }
+
+/* ============================== fibre plot ============================== */
+function drawFibre(){
+  const cv=$('fibre'); const {g,W,H}=prep(cv);
+  const q=internal(S.yGL), Kt=5.0;
+  const amp=q.M*S.r/S.I;
+  const ink=css('--ink'), soft=css('--soft'), rule=css('--rule'), ten=css('--ten'), com=css('--com');
+  const pl=36, pr=8, pt=10, pb=18;
+  const X=a=>pl+a/(Math.PI*2)*(W-pl-pr), Y=s=>pt+(1-(s/amp+1)/2)*(H-pt-pb);
+  g.strokeStyle=rule; g.beginPath(); g.moveTo(pl,Y(0)); g.lineTo(W-pr,Y(0)); g.stroke();
+  g.font='10px '+css('--mono'); g.fillStyle=soft; g.textAlign='right'; g.textBaseline='middle';
+  g.fillText('+'+fmt(amp,0),pl-4,Y(amp)); g.fillText('0',pl-4,Y(0)); g.fillText('−'+fmt(amp,0),pl-4,Y(-amp));
+  g.textAlign='center'; g.fillText('one revolution →',(pl+W)/2,H-6);
+  g.beginPath();
+  for (let i=0;i<=120;i++){ const a=i/120*Math.PI*2; const s=sigmaAt(q,a); const x=X(a), y=Y(s); i?g.lineTo(x,y):g.moveTo(x,y); }
+  g.strokeStyle=ink; g.lineWidth=1.5; g.stroke();
+  // stripe position: stripe starts at +x (phi=0) and the group rotates +y, taking x toward −z (phi decreasing)
+  const phi=((-spinAng)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
+  const sNow=sigmaAt(q,phi);
+  g.fillStyle=sNow>=0?ten:com; g.beginPath(); g.arc(X(phi),Y(sNow),4,0,Math.PI*2); g.fill();
+  $('fibreNow').textContent=(sNow>=0?'+':'−')+fmt(Math.abs(sNow),1)+' MPa';
+  $('fibreTxt').innerHTML='At d = '+fmt(S.d,2)+' mm the nominal bending stress at the groove swings between <b>±'+fmt(amp,1)+' MPa</b> (σ<sub>a</sub> = '+fmt(amp,1)+', σ<sub>m</sub> = 0). With the first-guess K<sub>t</sub> = 5 that is ±'+fmt(Kt*amp,0)+' MPa. The torque is zero here; the steady axial stress is only '+fmt(q.N/S.A,2)+' MPa.';
+}
+
+/* ============================== controls ============================== */
+function seg(id,key,cast){ document.querySelectorAll('#'+id+' button').forEach(b=>b.addEventListener('click',()=>{ P[key]=cast?cast(b.dataset.v):b.dataset.v;
+  document.querySelectorAll('#'+id+' button').forEach(x=>x.setAttribute('aria-pressed',x===b)); refresh(); })); }
+function tog(id,key,fn){ $(id).addEventListener('click',()=>{ P[key]=!P[key]; $(id).setAttribute('aria-pressed',P[key]); (fn||refresh)(); }); }
+function refresh(){ solve(); renderText(); build(); drawDiagrams(); drawFibre(); }
+seg('spanSeg','span'); seg('chainSeg','chain',Number); seg('hubSeg','hub'); seg('scaleSeg','scale');
+$('dSel').addEventListener('change',e=>{ P.d=+e.target.value; refresh(); });
+tog('tApplied','showA'); tog('tReactions','showR'); tog('tTorque','showT'); tog('tComp','comps'); tog('tXray','xray');
+tog('tSpin','spin',()=>{ drawFibre(); });
+tog('tHeat','heat');
+document.querySelectorAll('.views button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+['forces','stress'].forEach(t=>$('tab-'+t).addEventListener('click',()=>{ P.tab=t;
+  ['forces','stress'].forEach(u=>{ $('tab-'+u).setAttribute('aria-pressed',u===t); $('tab-'+u).setAttribute('aria-selected',u===t); $('pane-'+u).hidden=u!==t; });
+  build(); if (t==='stress') drawFibre(); }));
+const rethem=()=>{ setBg(); build(); drawDiagrams(); drawFibre(); };
+try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',rethem); }catch(e){}
+new MutationObserver(rethem).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+window.addEventListener('resize',()=>{ drawDiagrams(); drawFibre(); });
+
+solve(); renderText(); bindDiagrams();
+if (window.THREE && THREE.OrbitControls){ initThree(); setBg(); build(); }
+else { stage.innerHTML='<p style="padding:1rem">The 3D view needs three.js from cdnjs, which did not load. The tables and diagrams below still work.</p>'; }
+drawDiagrams(); drawFibre();
+})();
+</script>

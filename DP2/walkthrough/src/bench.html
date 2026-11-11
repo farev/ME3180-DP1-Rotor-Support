@@ -1,0 +1,54 @@
+<aside class="bench" id="bench" aria-label="3D model of the rotor shaft">
+  <div class="bench-top">
+    <span class="stepno" id="stepNo">R</span>
+    <label for="stepSel" class="src" hidden>Step</label>
+    <select id="stepSel" aria-label="Jump to step"></select>
+    <button class="ib" id="prevStep" type="button" aria-label="Previous step">◀</button>
+    <button class="ib" id="nextStep" type="button" aria-label="Next step">▶</button>
+    <button class="ib mobile-toggle" id="minBench" type="button" aria-pressed="false">Hide 3D</button>
+  </div>
+  <div class="progress"><i id="prog"></i></div>
+  <div class="stage" id="stage">
+    <canvas id="c3d" aria-label="Interactive 3D view; drag to orbit, scroll to zoom, click a part or force"></canvas>
+    <div class="labels" id="labels"></div>
+    <div class="hint" id="hint">Drag to orbit · scroll to zoom · click a force or part</div>
+    <div class="views">
+      <button class="ib" type="button" data-view="iso">Iso</button>
+      <button class="ib" type="button" data-view="front">Front x-y</button>
+      <button class="ib" type="button" data-view="side">Side z-y</button>
+      <button class="ib" type="button" data-view="top">Top</button>
+      <button class="ib" type="button" id="fitAll">Fit all</button>
+    </div>
+    <div class="cutbox" id="cutBox" hidden>
+      <div class="cutrow"><label for="cutY">Cut at y</label><input type="range" id="cutY" min="-250" max="303.5" step="0.25" value="-0.49"><output id="cutOut" for="cutY">−0.49 mm</output></div>
+      <div class="cutrow presets">
+        <button class="ib" type="button" data-cut="-0.49">groove</button><button class="ib" type="button" data-cut="6.35">R<sub>L</sub></button><button class="ib" type="button" data-cut="-24.75">keyseat</button><button class="ib" type="button" data-cut="-50">chain</button><button class="ib" type="button" data-cut="-176.81">pin hole</button>
+      </div>
+      <div class="cuteq" id="cutEq"></div>
+    </div>
+    <div class="info" id="info" hidden>
+      <button class="x" id="infoX" type="button" aria-label="Close">×</button>
+      <h4 id="infoT"></h4>
+      <div class="v" id="infoV"></div>
+      <p id="infoD"></p>
+      <div class="row" id="infoRow"></div>
+    </div>
+  </div>
+  <div class="toggles">
+    <button class="ib" type="button" id="tFollow" aria-pressed="true">Follow steps</button>
+    <button class="ib" type="button" id="tLabels" aria-pressed="true">Labels</button>
+    <button class="ib" type="button" id="tDiag" aria-pressed="false">M and T diagrams</button>
+    <button class="ib" type="button" id="tDims" aria-pressed="false">Dimensions</button>
+    <button class="ib" type="button" id="tCut" aria-pressed="false">Cut at y</button>
+    <button class="ib" type="button" id="tRotor" aria-pressed="true">Rotor and supports</button>
+    <button class="ib" type="button" id="tClear">Clear highlight</button>
+  </div>
+  <div class="legend">
+    <span><i style="background:var(--c-water)"></i>water loads</span>
+    <span><i style="background:var(--c-chain)"></i>chain</span>
+    <span><i style="background:var(--c-weight)"></i>weights</span>
+    <span><i style="background:var(--c-react)"></i>reactions</span>
+    <span><i style="background:var(--c-feat)"></i>stress raisers</span>
+    <span><i style="background:var(--c-hw)"></i>hardware</span>
+  </div>
+</aside>

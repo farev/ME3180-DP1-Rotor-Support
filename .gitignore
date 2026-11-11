@@ -10,8 +10,13 @@
 !/RotorSupportFBDLab.html
 !/RotorSupportExplorer.html
 !/RotorSupport3D.html
+!/DP2/
 
 **/__pycache__/
 *.bak
 *_6061plates.*
 .DS_Store
+
+# Course handouts are not ours to publish
+DP2/*.pdf
+DP2/solution/sources/assignment-extracted.txt
