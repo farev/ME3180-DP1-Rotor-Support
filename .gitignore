@@ -1,22 +1,25 @@
 # Publish only code, figures and the interactive tools
 /*
 !/.gitignore
-!/README.md
-!/FBD_report/
-!/DP1_Solver/
-!/dp1_model.py
-!/dp1_fe_check.py
-!/RotorBeamFBD.html
-!/RotorSupportFBDLab.html
-!/RotorSupportExplorer.html
-!/RotorSupport3D.html
+!/DP1/
 !/DP2/
+
+/DP1/*
+!/DP1/README.md
+!/DP1/FBD_report/
+!/DP1/DP1_Solver/
+!/DP1/dp1_model.py
+!/DP1/dp1_fe_check.py
+!/DP1/RotorBeamFBD.html
+!/DP1/RotorSupportFBDLab.html
+!/DP1/RotorSupportExplorer.html
+!/DP1/RotorSupport3D.html
 
 **/__pycache__/
 *.bak
 *_6061plates.*
 .DS_Store
 
-# Course handouts are not ours to publish
+# Course handouts and the submitted report stay local
 DP2/*.pdf
 DP2/solution/sources/assignment-extracted.txt
