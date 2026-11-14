@@ -9,21 +9,21 @@ const F = {
   drag:{t:'Drag, D',v:'560 N in +z',d:'Water stream on the rotor, acting at the centre of pressure y = −500 mm. Its 506 mm lever arm to the lower bearing makes it the load that sizes the shaft.',s:'s2',c:'--c-water',chip:'Drag',val:'560 N'},
   chain:{t:'Chain force, F_c',v:'161.8 N at −4.732° → (161.25, 0, +13.35) N',d:'Tight span at the chain line, y = −50 mm. Eqs. (1)–(2). The +z part adds to the drag (conservative sign).',s:'s2',c:'--c-chain',chip:'Chain force',val:'161.8 N'},
   wr:{t:'Rotor + blade weight',v:'120 N down',d:'At the rotor CG, y = −350 mm. Carried into the shaft by the pin; the shaft hangs from the upper ring.',s:'s2',c:'--c-weight',chip:'Rotor weight',val:'120 N'},
-  ws:{t:'Sprocket weight',v:'35 N down',d:'Held by the key and set screw through friction: n_slip = 0.10(459.8)/35 = 1.31.',s:'s12',c:'--c-weight',chip:'Sprocket weight',val:'35 N'},
+  ws:{t:'Sprocket weight',v:'35 N down',d:'Held by the set screw through friction at two contacts: n_slip = 2(0.15)(141.7)/35 = 1.22.',s:'s12',c:'--c-weight',chip:'Sprocket weight',val:'35 N'},
   wsh:{t:'Shaft self-weight',v:'48.62 N down',d:'ρg(πD²/4)L for the 554 mm shaft, Eq. (3). Drawn at mid-length.',s:'s2',c:'--c-weight',chip:'Shaft weight',val:'48.6 N'},
-  tw:{t:'Water torque',v:'19.63 N·m about +y',d:'Enters the shaft at the pin, y = −180 mm. Only the stretch from the pin up to the key is twisted.',s:'s2',c:'--c-water',chip:'Water torque',val:'19.63 N·m'},
+  tw:{t:'Water torque',v:'19.63 N·m about +y',d:'Enters the shaft at the pin, y = −185 mm. Only the stretch from the pin up to the key is twisted.',s:'s2',c:'--c-water',chip:'Water torque',val:'19.63 N·m'},
   tc:{t:'Chain torque',v:'19.63 N·m, opposite',d:'Leaves the shaft through the key into the sprocket. ΣM_y = 0, so the bearings carry no torque.',s:'s2',c:'--c-chain',chip:'Chain torque',val:'19.63 N·m'},
   rl:{t:'Lower bearing reaction, R_L',v:'(−192.88, 0, −1562.93) N · |R_L| = 1574.8 N',d:'At the lower bearing midplane, y = 6.35 mm. Pushes upstream at 2.8 times the drag because of the overhang. Eqs. (6), (8).',s:'s3',c:'--c-react',chip:'R_L',val:'1574.8 N'},
   ru:{t:'Upper bearing reaction, R_U',v:'(+31.63, 0, +989.59) N · |R_U| = 990.1 N',d:'At the upper bearing midplane, y = 293.65 mm. Pulls downstream to stop the shaft tipping. Eqs. (5), (7).',s:'s3',c:'--c-react',chip:'R_U',val:'990.1 N'},
   thrust:{t:'Axial thrust on the upper ring',v:'N = 203.62 N up',d:'The upper bearing pushes up on the upper ring; all three weights hang below it. Eq. (4). Both rings are checked for it.',s:'s3',c:'--c-react',chip:'Ring thrust',val:'203.6 N'},
-  'groove-l':{t:'Lower ring groove (critical)',v:'M = 280.5 N·m, T = 0 · n_y = 3.08 (K_t), 3.96 (Eq 7-15), n_f = 1.45',d:'Root Ø37.06 mm, R 0.25 mm, K_t = 3.5 (Fig. A-15-16). Highest stress in the shaft; governs yield.',s:'s9',c:'--c-feat',chip:'Lower groove',val:'n_y 3.08'},
-  'groove-u':{t:'Upper ring groove',v:'M = 0, T = 0',d:'Same groove section. Carries the 203.6 N thrust; 2.56 mm of shaft above it (≥ 3t = 1.56 mm).',s:'s14',c:'--c-feat',chip:'Upper groove',val:'M = 0'},
-  keyseat:{t:'Keyseat (closed slot)',v:'22.45 × 9.525 × 4.76 deep, y −47.25 to −24.75',d:'Upper end: M = 266.5 N·m, T = 19.63 N·m. Conservative K_t 3.0, K_ts 4.0 plus key pressure. n_f = 1.44 (governs fatigue), n_y = 3.63.',s:'s9',c:'--c-feat',chip:'Keyseat',val:'n_f 1.44'},
-  pinhole:{t:'Pin hole, Ø6.37 mm',v:'M = 181.0 N·m, T = 19.63 N·m · n_y = 5.53, n_f = 2.20',d:'Transverse hole, a/D = 0.168. Table A-16: K_t 2.114 (A 0.732), K_ts 1.606 (A 0.856).',s:'s9',c:'--c-feat',chip:'Pin hole',val:'n_f 2.20'},
+  'groove-l':{t:'Lower ring groove (critical)',v:'M = 280.5 N·m, T = 0 · n_y = 3.92 (Eq 7-15), n_f = 1.43',d:'Root Ø36.98–37.08 mm, R 0.20–0.25 mm, K_t = 3.6 at the worst corner (Fig. A-15-16). Governs yield and fatigue.',s:'s9',c:'--c-feat',chip:'Lower groove',val:'n_f 1.43'},
+  'groove-u':{t:'Upper ring groove',v:'M = 0, T = 0',d:'Same groove section. Carries the 203.6 N thrust; 2.56 mm of shaft above it (≥ 3t = 1.68 mm).',s:'s14',c:'--c-feat',chip:'Upper groove',val:'M = 0'},
+  keyseat:{t:'Keyseat (closed slot)',v:'22.225 × 9.525, 3/16 in deep at the wall (B17.1), y −47.11 to −24.89',d:'Upper end (longest slot, y −24.65): M = 266.6 N·m, T = 19.63 N·m. End centres 12.70 H14, width +0.051/−0, fillet R 1/32 in (B17.1). Peterson K_t 2.17, K_ts 2.59. n_f = 2.02, n_y = 5.61.',s:'s9',c:'--c-feat',chip:'Keyseat',val:'n_f 2.02'},
+  pinhole:{t:'Pin hole, Ø6.37 mm',v:'M = 178.2 N·m, T = 19.63 N·m · n_y = 6.31, n_f = 2.28',d:'Transverse hole, a/D = 0.168. Table A-16: K_t 2.114 (A 0.732), K_ts 1.606 (A 0.856).',s:'s9',c:'--c-feat',chip:'Pin hole',val:'n_f 2.28'},
   plain:{t:'Plain section at the lower bearing',v:'M = 284.5 N·m · n_y = 11.5, n_f = 4.95',d:'Largest moment on the shaft but no notch, ground surface.',s:'s9',c:'--c-feat',chip:'Plain section',val:'n_f 4.95'},
-  key:{t:'Key, 18-8, 3/8 × 3/8 × 1/2 in',v:'F = 1033.2 N · n_shear = 27.5, n_bearing = 23.5',d:'Cut 12.70 mm from 92530A319; longer than it is wide. Centred at y = −36 under the set screw.',s:'s11',c:'--c-hw',chip:'Key',val:'1/2 in'},
-  screw:{t:'Set screw, 1/4"-20 × 1/4 in flat tip',v:'Clamp 460–808 N · n_slip = 1.31, n_y = 1.27',d:'94355A533, 18-8. Through the sprocket hub, presses on the key. 0.73–0.77 N·m.',s:'s12',c:'--c-hw',chip:'Set screw',val:'n 1.27'},
-  pin:{t:'Pin, 416 stainless, 1/4 × 3 in',v:'R = 520.1 N per shear plane · n_y = 1.35 (with fit)',d:'98380A556 at y = −180, spanning the 3 in hub. Clearance in the shaft, interference in one hub wall.',s:'s13',c:'--c-hw',chip:'Pin',val:'n 1.35'},
+  key:{t:'Key, 18-8, 3/8 × 3/8 × 1/2 in',v:'F = 1033.2 N · n_shear = 26.7, n_bearing = 15.2',d:'Cut 12.70 h14 from 92530A319; longer than it is wide; long edges chamfered 3/64 in (B17.1). Centred at y = −36 under the set screw.',s:'s11',c:'--c-hw',chip:'Key',val:'1/2 in'},
+  screw:{t:'Set screw, 1/4"-20 × 1/4 in flat tip',v:'Clamp 142–236 N · n_slip = 1.22, thread n = 4.74',d:'94355A533, 18-8. Through the sprocket hub, presses on the key. 0.24 N·m (K 0.2, μ 0.15).',s:'s12',c:'--c-hw',chip:'Set screw',val:'0.24 N·m'},
+  pin:{t:'Pin, 416 stainless, 1/4 × 3 in',v:'R = 520.1 N per shear plane · n = 30.8 vs 7200 lbf rating',d:'98380A556 at y = −185, spanning the 3 in hub. Shaft hole 6.35 F7 (slip); hub holes 0.2495–0.2500 in (B18.8.2 press fit).',s:'s13',c:'--c-hw',chip:'Pin',val:'n 1.35'},
   'ring-l':{t:'Lower retaining ring',v:'93576A210 · 4950 lbf rating',d:'18-8 single-turn spiral ring below the lower bearing. Unloaded in normal operation, still checked for 203.6 N.',s:'s14',c:'--c-hw',chip:'Lower ring',val:''},
   'ring-u':{t:'Upper retaining ring',v:'93576A210 · capacity/N = 108',d:'Sits on the upper bearing and carries the whole 203.6 N thrust.',s:'s14',c:'--c-hw',chip:'Upper ring',val:'×108'},
   'bearing-l':{t:'Lower bearing',v:'12.7 mm wide, midplane y = 6.35',d:'Assumption A2: the 300 mm runs between the outer bearing faces, so the midplanes are 287.3 mm apart.',s:'s1',c:'--c-steel',chip:'Lower bearing',val:''},
@@ -34,7 +34,7 @@ const F = {
   cg:{t:'Rotor centre of gravity',v:'y = −350 mm',d:'Where the 120 N rotor weight acts.',s:'s2',c:'--c-weight',chip:'CG',val:''},
   cop:{t:'Centre of pressure',v:'y = −500 mm',d:'Where the 560 N drag acts.',s:'s2',c:'--c-water',chip:'COP',val:''},
   mdiag:{t:'Bending moment diagram',v:'Peak 284.5 N·m at the lower bearing midplane',d:'Drawn on the −x side, scaled to the resultant M = √(M_x² + M_z²). Eqs. (9)–(11).',s:'s4',c:'--c-water',chip:'M diagram',val:'284.5 N·m'},
-  tdiag:{t:'Torque diagram',v:'19.63 N·m from the pin (y −180) to the keyseat top (y −24.75)',d:'Drawn on the +x side. Zero at both bearings and both grooves.',s:'s4',c:'--c-chain',chip:'T diagram',val:'19.63 N·m'}
+  tdiag:{t:'Torque diagram',v:'19.63 N·m from the pin (y −185) to the keyseat top (y −24.89)',d:'Drawn on the +x side. Zero at both bearings and both grooves.',s:'s4',c:'--c-chain',chip:'T diagram',val:'19.63 N·m'}
 };
 const ALIAS = { rings:['ring-l','ring-u'], applied:['drag','chain','wr','ws','wsh','tw','tc'], reactions:['rl','ru','thrust'] };
 const expand = ids => [].concat(...ids.map(i=>ALIAS[i]||[i]));
@@ -64,8 +64,8 @@ const SCENE = {
 
 /* ---------------- geometry (mm), Rev P2 ---------------- */
 const G = {r:19.05,yBot:-250.5,yTop:303.5,yL:6.35,yU:293.65,bw:12.7,gL:-0.49,gU:300.52,gW:0.81,
-  ks0:-47.25,ks1:-24.75,k0:-42.35,k1:-29.65,ksD:4.7625,ksW:9.525,yS:-36,
-  sT0:-53.61,sT1:-46.39,sH1:-25.03,Rp:121.3,hub0:-250,hub1:-150,yPin:-180,yCG:-350,yCOP:-500,rot0:-255,rot1:-720,rotR:185};
+  ks0:-47.11,ks1:-24.89,k0:-42.35,k1:-29.65,ksD:5.367,ksW:9.525,yS:-36,
+  sT0:-53.61,sT1:-46.39,sH1:-25.03,Rp:121.3,hub0:-250,hub1:-150,yPin:-185,yCG:-350,yCOP:-500,rot0:-255,rot1:-720,rotR:185};
 function Mres(y){ // resultant bending moment, N·mm
   if (y>G.yU) return 0;
   if (y>=G.yL) return 990.09*(G.yU-y);
@@ -131,7 +131,7 @@ function build(){
   sh.position.y=(G.yTop+G.yBot)/2; reg(sh,'shaft',{ctx:true,pri:1});
   // plain-section marker and cut discs (only when focused)
   const cut=(fid,y)=>{ const d=new THREE.Mesh(new THREE.RingGeometry(r*1.15,r*1.6,48),mat('--glow',{basic:true,op:.5})); d.rotation.x=-Math.PI/2; d.position.y=y; reg(d,fid,{only:true,op:.5,pri:0}); };
-  cut('plain',G.yL); cut('groove-l',G.gL); cut('keyseat',G.ks1); cut('pinhole',-176.81);
+  cut('plain',G.yL); cut('groove-l',G.gL); cut('keyseat',G.ks1); cut('pinhole',-181.81);
   // grooves (dark bands) and rings
   [['groove-l',G.gL],['groove-u',G.gU]].forEach(([f,y])=>{ const b=new THREE.Mesh(new THREE.CylinderGeometry(r+.15,r+.15,Math.max(G.gW,1.4),48,1,true),mat('--c-feat',{metal:.1})); b.position.y=y; reg(b,f,{pri:2}); });
   [['ring-l',G.gL],['ring-u',G.gU]].forEach(([f,y])=>{ const m=new THREE.Mesh(annulus(r+3.4,r-.5,.9,.45),mat('--c-hw',{metal:.5})); m.position.y=y-.45; reg(m,f,{pri:2}); });
@@ -223,7 +223,7 @@ function dimV(grp,x,y0,y1,text,c,ext,z,left){ z=z||0; const g=new THREE.Group();
 function buildDims(){
   const RX=250, r=G.r;
   const st=[[303.5,'303.5 top'],[300,'300 brg face'],[293.65,'293.65 R<sub>U</sub>'],[6.35,'6.35 R<sub>L</sub>'],[0,'0 brg face'],
-    [-24.75,'−24.75 keyseat'],[-50,'−50 chain'],[-150,'−150 hub top'],[-180,'−180 pin'],[-250,'−250 shaft end'],[-350,'−350 CG'],[-500,'−500 COP']];
+    [-24.89,'−24.89 keyseat'],[-50,'−50 chain'],[-150,'−150 hub top'],[-185,'−185 pin'],[-250,'−250 shaft end'],[-350,'−350 CG'],[-500,'−500 COP']];
   const g=new THREE.Group(), lm=new THREE.LineBasicMaterial({color:col('--muted'),transparent:true});
   g.add(new THREE.Line(lineGeo([V(RX,-500),V(RX,303.5)]),lm));
   const gm=new THREE.LineDashedMaterial({color:col('--muted'),dashSize:3,gapSize:5,transparent:true,opacity:.55});
@@ -289,7 +289,7 @@ function paint(){
     l.el.classList.toggle('on',!!on); });
   document.querySelectorAll('[data-f]').forEach(e=>{ const ids=expand(e.dataset.f.split(',')); e.classList.toggle('on', ids.some(i=>focusSet.has(i))); });
 }
-const SECY={'groove-l':-0.49,'keyseat':-24.75,'pinhole':-176.81,'plain':6.35,'groove-u':300.5,'chain':-50,'mdiag':null};
+const SECY={'groove-l':-0.49,'keyseat':-24.89,'pinhole':-181.81,'plain':6.35,'groove-u':300.5,'chain':-50,'mdiag':null};
 function setFocus(ids,o){ o=o||{}; focusSet=new Set(expand(ids)); preview=null; if(opts.cut && ids.length && SECY[ids[0]]!=null) setCut(SECY[ids[0]]); paint();
   if (o.fly!==false && focusSet.size) fly([...focusSet],o.view);
   if (o.info) showInfo(ids[0]); else if(!o.keepInfo) hideInfo(); }

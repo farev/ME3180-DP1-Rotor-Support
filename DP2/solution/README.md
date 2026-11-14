@@ -5,8 +5,18 @@ Rockwell C25, 1-1/2 x 24 in) with the Piazza-approved Sy = 88 ksi and
 Sut = 3.4 HB = 860.2 MPa. Cost rule: full price of the shortest sufficient
 stock plus prorated hardware. The catalog-wide search is in ../solver/.
 
-Both yield checks pass: Shigley Kf/Kfs (needs Sy >= 500.9 MPa) and the added
-Kt/Kts elastic check (needs Sy >= 591.4 MPa).
+Groove callout: root 1.456-1.460 in, radius 0.008-0.010 in (worst corner Kt 3.6).
+The lower ring groove governs: ny 3.92 (Shigley Eq. 7-15, needs Sy >= 464.8 MPa)
+and nf 1.34 (surface factor from Shigley 11th ed. Table 6-2, corrected 12 Nov; the
+10th-edition coefficients gave 1.43). Keyseat to ASME B17.1 (Peterson Kt 2.17): ny 5.61, nf 1.89. Key
+12.70 h14, set screw 0.24 N m (sized from the 35 N sprocket weight), pin checked
+against McMaster's 7200 lbf double-shear rating at y = -185 mm. The Kt/Kts
+elastic peak at the groove is reported for information only (n = 2.97).
+Drawing tolerances are still being converted to standards.
+
+NOTE (12 Nov): the PROVISIONAL PDFs in ../../output/pdf and design_review.md were built before the
+surface-factor correction and still show nf 1.43/2.02/2.28. The VibeWrite report is the current text.
+Report figures: ../FBD_report/ (fig_fbd_views, fig_shaft_layout, fig_internal_loads). Onshape source: cad/dp2_shaft.fs.
 
 Files:
 - `calculate.py`: auditable assumptions, equations, equilibrium/criterion checks.

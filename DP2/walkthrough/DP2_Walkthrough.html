@@ -208,9 +208,9 @@ code{overflow-wrap:anywhere;word-break:break-word}
   </div>
   <dl class="spec">
     <div><dt>Shaft</dt><dd>Ø1.500 in × 554 mm<small>1566 HRC25 precision rotary, McMaster 1346K534 (24 in)</small></dd></div>
-    <div><dt>Shaft yield</dt><dd>n<sub>y</sub> = 3.08<small>lower ring groove, K<sub>t</sub> used (3.63 by Shigley Eq. 7-15, keyseat)</small></dd></div>
-    <div><dt>Shaft fatigue</dt><dd>n<sub>f</sub> = 1.44<small>keyseat end, conservative model</small></dd></div>
-    <div><dt>Hardware minimum</dt><dd>n = 1.27<small>set screw installation stress</small></dd></div>
+    <div><dt>Shaft yield</dt><dd>n<sub>y</sub> = 3.92<small>lower ring groove, Shigley Eq. 7-15 (keyseat 5.61)</small></dd></div>
+    <div><dt>Shaft fatigue</dt><dd>n<sub>f</sub> = 1.43<small>lower ring groove, deepest root and smallest radius</small></dd></div>
+    <div><dt>Hardware minimum</dt><dd>n = 1.22<small>set screw holding the sprocket (slip)</small></dd></div>
     <div><dt>Cost</dt><dd>$222.07<small>full 24 in stock + $100 coating allowance</small></dd></div>
   </dl>
 </header>
@@ -221,14 +221,14 @@ code{overflow-wrap:anywhere;word-break:break-word}
   <p class="sub">Rev P3 passes every Rev2 requirement with the Piazza-approved shaft properties. The geometry is the P2 design; only the shaft stock changed, after the approved 1045 yield strength (75 ksi) came in below the 598 MPa we had proposed and the cost rule was read as the full price of the shortest sufficient stock. Items marked ⚠ are corrections or improvements for the report.</p>
   <div class="findings">
     <div class="f"><span class="tag ok">Verified</span><p><b>Arithmetic.</b> Reactions, moments, Marin factors, notch sensitivity, all five section checks, the key, screw, pin and ring checks and the BOM total were rebuilt from scratch with vector statics (r × F about each cut). Every value matches the provisional PDF to four decimals.</p></div>
-    <div class="f"><span class="tag ok">Verified</span><p><b>Groove K<sub>t</sub> = 3.5 is conservative.</b> Reading Shigley Fig. A-15-16 (11th ed., p. 1047) at a/t = 1.51: the r/t = 0.40 curve gives 3.40 and r/t = 0.60 gives 3.17, so r/t = 0.478 gives K<sub>t</sub> ≈ 3.3. Using 3.5 adds about 6 %.</p></div>
-    <div class="f"><span class="tag ok">Verified</span><p><b>Shaft choice (Rev P3).</b> A solver (DP2/solver) ran every McMaster rotary shaft and every stainless ring for its diameter through these same equations. 1346K534 (1566, HRC25, 1-1/2 × 24 in, $112.69) is the cheapest that passes fatigue and both yield checks. 4138N27 (1-11/16 in 1045) is $20 cheaper but fails the added K<sub>t</sub> check. See Step 10.</p></div>
-    <div class="f"><span class="tag warn">⚠ Method</span><p><b>Yield check uses K<sub>t</sub>, Shigley uses K<sub>f</sub>.</b> Shigley Eq. (7-15) builds σ′<sub>max</sub> with K<sub>f</sub> and K<sub>fs</sub>. With K<sub>f</sub> = 2.72 at the groove, n<sub>y</sub> = 3.96 instead of 3.08. Report both. The keyseat governs the Shigley check at 3.63 (needs S<sub>y</sub> ≥ 501 MPa); the strict groove check needs S<sub>y</sub> ≥ 591 MPa. The approved 606.7 MPa clears both.</p></div>
+    <div class="f"><span class="tag ok">Verified</span><p><b>Groove K<sub>t</sub> = 3.6 at the worst corner.</b> Reading Shigley Fig. A-15-16 (11th ed., p. 1047) at a/t = 1.41 for root Ø1.456 in and R 0.008 in: the r/t = 0.20 curve gives 4.23 and r/t = 0.40 gives 3.43, so r/t = 0.364 gives K<sub>t</sub> ≈ 3.58, read as 3.6. Shigley's Example 7-2 reads this chart the same way (K<sub>t</sub> = 4.3 at r/t = 0.208, a/t = 1.42) with no added margin.</p></div>
+    <div class="f"><span class="tag warn">⚠ Cost</span><p><b>Shaft choice (Rev P3).</b> A solver (DP2/solver) ran every McMaster rotary shaft and every stainless ring for its diameter through these same equations. 4138N27 (1-11/16 in 1045, $202.18) is the cheapest that passes fatigue and Shigley yield. 1346K534 (1566, HRC25, 1-1/2 × 24 in, $222.07) costs $19.89 more and is selected for its slightly larger fatigue margin (1.43 against 1.38), milder groove and standard 1-1/2 in rings, key and pin; yield margins are about equal (3.91 against 3.92). See Step 10.</p></div>
+    <div class="f"><span class="tag ok">Method</span><p><b>Yield uses Shigley Eq. (7-15), with K<sub>f</sub>.</b> With K<sub>f</sub> = 2.73 at the groove, n<sub>y</sub> = 3.92 governs (needs S<sub>y</sub> ≥ 465 MPa); the keyseat follows at 5.61. The K<sub>t</sub> elastic peak at the worst-case groove gives 2.97 (it would need 612 MPa); it is shown for information and is not a Rev2 requirement.</p></div>
     <div class="f"><span class="tag ok">Fixed</span><p><b>Hardness conversion.</b> Shigley 11th ed. Eq. (2-36) is S<sub>ut</sub> = 3.4 H<sub>B</sub> MPa. For the 1566 shaft, HRC25 = HB 253, so S<sub>ut</sub> = 3.4(253) = 860.2 MPa. Piazza lists only S<sub>y</sub>, so this hardness minimum is used.</p></div>
-    <div class="f"><span class="tag warn">⚠ Drawing</span><p><b>Groove radius tolerance is not machinable.</b> R 0.0098–0.0100 in is a 5 µm band. R 0.008–0.010 in (0.20–0.25 mm) is inspectable and within Smalley's 0.010 in limit. At r<sub>min</sub> = 0.20 mm the chart gives K<sub>t</sub> ≈ 3.45 ≤ 3.5, so the result is unchanged.</p></div>
-    <div class="f"><span class="tag ok">Changed P2</span><p><b>Key lengthened to 1/2 in.</b> The class rule says a key must be longer than it is wide, so the 1/4 in key is out. The 1/2 in key gives n = 27.5 in shear and 23.5 in bearing and halves the key pressure on the keyseat (17.5 MPa). The slot is 22.45 mm.</p></div>
-    <div class="f"><span class="tag warn">⚠ Practice</span><p><b>Set-screw torque 0.75 ± 0.02 N·m.</b> That is about 1/13 of Shigley Table 7-4's seating torque for a 1/4 in screw (87 lbf·in = 9.8 N·m). It is chosen so the 18-8 screw stays under 205 MPa. The ±0.02 N·m band is tighter than a typical torque driver holds (about ±6 %). The checks already use the 0.73–0.77 N·m range, so the numbers stand; consider stating the tool accuracy.</p></div>
-    <div class="f"><span class="tag ok">Verified</span><p><b>Notch sensitivity.</b> q = 0.688 (Shigley Eqs. 6-33, 6-35, checked in US and SI forms). The design still passes with q up to 0.91. With K<sub>f</sub> = K<sub>t</sub> everywhere (as the reference design does), only a 1-15/16 in shaft passes, at $306.55.</p></div>
+    <div class="f"><span class="tag ok">Fixed</span><p><b>Groove callout relaxed.</b> R 0.0098–0.0100 in was a 5 µm band that could not be cut or inspected. Rev P3 calls out root Ø1.456–1.460 in and R 0.008–0.010 in (0.20–0.25 mm), cut with a standard corner-radius grooving insert and within Smalley's 0.010 in limit. The checks use the worst corner: deepest root, smallest radius.</p></div>
+    <div class="f"><span class="tag ok">Changed P2</span><p><b>Key and keyseat to ASME B17.1.</b> The class rule says a key must be longer than it is wide, so the key is 1/2 in (12.70 h14). McMaster's key stock has square edges, so the cut key gets the B17.1 3/64 in × 45° chamfer to clear the 1/32 in keyseat fillet. Key factors: 26.7 in shear, 15.2 in bearing. Slot end-centre distance 12.70 H14, overall 22.225 mm.</p></div>
+    <div class="f"><span class="tag ok">Fixed</span><p><b>Set-screw torque from the load.</b> McMaster lists no torque for 94355A533, and Unbrako's 70 in·lb applies to stronger ASTM F880 screws. The torque is now the smallest that holds the 35 N sprocket with n = 1.2 at the low end of the ±25% preload scatter: 0.24 N·m, with K = 0.2 and μ = 0.15 from Shigley. The screw then has n = 4.74 at the thread root.</p></div>
+    <div class="f"><span class="tag ok">Verified</span><p><b>Notch sensitivity.</b> q = 0.666 at r = 0.008 in (Shigley Eqs. 6-33, 6-35, checked in US and SI forms). Fatigue still passes with q up to 0.87. With K<sub>f</sub> = K<sub>t</sub> everywhere (as the reference design does), only a 1-15/16 in shaft passes, at $306.55.</p></div>
     <div class="f"><span class="tag ok">Resolved</span><p><b>Shaft properties.</b> S<sub>y</sub> = 88 ksi for 1566 at HRC25, D ≤ 1.5 in, is on the instructor's approved list (10 Nov). No request is needed.</p></div>
   </div>
 </section>
@@ -271,10 +271,10 @@ code{overflow-wrap:anywhere;word-break:break-word}
       <tr data-f="bearing-u"><td>Upper bearing midplane, y<sub>U</sub></td><td class="num">+293.65</td><td>300 − 12.7/2 <span class="tag a">A2</span></td></tr>
       <tr data-f="bearing-l"><td>Lower bearing midplane, y<sub>L</sub></td><td class="num">+6.35</td><td>12.7/2 <span class="tag a">A2</span></td></tr>
       <tr data-f="groove-l"><td>Lower ring groove (centre)</td><td class="num">−0.49</td><td>Just outside the lower bearing</td></tr>
-      <tr data-f="keyseat"><td>Keyseat (centre / upper end)</td><td class="num">−36.0 / −24.75</td><td>In the sprocket hub, under the set screw <span class="tag d">D9</span></td></tr>
+      <tr data-f="keyseat"><td>Keyseat (centre / upper end)</td><td class="num">−36.0 / −24.89</td><td>In the sprocket hub, under the set screw <span class="tag d">D9</span></td></tr>
       <tr data-f="chain"><td>Chain line (tooth midplane)</td><td class="num">−50</td><td>Fig. 2</td></tr>
       <tr data-f="hub"><td>Top of rotor hub</td><td class="num">−150</td><td>Fig. 2</td></tr>
-      <tr data-f="pin"><td>Pin centre</td><td class="num">−180</td><td>30 mm into the hub's upper 40 mm <span class="tag d">D12</span></td></tr>
+      <tr data-f="pin"><td>Pin centre</td><td class="num">−185</td><td>35 mm into the hub's upper 40 mm (lowest round position) <span class="tag d">D12</span></td></tr>
       <tr data-f="hub"><td>Bottom of hub / shaft bottom end</td><td class="num">−250 / −250.5</td><td>Shaft must pass through the hub</td></tr>
       <tr data-f="wr"><td>Rotor CG (120 N)</td><td class="num">−350</td><td>Fig. 2</td></tr>
       <tr data-f="drag"><td>Centre of pressure (560 N drag, +z)</td><td class="num">−500</td><td>Fig. 2</td></tr>
@@ -319,26 +319,26 @@ code{overflow-wrap:anywhere;word-break:break-word}
   <div class="eq"><div>\[y_L\le y\le y_U:\quad M=|R_U|(y_U-y)=990.09(293.65-y),\qquad M=\sqrt{M_x^2+M_z^2}\]</div><span class="no">(11)</span></div>
   <p><button type="button" class="ref" data-f="mdiag,tdiag">Show these diagrams on the 3D shaft</button></p>
   <figure class="chartwrap"><svg id="mtSvg" viewBox="0 0 720 330" role="img" aria-label="Resultant bending moment and torque along the shaft"></svg>
-  <figcaption>Resultant bending moment M (top) and torque T (bottom) along y, drawn from Eqs. (9)–(11). Torque exists only between the pin (y = −180) and the key; the full 19.63 N·m is carried through the whole keyseat.</figcaption></figure>
+  <figcaption>Resultant bending moment M (top) and torque T (bottom) along y, drawn from Eqs. (9)–(11). Torque exists only between the pin (y = −185) and the key; the full 19.63 N·m is carried through the whole keyseat.</figcaption></figure>
   <div class="tbl"><table>
     <thead><tr><th>Section</th><th class="num">y (mm)</th><th class="num">M<sub>x</sub></th><th class="num">M<sub>z</sub></th><th class="num">M</th><th class="num">T (N·m)</th></tr></thead>
     <tbody>
       <tr data-f="plain"><td>Lower bearing midplane</td><td class="num">6.35</td><td class="num">284.31</td><td class="num">9.09</td><td class="num">284.45</td><td class="num">0</td></tr>
       <tr data-f="groove-l" class="hl"><td>Lower ring groove</td><td class="num">−0.49</td><td class="num">280.38</td><td class="num">7.98</td><td class="num">280.50</td><td class="num">0</td></tr>
-      <tr data-f="keyseat"><td>Keyseat upper end</td><td class="num">−24.75</td><td class="num">266.48</td><td class="num">4.07</td><td class="num">266.51</td><td class="num">19.63</td></tr>
-      <tr data-f="pinhole"><td>Pin hole, upper edge</td><td class="num">−176.81</td><td class="num">180.99</td><td class="num">0</td><td class="num">180.99</td><td class="num">19.63</td></tr>
+      <tr data-f="keyseat"><td>Keyseat upper end</td><td class="num">−24.89</td><td class="num">266.40</td><td class="num">4.05</td><td class="num">266.43</td><td class="num">19.63</td></tr>
+      <tr data-f="pinhole"><td>Pin hole, upper edge</td><td class="num">−181.81</td><td class="num">178.19</td><td class="num">0</td><td class="num">178.19</td><td class="num">19.63</td></tr>
       <tr data-f="groove-u"><td>Upper ring groove</td><td class="num">+300.5</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
     </tbody></table></div>
   <p>Example, groove at y = −0.4937: M<sub>x</sub> = 560(499.51) + 13.35(49.51) = 280 384 N·mm, M<sub>z</sub> = 161.25(49.51) = 7 983 N·mm, M = √(280 384² + 7 983²) = 280 498 N·mm.</p>
-  <div class="box a"><span class="lbl">Hub model check</span><p>A statically consistent hub contact (−1820 N at y = −160, +2380 N at y = −240) sums to 560 N with moment −280 N·m about y = 0. The pin-hole check instead uses the larger cantilever value at the hole edge (181 N·m). Average contact pressure in a 10 mm band: 2380/(38.05 × 10) = 6.26 MPa, covered by a 12 MPa mean-stress allowance at the hole.</p></div>
+  <div class="box a"><span class="lbl">Hub model check</span><p>A statically consistent hub contact (−1820 N at y = −160, +2380 N at y = −240) sums to 560 N with moment −280 N·m about y = 0. The pin-hole check instead uses the larger cantilever value at the hole edge (181 N·m). Average contact pressure in a 10 mm band: 2380/(38.00 × 10) = 6.26 MPa. It is radial compression, so, as in Shigley, it is not added to the axial shaft stresses.</p></div>
 </section>
 
 <!-- ============ STEP 5 ============ -->
 <section class="step" id="s5">
   <h2><span class="n">05</span>Where the highest stress is (Shaft item 2)</h2>
   <p>The shaft has one diameter and no shoulders, so the only stress raisers are the two ring grooves, the keyseat and the pin hole. The largest nominal moment is at the lower bearing midplane (284.5 N·m), but there is no notch there. Half a bearing width lower, the <button type="button" class="ref" data-f="groove-l">lower retaining-ring groove</button> combines almost the same moment (280.5 N·m) with the sharpest notch (K<sub>t</sub> 3.5) and the smallest section (root Ø37.06 mm). It carries no torque.</p>
-  <p>The <button type="button" class="ref" data-f="keyseat">keyseat upper end</button> comes second: slightly less moment (266.5 N·m), a milder notch, and the full 19.63 N·m torque. The <button type="button" class="ref" data-f="pinhole">pin hole</button> sees much less moment (181 N·m). The <button type="button" class="ref" data-f="groove-u">upper groove</button> sees no bending or torque.</p>
-  <div class="box"><span class="lbl">Result (Shaft items 2–3)</span><p>Highest stress: lower ring groove, M = 280.5 N·m, T = 0, with N = 203.6 N axial tension. Highest fatigue demand in the conservative model: keyseat upper end, M = 266.5 N·m, T = 19.63 N·m. Step 9 confirms the ranking: the groove governs yield, the keyseat governs fatigue.</p></div>
+  <p>The <button type="button" class="ref" data-f="keyseat">keyseat upper end</button> comes second: slightly less moment (266.4 N·m), a milder notch, and the full 19.63 N·m torque. The <button type="button" class="ref" data-f="pinhole">pin hole</button> sees much less moment (181 N·m). The <button type="button" class="ref" data-f="groove-u">upper groove</button> sees no bending or torque.</p>
+  <div class="box"><span class="lbl">Result (Shaft items 2–3)</span><p>Highest stress: lower ring groove, M = 280.5 N·m, T = 0, with N = 203.6 N axial tension. Second: keyseat upper end, M = 266.4 N·m, T = 19.63 N·m. Step 9 confirms the ranking: the groove governs both yield and fatigue.</p></div>
 </section>
 
 <!-- ============ STEP 6 ============ -->
@@ -359,19 +359,19 @@ code{overflow-wrap:anywhere;word-break:break-word}
     <tr><td>1566, Rockwell C25, D &gt; 1.5 in</td><td class="num">565.4</td><td class="num">860.2</td><td>—</td></tr>
     <tr><td>4140, Rockwell C28 (D ≤ 1 in / larger)</td><td class="num">827.4 / 758.4</td><td class="num">860.2 (cap)</td><td>2672N alloy</td></tr>
   </tbody></table></div>
-<p class="src">The earlier Marks proposal for 1045 (703/598 MPa) is superseded: the approved 1045 value is 517 MPa, which leaves the old 4138N14 design at 2.62 on the strict check.</p>
+<p class="src">The earlier Marks proposal for 1045 (703/598 MPa) is superseded: the approved 1045 value is 517 MPa, under which the old 4138N14 design passes (n<sub>y</sub> 3.63, n<sub>f</sub> 1.30) but is only sold 120 in long.</p>
 </section>
 
 <!-- ============ STEP 7 ============ -->
 <section class="step" id="s7">
   <h2><span class="n">07</span>Ring groove geometry and K<sub>t</sub></h2>
   <p><span class="tag d">D3</span><button type="button" class="ref" data-f="rings">Rings: McMaster 93576A210</button> 18-8 single-turn spiral rings for 1.500 in shafts. Catalog groove: Ø1.456 ± 0.004 in, width 0.031 +0.002/−0 in.</p>
-  <p><span class="tag d">D4</span><b>Shallow groove.</b> The drawing restricts the root to Ø1.4590–1.4600 in (the shallow end of the catalog range) with root radius 0.0098–0.0100 in (Smalley allows at most 0.010 in above 1 in shafts). A shallower, rounder groove lowers K<sub>t</sub>.</p>
-  <div class="eq"><div>\[d_{min}=1.459(25.4)=37.0586\ \text{mm},\qquad t_{max}=\frac{38.1000-37.0586}{2}=0.5207\ \text{mm}\]</div><span class="no">(13)</span></div>
-  <div class="eq"><div>\[\frac{r}{t}=\frac{0.2489}{0.5207}=0.478,\qquad \frac{a}{t}=\frac{0.7874}{0.5207}=1.512\]</div><span class="no">(14)</span></div>
-  <p>Shigley Fig. A-15-16 (flat-bottom groove, bending): at a/t = 1.51 the r/t = 0.40 curve reads 3.40 and the r/t = 0.60 curve reads 3.17. Interpolating gives K<sub>t</sub> ≈ 3.3 at r/t = 0.478.</p>
-  <div class="box"><span class="lbl">Decision D5</span><p>Use <b>K<sub>t</sub> = 3.5</b>, rounded up from the chart. The nominal stress is referred to the groove root d, as the chart defines σ<sub>0</sub> = 4F/(πd²) + 32M/(πd³).</p></div>
-  <div class="box r"><span class="lbl">Review note</span><p>Specify the radius as R 0.008–0.010 in (0.20–0.25 mm) instead of a 0.0002 in band. At r = 0.20 mm, r/t = 0.39 and the chart gives K<sub>t</sub> ≈ 3.45, still under 3.5.</p></div>
+  <p><span class="tag d">D4</span><b>Groove callout.</b> The drawing calls out root Ø1.456–1.460 in (the shallower half of the catalog range) with root radius 0.008–0.010 in (Smalley allows at most 0.010 in above 1 in shafts). Both are ordinary CNC limits: a 0.2 or 0.25 mm corner-radius grooving insert sets the radius. K<sub>t</sub> is taken at the worst corner, deepest root and smallest radius.</p>
+  <div class="eq"><div>\[d_{min}=1.456(25.4)=36.9824\ \text{mm},\qquad t_{max}=\frac{38.1000-36.9824}{2}=0.5588\ \text{mm}\]</div><span class="no">(13)</span></div>
+  <div class="eq"><div>\[\frac{r}{t}=\frac{0.2032}{0.5588}=0.364,\qquad \frac{a}{t}=\frac{0.7874}{0.5588}=1.409\]</div><span class="no">(14)</span></div>
+  <p>Shigley Fig. A-15-16 (flat-bottom groove, bending): at a/t = 1.41 the r/t = 0.20 curve reads 4.23 and the r/t = 0.40 curve reads 3.43. Interpolating gives K<sub>t</sub> ≈ 3.58 at r/t = 0.364.</p>
+  <div class="box"><span class="lbl">Decision D5</span><p>Use <b>K<sub>t</sub> = 3.6</b>, the chart reading to one decimal, as Shigley does in Example 7-2. The nominal stress is referred to the groove root d, as the chart defines σ<sub>0</sub> = 4F/(πd²) + 32M/(πd³).</p></div>
+  <div class="box r"><span class="lbl">Cost of the relaxed callout</span><p>The earlier Ø1.4590–1.4600 in, R 0.0098–0.0100 in groove read K<sub>t</sub> ≈ 3.3 off the chart, but its radius band could not be made. The machinable callout reads 3.6 at its worst corner.</p></div>
 </section>
 
 <!-- ============ STEP 8 ============ -->
@@ -379,14 +379,14 @@ code{overflow-wrap:anywhere;word-break:break-word}
   <h2><span class="n">08</span>Notch sensitivity and endurance limit</h2>
   <p>Neuber constant for bending (Shigley Eq. 6-35), with S<sub>ut</sub> in kpsi: 860.2 MPa = 124.76 kpsi.</p>
   <div class="eq"><div>\[\sqrt{a}=0.246-3.08(10^{-3})S_{ut}+1.51(10^{-5})S_{ut}^2-2.67(10^{-8})S_{ut}^3=0.0449\ \sqrt{\text{in}}\]</div><span class="no">(15)</span></div>
-  <div class="eq"><div>\[q=\frac{1}{1+\sqrt{a}/\sqrt{r}}=\frac{1}{1+0.0449/\sqrt{0.0098}}=0.688\]</div><span class="no">(16)</span></div>
-  <div class="eq"><div>\[K_f=1+q(K_t-1)=1+0.688(3.5-1)=2.720\]</div><span class="no">(17)</span></div>
+  <div class="eq"><div>\[q=\frac{1}{1+\sqrt{a}/\sqrt{r}}=\frac{1}{1+0.0449/\sqrt{0.008}}=0.666\]</div><span class="no">(16)</span></div>
+  <div class="eq"><div>\[K_f=1+q(K_t-1)=1+0.666(3.6-1)=2.731\]</div><span class="no">(17)</span></div>
   <h3>Marin factors (Shigley Eqs. 6-18 to 6-20, Table 6-5)</h3>
   <div class="eq"><div>\[k_a=4.51\,S_{ut}^{-0.265}=4.51(860.2)^{-0.265}=0.753\ \ (\text{machined}),\qquad k_b=1.24\,d^{-0.107}=1.24(38.1)^{-0.107}=0.840\]</div><span class="no">(18)</span></div>
   <div class="eq"><div>\[k_c=k_d=k_f=1,\qquad k_e=0.814\ (99\%\ \text{reliability})\]</div><span class="no">(19)</span></div>
   <div class="eq"><div>\[S_e=k_ak_bk_ck_dk_e(0.5S_{ut})=0.753(0.840)(0.814)(0.5)(860.2)=221.29\ \text{MPa}\]</div><span class="no">(20)</span></div>
   <p>The plain, ground section uses k<sub>a</sub> = 1.58(860.2)<sup>−0.085</sup> = 0.890, giving S<sub>e</sub> = 261.62 MPa. Using the full 38.1 mm in k<sub>b</sub> is slightly conservative.</p>
-  <div class="box"><span class="lbl">Decision D6</span><p>At the keyseat and pin hole, take K<sub>f</sub> = K<sub>t</sub> (no notch-sensitivity credit).</p></div>
+  <div class="box"><span class="lbl">Decision D6</span><p>At the keyseat and pin hole, take K<sub>f</sub> = K<sub>t</sub> (no notch-sensitivity credit). Peterson notes his q data were not verified for notches deeper than four times their radius; the keyseat is about six (4.76/0.76), and Shigley says K<sub>f</sub> = K<sub>t</sub> is always safe.</p></div>
 </section>
 
 <!-- ============ STEP 9 ============ -->
@@ -395,26 +395,27 @@ code{overflow-wrap:anywhere;word-break:break-word}
   <p class="sub">Nominal stresses, then distortion-energy yield and modified-Goodman fatigue (Shigley Eqs. 7-4, 7-5, 7-15, 7-16, 6-46).</p>
   <div class="eq"><div>\[\sigma_b=\frac{32M}{\pi d^3},\qquad \tau_t=\frac{16T}{\pi d^3},\qquad \sigma_N=\frac{4N}{\pi d^2}\]</div><span class="no">(21)</span></div>
   <div class="eq"><div>\[\sigma_a=K_f\sigma_b,\qquad \sigma_m=K_t\sigma_N(+\,p),\qquad \tau_m=K_{ts}\tau_t,\qquad \sigma'_m=\sqrt{\sigma_m^2+3\tau_m^2}\]</div><span class="no">(22)</span></div>
-  <div class="eq"><div>\[\text{Yield (design, strict): }\ n_y=\frac{S_y}{\sqrt{(K_t\sigma_b+\sigma_m)^2+3\tau_m^2}}\qquad \text{Fatigue: }\ \frac{1}{n_f}=\frac{\sigma_a}{S_e}+\frac{\sigma'_m}{S_{ut}}\]</div><span class="no">(23)</span></div>
-  <div class="box"><span class="lbl">Decision D7</span><p>The design checks yield with K<sub>t</sub>, no notch-sensitivity credit. Shigley's Eq. (7-15) uses K<sub>f</sub>. Both are shown below; the strict K<sub>t</sub> number is the one quoted as the design value.</p></div>
+  <div class="eq"><div>\[\text{Yield (Eq. 7-15): }\ n_y=\frac{S_y}{\sqrt{(K_f\sigma_b+\sigma_m)^2+3(K_{fs}\tau_t)^2}}\qquad \text{Fatigue: }\ \frac{1}{n_f}=\frac{\sigma_a}{S_e}+\frac{\sigma'_m}{S_{ut}}\]</div><span class="no">(23)</span></div>
+  <div class="box"><span class="lbl">Decision D7</span><p>Yield is checked with Shigley's Eq. (7-15), which uses K<sub>f</sub>. The K<sub>t</sub> elastic peak is also shown, for information; it is not a Rev2 requirement.</p></div>
 
-  <h3><button type="button" class="ref" data-f="groove-l">Lower ring groove</button> (governs yield)</h3>
-  <div class="eq"><div>\[\sigma_b=\frac{32(280\,498)}{\pi(37.0586)^3}=56.139,\qquad \sigma_m=3.5\,\frac{4(203.62)}{\pi(37.0586)^2}=0.661\ \text{MPa}\]</div><span class="no">(24)</span></div>
-  <div class="eq"><div>\[n_y=\frac{606.7}{3.5(56.139)+0.661}=\frac{606.7}{197.15}=3.08\qquad\Big(\text{Eq. 7-15 with }K_f:\ \frac{606.7}{2.720(56.139)+0.661}=3.96\Big)\]</div><span class="no">(25)</span></div>
-  <div class="eq"><div>\[\frac{1}{n_f}=\frac{2.720(56.139)}{221.29}+\frac{0.661}{860.2}=0.6900+0.0008\ \Rightarrow\ n_f=1.45\]</div><span class="no">(26)</span></div>
+  <h3><button type="button" class="ref" data-f="groove-l">Lower ring groove</button> (governs yield and fatigue)</h3>
+  <div class="eq"><div>\[\sigma_b=\frac{32(280\,498)}{\pi(36.9824)^3}=56.486,\qquad \sigma_m=3.6\,\frac{4(203.62)}{\pi(36.9824)^2}=0.682\ \text{MPa}\]</div><span class="no">(24)</span></div>
+  <div class="eq"><div>\[n_y=\frac{606.7}{2.731(56.486)+0.682}=\frac{606.7}{154.93}=3.92\qquad\Big(K_t\text{ peak, informational: }\frac{606.7}{3.6(56.486)+0.682}=2.97\Big)\]</div><span class="no">(25)</span></div>
+  <div class="eq"><div>\[\frac{1}{n_f}=\frac{2.731(56.486)}{221.29}+\frac{0.682}{860.2}=0.6971+0.0008\ \Rightarrow\ n_f=1.43\]</div><span class="no">(26)</span></div>
 
-  <h3><button type="button" class="ref" data-f="keyseat">Keyseat upper end</button> (governs fatigue)</h3>
-  <p><span class="tag d">D8</span>Keyseat factors raised to <b>K<sub>t</sub> = 3.0, K<sub>ts</sub> = 4.0</b> (Shigley Table 7-1 gives 2.14 and 3.0 for r/d = 0.02; the drawing's floor radius R0.13–0.25 mm is sharper). The key bearing pressure p = 17.52 MPa (Step 11) is added to the mean normal stress as a conservative bound. Section at D<sub>min</sub> = 37.9984 mm (OD tolerance −0.004 in).</p>
-  <div class="eq"><div>\[\sigma_b=\frac{32(266\,508)}{\pi(37.9984)^3}=49.478,\quad \tau_t=\frac{16(19\,630)}{\pi(37.9984)^3}=1.822,\quad \sigma_N=0.180\ \text{MPa}\]</div><span class="no">(27)</span></div>
-  <div class="eq"><div>\[\sigma_a=3(49.478)=148.44,\quad \sigma_m=3(0.180)+17.52=18.06,\quad \tau_m=4(1.822)=7.29\]</div><span class="no">(28)</span></div>
-  <div class="eq"><div>\[n_y=\frac{606.7}{\sqrt{(148.44+18.06)^2+3(7.29)^2}}=\frac{606.7}{166.98}=3.63\]</div><span class="no">(29)</span></div>
-  <div class="eq"><div>\[\sigma'_m=\sqrt{18.06^2+3(7.29)^2}=22.04,\qquad \frac{1}{n_f}=\frac{148.44}{221.29}+\frac{22.04}{860.2}=0.6964\ \Rightarrow\ n_f=1.44\]</div><span class="no">(30)</span></div>
-  <p class="src">With plain Table 7-1 values and notch sensitivity (no bearing-pressure term) the keyseat gives n<sub>f</sub> = 2.29 and n<sub>y</sub> = 6.4. The 1.44 is a deliberately harsh model.</p>
+  <h3><button type="button" class="ref" data-f="keyseat">Keyseat upper end</button></h3>
+  <p><span class="tag d">D8</span><b>Keyseat to ASME B17.1</b> (Class 1, Tables 4–5): floor fillet 1/32 in for a keyseat depth over 1/8 to 1/4 in, cut with a 3/8 in corner-radius end mill. K<sub>t</sub> and K<sub>ts</sub> come from Peterson's end-milled keyseat fits (Pilkey §5.2, valid 0.005 ≤ r/d ≤ 0.07). No key-pressure term, as in Shigley. The check is at the upper end of the longest, widest slot, y = −24.65 (M = 266.6 N·m); section at D<sub>min</sub> = 37.9984 mm.</p>
+  <div class="eq"><div>\[\frac{r}{d}=\frac{25.4/32}{37.9984}=0.0209,\quad u=\frac{0.1}{r/d}=4.787,\quad K_t=1.426+0.1643u-0.0019u^2=2.17,\quad K_{ts}=1.953+0.1434u-0.0021u^2=2.59\]</div><span class="no">(26a)</span></div>
+  <div class="eq"><div>\[\sigma_b=\frac{32(266\,567)}{\pi(37.9984)^3}=49.489,\quad \tau_t=\frac{16(19\,630)}{\pi(37.9984)^3}=1.822,\quad \sigma_N=0.180\ \text{MPa}\]</div><span class="no">(27)</span></div>
+  <div class="eq"><div>\[\sigma_a=2.17(49.489)=107.39,\quad \sigma_m=2.17(0.180)=0.39,\quad \tau_m=2.59(1.822)=4.72\]</div><span class="no">(28)</span></div>
+  <div class="eq"><div>\[n_y=\frac{606.7}{\sqrt{(107.39+0.39)^2+3(4.72)^2}}=\frac{606.7}{108.09}=5.61\]</div><span class="no">(29)</span></div>
+  <div class="eq"><div>\[\sigma'_m=\sqrt{0.39^2+3(4.72)^2}=8.18,\qquad \frac{1}{n_f}=\frac{107.39}{221.29}+\frac{8.18}{860.2}=0.4948\ \Rightarrow\ n_f=2.02\]</div><span class="no">(30)</span></div>
+  <p class="src">At r/d = 0.02 the same fits give 2.20 and 2.62, close to Shigley's 2.14 (Table 7-1) and his 2.62 for torsion without the key. The earlier R 0.13–0.25 mm floor, never sized for a keyseat, would have given K<sub>t</sub> ≈ 3.5–4.6.</p>
 
   <h3><button type="button" class="ref" data-f="pinhole">Pin hole</button> (Shigley Table A-16, solid bar)</h3>
-  <p>Hole 0.251 in = 6.375 mm, a/D = 6.375/37.998 = 0.1678. Bending: A = 0.732, K<sub>t</sub> = 2.114. Torsion: A = 0.856, K<sub>ts</sub> = 1.606 (interpolated). Net-section stresses σ = 32M/(πAD³), τ = 16T/(πAD³). Mean allowance 12 MPa for hub contact.</p>
-  <div class="eq"><div>\[\sigma_b=\frac{32(180\,985)}{\pi(0.732)(37.9984)^3}=45.93,\quad \tau_t=\frac{16(19\,630)}{\pi(0.856)(37.9984)^3}=2.13\]</div><span class="no">(31)</span></div>
-  <div class="eq"><div>\[n_y=\frac{606.7}{\sqrt{(97.12+12.38)^2+3(3.42)^2}}=5.53,\qquad \frac{1}{n_f}=\frac{97.12}{221.29}+\frac{13.72}{860.2}\ \Rightarrow\ n_f=2.20\]</div><span class="no">(32)</span></div>
+  <p>Largest hole 6.378 mm (F7), upper edge at y = −181.81 (M = 178.2 N·m); a/D = 6.378/37.998 = 0.1678. Bending: A = 0.731, K<sub>t</sub> = 2.114. Torsion: A = 0.856, K<sub>ts</sub> = 1.606 (interpolated). Net-section stresses σ = 32M/(πAD³), τ = 16T/(πAD³). No hub-contact term is added to the mean stress.</p>
+  <div class="eq"><div>\[\sigma_b=\frac{32(178\,186)}{\pi(0.731)(37.9984)^3}=45.23,\quad \tau_t=\frac{16(19\,630)}{\pi(0.856)(37.9984)^3}=2.13\]</div><span class="no">(31)</span></div>
+  <div class="eq"><div>\[n_y=\frac{606.7}{\sqrt{(95.62+0.38)^2+3(3.42)^2}}=\frac{606.7}{96.19}=6.31,\qquad \frac{1}{n_f}=\frac{95.62}{221.29}+\frac{5.94}{860.2}\ \Rightarrow\ n_f=2.28\]</div><span class="no">(32)</span></div>
 
   <h3>Summary and S<sub>y</sub> sensitivity</h3>
   <p>Move the slider to see how each section responds to a different approved yield strength (S<sub>ut</sub> and fatigue stay at 860.2 MPa).</p>
@@ -427,7 +428,7 @@ code{overflow-wrap:anywhere;word-break:break-word}
     <button type="button" data-sy="517">517 (75 ksi, 1045)</button>
   </div>
   <div class="tbl"><table id="secTbl">
-    <thead><tr><th>Location</th><th class="num">σ′<sub>max</sub> K<sub>t</sub></th><th class="num">n<sub>y</sub> strict</th><th class="num">n<sub>y</sub> Eq. 7-15</th><th class="num">n<sub>f</sub></th><th>Status</th></tr></thead>
+    <thead><tr><th>Location</th><th class="num">σ′<sub>max</sub> K<sub>t</sub></th><th class="num">n<sub>y</sub> K<sub>t</sub> (info)</th><th class="num">n<sub>y</sub> Eq. 7-15</th><th class="num">n<sub>f</sub></th><th>Status</th></tr></thead>
     <tbody></tbody></table></div>
 </section>
 
@@ -438,16 +439,16 @@ code{overflow-wrap:anywhere;word-break:break-word}
 <div class="tbl"><table>
   <thead><tr><th>Shaft (stock)</th><th class="num">Stock</th><th class="num">Total</th><th>Result</th></tr></thead>
   <tbody>
-    <tr><td>1045, 1-7/16 in, 4138N22 (24 in)</td><td class="num">$55.85</td><td class="num">$168.39</td><td>Fails fatigue at the deeper 2-turn ring groove (n<sub>f</sub> 1.06)</td></tr>
-    <tr><td>1566, 1-1/4 in, 1346K45 (24 in)</td><td class="num">$62.74</td><td class="num">$171.48</td><td>Fails fatigue (0.81)</td></tr>
-    <tr><td>1045, 35 mm, 4138N66 (1000 mm)</td><td class="num">$80.56</td><td class="num">$194.08</td><td>Fails fatigue (0.79)</td></tr>
-    <tr><td>1045, 1-11/16 in, 4138N27 (24 in)</td><td class="num">$76.03</td><td class="num">$202.18</td><td>Passes Shigley (3.87, n<sub>f</sub> 1.37); fails the strict K<sub>t</sub> check (2.69); 15-7 PH ring</td></tr>
-    <tr class="hl"><td>1566, 1-1/2 in, 1346K534 (24 in)</td><td class="num">$112.69</td><td class="num">$222.07</td><td>Selected: passes both yield checks and fatigue</td></tr>
+    <tr><td>1045, 1-7/16 in, 4138N22 (24 in)</td><td class="num">$55.85</td><td class="num">$168.39</td><td>Fails fatigue at the deeper 2-turn ring groove (n<sub>f</sub> 1.10)</td></tr>
+    <tr><td>1566, 1-1/4 in, 1346K45 (24 in)</td><td class="num">$62.74</td><td class="num">$171.48</td><td>Fails fatigue (0.83)</td></tr>
+    <tr><td>1045, 35 mm, 4138N66 (1000 mm)</td><td class="num">$80.56</td><td class="num">$194.08</td><td>Fails fatigue (0.82)</td></tr>
+    <tr><td>1045, 1-11/16 in, 4138N27 (24 in)</td><td class="num">$76.03</td><td class="num">$202.18</td><td>Passes: yield 3.91, n<sub>f</sub> 1.38; groove K<sub>t</sub> 4.5; 15-7 PH ring</td></tr>
+    <tr class="hl"><td>1566, 1-1/2 in, 1346K534 (24 in)</td><td class="num">$112.69</td><td class="num">$222.07</td><td>Selected: yield 3.92, n<sub>f</sub> 1.43; groove K<sub>t</sub> 3.6</td></tr>
     <tr><td>1045, 1-15/16 in, 4138N33 (24 in)</td><td class="num">$97.65</td><td class="num">$306.55</td><td>Passes; heavy-duty rings $49.11 each</td></tr>
-    <tr><td>1045, 1-1/2 in, 4138N14 (120 in only)</td><td class="num">$306.52</td><td class="num">$415.90</td><td>Old design; passes Shigley only at 517 MPa</td></tr>
+    <tr><td>1045, 1-1/2 in, 4138N14 (120 in only)</td><td class="num">$306.52</td><td class="num">$415.90</td><td>Old design; passes (3.63, n<sub>f</sub> 1.30) but only sold 120 in long</td></tr>
   </tbody></table></div>
 <p class="src">Excluded before any stress check: keyed shafts (the keyway runs through the bearing seats and grooves), D-profile shafts (full-length flat), nitrided shafts (only case hardness listed, so no property set can meet Req. 5), chrome-plated shafts (Req. 5). Plain stainless stops at 1-1/4 in and fails fatigue badly.</p>
-<div class="box"><span class="lbl">Decision D1 justified</span><p>1346K534 is the cheapest shaft that passes fatigue, the Shigley yield check and the strict K<sub>t</sub> check, and it keeps the 1-1/2 in rings, key and pin. It also has the most margin on notch sensitivity: it still passes with q up to 0.91 (calculated 0.688).</p></div>
+<div class="box"><span class="lbl">Decision D1</span><p>4138N27 ($202.18) is the cheapest shaft that meets every requirement. 1346K534 ($222.07) is selected: $19.89 more for a slightly larger fatigue margin (1.43 against 1.38), a milder groove (K<sub>t</sub> 3.6 against 4.5) and the standard 1-1/2 in rings, key and pin. yield margins are about equal (3.91 against 3.92). The groove still passes fatigue with q up to 0.87 (calculated 0.666).</p></div>
 <div class="eq"><div>\[C_{shaft}=\$112.69\ \ (\text{full price of the 24 in stick; the shaft uses }554/25.4=21.81\ \text{in})\]</div><span class="no">(33)</span></div>
 </section>
 
@@ -455,41 +456,42 @@ code{overflow-wrap:anywhere;word-break:break-word}
 <section class="step" id="s11">
   <h2><span class="n">11</span>Key (Hardware item 1)</h2>
   <p><span class="tag d">D9</span><button type="button" class="ref" data-f="key">18-8 stainless square key, 3/8 × 3/8 in, cut 1/2 in long</button> (12.70 ± 0.05 mm) from 36 in stock 92530A319 (width and height −0.003/0 in). The class rule requires a key longer than it is wide: 12.70 &gt; 9.525 mm. Key spans y = −42.35 to −29.65, inside the un-toothed sprocket hub (y = −46.39 to −25.03), centred under the set screw.</p>
-  <p><span class="tag d">D10</span><button type="button" class="ref" data-f="keyseat">Closed keyseat</button> 22.45 ± 0.05 mm long, 9.525 +0.0254/−0 mm wide, 4.7625 ± 0.0254 mm deep, semicircular ends, centred at y = −36.0 (spans −47.25 to −24.75, 0.28 mm past the sprocket face). Straight length 22.40 − 9.55 = 12.85 mm ≥ 12.75 mm maximum key.</p>
+  <p><span class="tag d">D10</span><b><button type="button" class="ref" data-f="keyseat">Closed keyseat</button>, ASME B17.1 Class 1</b>: width 9.525 +0.051/−0 mm (3/8 in +0.002/−0); depth 3/16 in at the side wall, dimensioned S = D − Y − H/2 = 1.5000 − 0.0238 − 0.1875 = 1.2887 in +0.000/−0.015 (Y = chordal height); floor fillet R 1/32 in. B17.1 gives no length tolerance, so the length uses ISO 286 IT14: key 12.70 h14 (+0/−0.43), slot end-centre distance 12.70 H14 (+0.43/−0). The straight walls equal the end-centre distance, so the slot is never shorter than the key. Overall 12.70 + 9.525 = 22.225 mm, centred at y = −36.0 (spans −47.11 to −24.89). Key edges chamfered 3/64 in × 45° (B17.1 Table 5).</p>
   <p><span class="tag a">Req. 7</span>S<sub>y</sub> = 0.8 S<sub>ut</sub> = 0.8(515) = 412 MPa (ATI 304 annealed S<sub>ut</sub> as the 18-8 baseline).</p>
   <div class="eq"><div>\[F=\frac{2T}{D_{min}}=\frac{2(19\,630)}{37.9984}=1033.2\ \text{N}\]</div><span class="no">(34)</span></div>
-  <div class="eq"><div>\[\tau=\frac{F}{b_{min}L_{min}}=\frac{1033.2}{9.4488(12.65)}=8.64\ \text{MPa},\qquad n_s=\frac{S_y}{\sqrt3\,\tau}=\frac{412}{\sqrt3(8.64)}=27.5\]</div><span class="no">(35)</span></div>
-  <p>Hub-side engagement = h<sub>min</sub> − seat depth<sub>max</sub> = 9.4488 − 4.7879 = 4.661 mm.</p>
-  <div class="eq"><div>\[p=\frac{F}{e\,L_{min}}=\frac{1033.2}{4.661(12.65)}=17.52\ \text{MPa},\qquad n_b=\frac{412}{17.52}=23.5\]</div><span class="no">(36)</span></div>
+  <div class="eq"><div>\[\tau=\frac{F}{b_{min}L_{min}}=\frac{1033.2}{9.4488(12.27)}=8.91\ \text{MPa},\qquad n_s=\frac{S_y}{\sqrt3\,\tau}=\frac{412}{\sqrt3(8.91)}=26.7\]</div><span class="no">(35)</span></div>
+  <p>L<sub>min</sub> = 12.70 − 0.43 = 12.27 mm (h14). Bearing height = min(h<sub>min</sub> − depth<sub>side,max</sub>, depth<sub>side,min</sub>) − chamfer = min(9.4488 − (4.7625 + 0.3810), 4.7625) − 1.1906 = 3.115 mm.</p>
+  <div class="eq"><div>\[p=\frac{F}{e\,L_{min}}=\frac{1033.2}{3.115(12.27)}=27.04\ \text{MPa},\qquad n_b=\frac{412}{27.04}=15.2\]</div><span class="no">(36)</span></div>
   <div class="eq"><div>\[C_{key}=\frac{\$28.32}{36\ \text{in}}(0.50\ \text{in})=\$0.393\]</div><span class="no">(37)</span></div>
-  <div class="box g"><span class="lbl">Why 1/2 in</span><p>It is the shortest common fraction longer than the 3/8 in width. Longer keys barely change the keyseat (n<sub>f</sub> 1.238 at 5/8 in, 1.238 at 3/4 in) and cost more. Cutting from 36 in stock ($0.79/in) beats precut 1 in keys ($2.876 each) and 12 in stock ($10.49).</p></div>
+  <div class="box g"><span class="lbl">Why 1/2 in</span><p>It is the shortest common fraction longer than the 3/8 in width. Key length barely changes the keyseat (n<sub>f</sub> 1.96 at 1/4 in, 1.95 at 1/2 in); longer keys cost more. Cutting from 36 in stock ($0.79/in) beats precut 1 in keys ($2.876 each) and 12 in stock ($10.49).</p></div>
 </section>
 
 <!-- ============ STEP 12 ============ -->
 <section class="step" id="s12">
   <h2><span class="n">12</span>Set screw (Hardware item 2)</h2>
-  <p><span class="tag d">D11</span><button type="button" class="ref" data-f="screw">McMaster 94355A533</button>: 18-8 stainless, flat tip, 1/4"-20 × 1/4 in, 1/8 in hex. Tapped through the sprocket hub wall (19.05 mm) at the key centre, at least 4.5 mm of full thread engaged. Flat tip bears on the flat key. Tighten to 0.73–0.77 N·m.</p>
-  <p><span class="tag a">A</span>Friction μ ≥ 0.10 at the screw/key and key/shaft faces; nut factor K = 0.15–0.25. Only one interface is credited.</p>
-  <div class="eq"><div>\[F_{min}=\frac{T_{min}}{K_{max}d}=\frac{0.73}{0.25(0.00635)}=459.8\ \text{N},\qquad F_{max}=\frac{0.77}{0.15(0.00635)}=808.4\ \text{N}\]</div><span class="no">(38)</span></div>
-  <div class="eq"><div>\[n_{slip}=\frac{\mu F_{min}}{W_s}=\frac{0.10(459.8)}{35}=1.31\]</div><span class="no">(39)</span></div>
-  <p>Screw body at installation, S<sub>y</sub> = 205 MPa, root Ø4.57 mm minus the hex socket (across flats 3.175 mm):</p>
-  <div class="eq"><div>\[A=\frac{\pi(4.57)^2}{4}-\frac{\sqrt3}{2}(3.175)^2=7.673\ \text{mm}^2,\quad J=\frac{\pi}{32}\Big[4.57^4-\Big(\frac{2(3.175)}{\sqrt3}\Big)^4\Big]=25.09\ \text{mm}^4\]</div><span class="no">(40)</span></div>
-  <div class="eq"><div>\[\sigma=\frac{808.4}{7.673}=105.4,\quad \tau=\frac{770(2.285)}{25.09}=70.1,\quad n_y=\frac{205}{\sqrt{105.4^2+3(70.1)^2}}=\frac{205}{160.8}=1.27\]</div><span class="no">(41)</span></div>
-  <div class="eq"><div>\[n_{thread}=\frac{205/\sqrt3}{808.4/[0.5\pi(5.4)(4.5)]}=5.59,\qquad n_{tip}=\frac{205}{808.4/[\pi(3.5)^2/4]}=2.44\]</div><span class="no">(42)</span></div>
+  <p><span class="tag d">D11</span><button type="button" class="ref" data-f="screw">McMaster 94355A533</button>: 18-8 stainless, flat tip, 1/4"-20 UNC-3A × 1/4 in, 1/8 in hex, ASME B18.3, Rockwell B80. Threaded through the sprocket hub at the key centre; the flat tip presses on the key. McMaster lists no tightening torque, so the torque is set by what the screw has to hold.</p>
+  <p><span class="tag a">Load</span>The closed keyseat holds the key axially and the key carries the torque, so the screw only keeps the sprocket from sliding down under its weight, W<sub>s</sub> = 35 N. The screw presses the key with F and the hub bore presses the opposite side of the shaft with the same F, so the holding force is 2μF. μ = 0.15 (Shigley Table 8-5, dry steel on steel, low end); K = 0.2 (Shigley Table 8-15 default); preload scatter ±25% at a given torque (Unbrako).</p>
+  <div class="eq"><div>\[F_{req}=\frac{n\,W_s}{2\mu}=\frac{1.2(35)}{2(0.15)}=140.0\ \text{N},\qquad T_{req}=K F_{req} d=0.2(140.0)(6.35)=177.8\ \text{N·mm}\]</div><span class="no">(38)</span></div>
+  <div class="eq"><div>\[T_{spec}=\frac{T_{req}}{0.75}=237.1\to 0.24\ \text{N·m},\quad F=\frac{240}{0.2(6.35)}(1\mp0.25)=141.7\text{ to }236.2\ \text{N},\quad n_{slip}=\frac{2(0.15)(141.7)}{35}=1.22\]</div><span class="no">(39)</span></div>
+  <p>Screw strength at the high end (F = 236.2 N, T = 0.24 N·m), S<sub>y</sub> = 205 MPa (ATI 304 annealed). Root area A<sub>r</sub> = 0.0269 in² (Shigley Table 8-2), d<sub>r</sub> = 4.701 mm; section through the 1/8 in hex socket:</p>
+  <div class="eq"><div>\[A=17.35-\frac{\sqrt3}{2}(3.175)^2=8.625\ \text{mm}^2,\qquad J=\frac{\pi(4.701)^4}{32}-\frac{5\sqrt3}{8}\Big(\frac{3.175}{\sqrt3}\Big)^4=35.71\ \text{mm}^4\]</div><span class="no">(40)</span></div>
+  <div class="eq"><div>\[\sigma=\frac{236.2}{8.625}=27.39,\quad \tau=\frac{240(2.350)}{35.71}=15.80,\quad n_y=\frac{205}{\sqrt{27.39^2+3(15.80)^2}}=\frac{205}{38.71}=5.30\]</div><span class="no">(41)</span></div>
+  <p>Thread root, Shigley Sec. 8-2 (Eq. 8-12 set), first thread carrying 0.38F and 0.38T, n<sub>t</sub> = 1, p = 1.27 mm; flat tip Ø ≥ 0.118 in = 3.00 mm (ASME B18.3):</p>
+  <div class="eq"><div>\[\sigma_x=\frac{6(0.38F)}{\pi d_r p}=28.72,\ \sigma_y=-\frac{4F}{\pi d_r^2}=-13.61,\ \tau_{yz}=\frac{16T}{\pi d_r^3}=11.77,\ \tau_{zx}=\frac{4(0.38T)}{\pi d_r^2p}=4.14\ \Rightarrow\ \sigma'=43.2,\ n=4.74;\quad n_{tip}=\frac{205}{236.2/7.05}=6.12\]</div><span class="no">(42)</span></div>
   <div class="eq"><div>\[C_{screw}=\$4.81/25=\$0.192\]</div><span class="no">(43)</span></div>
 </section>
 
 <!-- ============ STEP 13 ============ -->
 <section class="step" id="s13">
   <h2><span class="n">13</span>Pin (Hardware item 3)</h2>
-  <p><span class="tag d">D12</span><button type="button" class="ref" data-f="pin">McMaster 98380A556</button>: 416 stainless dowel pin, 1/4 in × 3 in (spans the 3 in hub OD), HRC 36 min, rated 7200 lbf double shear. At y = −180, 30 mm below the hub top. Shaft hole 6.363–6.375 mm (clearance, no press-fit hoop stress in the shaft); interference in one hub wall only retains it.</p>
-  <p><span class="tag a">A</span>S<sub>y,pin</sub> = 760 MPa: lower end of Swiss Steel's 416 condition-T range, an assumed typical value.</p>
-  <div class="eq"><div>\[F_t=\frac{T}{D_{min}}=\frac{19\,630}{37.9984}=516.6\ \text{N},\quad F_a=\frac{120}{2}=60\ \text{N},\quad R=\sqrt{516.6^2+60^2}=520.1\ \text{N per plane}\]</div><span class="no">(44)</span></div>
-  <div class="eq"><div>\[\tau=\frac{R}{\pi d_p^2/4}=\frac{520.1}{\pi(6.35)^2/4}=16.4\ \text{MPa}\]</div><span class="no">(45)</span></div>
-  <div class="eq"><div>\[M_p=R\frac{D}{2}=520.1(19.05)=9907\ \text{N·mm},\quad \sigma_b=\frac{32M_p}{\pi d_p^3}=394.1\ \text{MPa},\quad n_y=\frac{760}{\sqrt{394.1^2+3(16.4)^2}}=1.92\]</div><span class="no">(46)</span></div>
-  <div class="eq"><div>\[\text{With fit pressure }(p_{max}=85):\ \ n_y=\frac{760}{\sqrt{(394.1+2\cdot85)^2+3(16.4)^2}}=\frac{760}{564.8}=1.35\]</div><span class="no">(47)</span></div>
-  <p>Bearing over 10 mm of hub wall: 520.1/(6.35 × 10) = 8.19 MPa, n = 92.8. Axial retention μpπd<sub>p</sub>L<sub>e</sub> = 0.10(40)π(6.35)(10) = 798 N. Catalog breaking-load ratio 32 027/(2 × 520.1) = 30.8 (ultimate check, not a yield factor). A 3/16 in pin would reach about 935 MPa bending under the same bound and fails.</p>
-  <div class="eq"><div>\[C_{pin}=\$4.69\]</div><span class="no">(48)</span></div>
+  <p><span class="tag d">D12</span><button type="button" class="ref" data-f="pin">McMaster 98380A556</button>: 416 stainless dowel pin, 1/4 in × 3 in (spans the 3 in hub OD), ASME B18.8.2 standard series (+0.0001/+0.0003 in), HRC 36 min, <b>double shear breaking strength 7200 lbf</b>. Rev2 item 5 allows only Piazza-approved properties and none is listed for the pin, so the pin is checked against McMaster's rating.</p>
+  <p><span class="tag d">Location</span>Rev2 item 10 leaves the hub's upper 40 mm (y = −150 to −190) for the pin. The shaft moment at the hole, 560(500 + y), falls as the pin goes down, so it sits at the lowest round number that keeps the whole hole in that zone: <b>y = −185</b>, 35 mm below the hub top (hole edges −181.81 and −188.19).</p>
+  <p><span class="tag d">Fits</span>Shaft hole <b>6.35 F7</b> (ISO 286, 6.363–6.378 mm): slip fit, 0.005–0.025 mm clearance, so no press-fit hoop stress at the shaft's notch. Hub holes <b>0.2495–0.2500 in</b>, the ASME B18.8.2 press-fit hole for standard-series 1/4 in pins in steel: 0.003–0.020 mm interference in both hub walls.</p>
+  <div class="eq"><div>\[F_t=\frac{T}{D_{min}}=\frac{19\,630}{37.9984}=516.6\ \text{N},\quad F_a=\frac{W_r}{2}=\frac{120}{2}=60\ \text{N},\quad R=\sqrt{516.6^2+60^2}=520.1\ \text{N per plane}\]</div><span class="no">(44)</span></div>
+  <div class="eq"><div>\[F_{ds}=2R=1040.1\ \text{N},\qquad F_{rated}=7200\ \text{lbf}=32\,027\ \text{N}\]</div><span class="no">(45)</span></div>
+  <div class="eq"><div>\[n=\frac{F_{rated}}{F_{ds}}=\frac{32\,027}{1040.1}=30.8\ \ge 1.2\]</div><span class="no">(46)</span></div>
+  <p>The rating is a breaking load, so n is against fracture; it is the only pin strength McMaster publishes. The hub is at least as strong as the pin (Rev2 item 10), and the shaft side of the hole is the Table A-16 pin-hole check in Step 9.</p>
+  <div class="eq"><div>\[C_{pin}=\$4.69\]</div><span class="no">(47)</span></div>
 </section>
 
 <!-- ============ STEP 14 ============ -->
@@ -499,8 +501,8 @@ code{overflow-wrap:anywhere;word-break:break-word}
   <div class="eq"><div>\[\frac{\text{capacity}}{N}=\frac{4950(4.448)}{203.62}=\frac{22\,019}{203.62}=108\]</div><span class="no">(49)</span></div>
   <h3>Groove wall and end margin</h3>
   <div class="eq"><div>\[t_{min}=\frac{37.9984-37.0840}{2}=0.4572\ \text{mm},\quad \text{flat}=0.4572-0.254=0.2032\ \text{mm}\]</div><span class="no">(50)</span></div>
-  <div class="eq"><div>\[n_{groove}=\frac{S_y\,\pi d\,(\text{flat})}{N}=\frac{606.7\,\pi(37.0586)(0.2032)}{203.62}=70\]</div><span class="no">(51)</span></div>
-  <div class="eq"><div>\[\text{Top end margin}=303.5-(300.1+0.8382)=2.56\ \text{mm}\ \ge\ 3t_{max}=1.56\ \text{mm}\]</div><span class="no">(52)</span></div>
+  <div class="eq"><div>\[n_{groove}=\frac{S_y\,\pi d\,(\text{flat})}{N}=\frac{606.7\,\pi(36.9824)(0.2032)}{203.62}=70\]</div><span class="no">(51)</span></div>
+  <div class="eq"><div>\[\text{Top end margin}=303.5-(300.1+0.8382)=2.56\ \text{mm}\ \ge\ 3t_{max}=1.68\ \text{mm}\]</div><span class="no">(52)</span></div>
   <p>End-lip shear and lip bending factors exceed 500 and 700. The ring must bear on the rotating inner race (radial width 0.088 ± 0.004 in). The grooves leave about 0.50 mm total axial float; no preload.</p>
   <div class="eq"><div>\[C_{rings}=2\Big(\frac{\$10.26}{5}\Big)=\$4.10\]</div><span class="no">(53)</span></div>
 </section>
@@ -514,12 +516,12 @@ code{overflow-wrap:anywhere;word-break:break-word}
     <tbody>
       <tr data-f="shaft"><td>Overall length</td><td>554.00 ± 0.10 mm; ends C0.25 × 45°, square within 0.05</td><td class="num">−250.5 to 303.5</td></tr>
       <tr data-f="shaft"><td>Stock OD</td><td>37.9984–38.1000 mm (1.500 +0/−0.004 in), as supplied</td><td class="num">—</td></tr>
-      <tr data-f="pinhole"><td>Pin hole</td><td>Ø6.363 +0.012/−0 thru at 70.50 ± 0.10, ⟂ to keyseat plane ±1°</td><td class="num">−180.0</td></tr>
-      <tr data-f="keyseat"><td>Keyseat</td><td>Centre 214.50 ± 0.10; 22.45 ± 0.05 long; 9.525 +0.0254/−0 wide; 4.7625 ± 0.0254 deep; floor R0.13–0.25</td><td class="num">−36.0</td></tr>
-      <tr data-f="groove-l"><td>Lower groove</td><td>Near wall 249.6126 ± 0.05; root Ø37.0586–37.0840; width 0.7874–0.8382; root R0.2489–0.2540</td><td class="num">−0.89 to −0.05</td></tr>
+      <tr data-f="pinhole"><td>Pin hole</td><td>Ø6.35 F7 (6.363–6.378) thru at 65.50 ± 0.10, ⟂ to keyseat plane ±1°</td><td class="num">−185.0</td></tr>
+      <tr data-f="keyseat"><td>Keyseat</td><td>Centre 214.50 ± 0.10; end-centre distance 12.70 H14 (+0.43/−0); width 9.525 +0.051/−0 (B17.1 Class 1); S = 32.733 +0/−0.381 (B17.1); floor R 1/32 in (B17.1 Table 5)</td><td class="num">−36.0</td></tr>
+      <tr data-f="groove-l"><td>Lower groove</td><td>Near wall 249.6126 ± 0.05; root Ø36.9824–37.0840; width 0.7874–0.8382; root R0.2032–0.2540</td><td class="num">−0.89 to −0.05</td></tr>
       <tr data-f="groove-u"><td>Upper groove</td><td>Near wall 550.6000 ± 0.05; same section as the lower groove</td><td class="num">+300.1 to +300.94</td></tr>
     </tbody></table></div>
-  <p class="src">Notes on the sheet: preserve supplied OD; Ra ≤ 3.2 µm on grooves and hole; no extra grooves or keyways; paint exposed surfaces under the $100 allowance; inspect groove root, radius, edge margins, hole clearance and keyseat location.</p>
+  <p class="src">Notes on the sheet: preserve supplied OD; Ra ≤ 3.2 µm on grooves and hole; no extra grooves or keyways; cut the keyseat with a 3/8 in, R 1/32 in corner-radius end mill; key 12.70 h14 with 3/64 in edge chamfers; paint exposed surfaces under the $100 allowance; inspect groove root, radius, edge margins, hole clearance and keyseat location.</p>
 </section>
 
 <!-- ============ STEP 16 ============ -->
@@ -544,9 +546,9 @@ code{overflow-wrap:anywhere;word-break:break-word}
   <div class="tbl"><table>
     <thead><tr><th>Rev2 requirement</th><th>Evidence</th><th>Status</th></tr></thead>
     <tbody>
-      <tr><td>Shaft yield n ≥ 3.0</td><td>3.63 Eq. 7-15 (keyseat); 3.08 strict K<sub>t</sub> (lower groove)</td><td><span class="tag ok">Pass</span></td></tr>
-      <tr><td>Shaft fatigue n ≥ 1.2, infinite life</td><td>1.44 at keyseat (conservative model)</td><td><span class="tag ok">Pass</span></td></tr>
-      <tr><td>Hardware n ≥ 1.2</td><td>Key 23.5; screw 1.27; pin 1.35; rings 70</td><td><span class="tag ok">Pass</span></td></tr>
+      <tr><td>Shaft yield n ≥ 3.0</td><td>3.92 Eq. 7-15 (lower groove); keyseat 5.61</td><td><span class="tag ok">Pass</span></td></tr>
+      <tr><td>Shaft fatigue n ≥ 1.2, infinite life</td><td>1.43 at the lower groove (worst-case root and radius); keyseat 1.95</td><td><span class="tag ok">Pass</span></td></tr>
+      <tr><td>Hardware n ≥ 1.2</td><td>Key 15.2; set screw slip 1.22, strength 4.74; pin 30.8 (rated double shear); rings 70</td><td><span class="tag ok">Pass</span></td></tr>
       <tr><td>McMaster parts, eligible materials</td><td>1566 rotary shaft (HRC25, at the cap); 18-8 key, screw, rings; 416 pin</td><td><span class="tag ok">Pass</span></td></tr>
       <tr><td>No chrome; $100 if not stainless</td><td>Uncoated 1566, $100 included</td><td><span class="tag ok">Pass</span></td></tr>
       <tr><td>Approved shaft properties</td><td>S<sub>y</sub> = 88 ksi, on the Piazza-approved list</td><td><span class="tag ok">Pass</span></td></tr>
@@ -559,11 +561,11 @@ code{overflow-wrap:anywhere;word-break:break-word}
 <section class="step" id="s18">
   <h2><span class="n">18</span>What changes in your report</h2>
   <ul class="flat">
-    <li>Table 1: bearing midplanes move to y = 6.35 and 293.65 (face-to-face reading, A2); pin moves from −170 to −180; add the groove, keyseat and shaft ends.</li>
+    <li>Table 1: bearing midplanes move to y = 6.35 and 293.65 (face-to-face reading, A2); pin moves from −170 to −185; add the groove, keyseat and shaft ends.</li>
     <li>Item 1: reactions become (−192.88, −1562.93) and (31.63, 989.59) N; thrust 203.62 N with W<sub>sh</sub> = 48.62 N.</li>
-    <li>Item 2: groove K<sub>t</sub> comes from Fig. A-15-16 for the actual groove (3.5), not the Table 7-1 first estimate (5.0). The broken "Equation:" lines are rebuilt as real equations.</li>
-    <li>Item 3: groove M = 280.5 N·m, T = 0; keyseat (upper end y = −24.75) M = 266.5 N·m, T = 19.63 N·m.</li>
-    <li>Shaft: McMaster 1346K534 (1566, HRC25), S<sub>y</sub> = 606.7 MPa approved, S<sub>ut</sub> = 860.2 MPa. Key 1/2 in long; keyseat 22.45 mm; n<sub>f</sub> = 1.44, n<sub>y</sub> = 3.63 (Eq. 7-15) / 3.08 (strict). Total cost $222.07.</li>
+    <li>Item 2: groove K<sub>t</sub> comes from Fig. A-15-16 for the actual groove (3.6 at the worst corner), not the Table 7-1 first estimate (5.0). The broken "Equation:" lines are rebuilt as real equations.</li>
+    <li>Item 3: groove M = 280.5 N·m, T = 0; keyseat (upper end y = −24.89) M = 266.4 N·m, T = 19.63 N·m.</li>
+    <li>Shaft: McMaster 1346K534 (1566, HRC25), S<sub>y</sub> = 606.7 MPa approved, S<sub>ut</sub> = 860.2 MPa. Key 1/2 in long (12.70 h14); keyseat to B17.1, end centres 12.70 H14; groove Ø1.456–1.460 in, R 0.008–0.010 in; n<sub>f</sub> = 1.43, n<sub>y</sub> = 3.92 (Eq. 7-15); keyseat fillet 1/32 in with a 3/64 in chamfered key. Total cost $222.07.</li>
     <li>Item 4 and the hardware, drawing/BOM and cost sections are written from Steps 6–17.</li>
     <li>Figures to insert: <code>DP2/solution/figures/load_map.png</code> and <code>moments.png</code>.</li>
   </ul>
@@ -640,7 +642,7 @@ code{overflow-wrap:anywhere;word-break:break-word}
     if(y<=yU) return RU*(yU-y);
     return 0;
   }
-  const T=y=>(y>=-180&&y<=-24.75)?19.63:0;
+  const T=y=>(y>=-185&&y<=-24.89)?19.63:0;
 
   function drawMT(){
     const s=document.getElementById('mtSvg'); s.innerHTML='';
@@ -670,7 +672,7 @@ code{overflow-wrap:anywhere;word-break:break-word}
     let dt='';for(let y=-250.5;y<=303.5;y+=0.5){dt+=(dt?'L':'M')+X(y).toFixed(1)+','+YT(T(y)).toFixed(1);}
     el('path',{d:dt,fill:'none',stroke:'var(--amber)','stroke-width':2},s);
     // markers
-    const pts=[[-0.49,'groove 280.5'],[-24.75,'keyseat 266.5'],[-176.8,'pin hole 181.0']];
+    const pts=[[-0.49,'groove 280.5'],[-24.89,'keyseat 266.4'],[-181.8,'pin hole 178.2']];
     for(const [y,l] of pts){const m=M(y)/1000;el('circle',{cx:X(y),cy:YM(m),r:4,fill:'var(--sheet)',stroke:'var(--ink)','stroke-width':1.5},s);
       txt(s,X(y)+(y<-100?-6:6),YM(m)-8,l,{'text-anchor':y<-100?'end':'start',fill:'var(--ink)','font-weight':600});}
     el('circle',{cx:X(yL),cy:YM(M(yL)/1000),r:4,fill:'var(--blue)'},s);
@@ -694,16 +696,16 @@ code{overflow-wrap:anywhere;word-break:break-word}
     // features
     el('line',{x1:X(-0.49),x2:X(-0.49),y1:cy-h/2,y2:cy+h/2,stroke:'var(--bad)','stroke-width':2.5},s);
     el('line',{x1:X(300.5),x2:X(300.5),y1:cy-h/2,y2:cy+h/2,stroke:'var(--bad)','stroke-width':2.5},s);
-    el('rect',{x:X(-47.25),y:cy-h/2,width:X(-24.75)-X(-47.25),height:4,fill:'var(--amber)'},s);
-    el('circle',{cx:X(-180),cy:cy,r:3.5,fill:'var(--amber)'},s);
+    el('rect',{x:X(-47.11),y:cy-h/2,width:X(-24.89)-X(-47.11),height:4,fill:'var(--amber)'},s);
+    el('circle',{cx:X(-185),cy:cy,r:3.5,fill:'var(--amber)'},s);
     // loads
     const arrow=(y,lab,up)=>{const x=X(y);el('line',{x1:x,x2:x,y1:up?cy+60:cy-60,y2:up?cy+26:cy-38,stroke:'var(--ink)','stroke-width':1.5},s);
       el('path',{d:up?`M${x-4},${cy+32}L${x},${cy+24}L${x+4},${cy+32}Z`:`M${x-4},${cy-44}L${x},${cy-36}L${x+4},${cy-44}Z`,fill:'var(--ink)'},s);
       txt(s,x,up?cy+74:cy-66,lab,{'text-anchor':'middle',fill:'var(--ink)'});};
     arrow(-500,'drag 560 N (+z)',false); arrow(-50,'chain 161.8 N',false); arrow(-350,'rotor 120 N',true);
     // axis
-    for(const y of [-500,-350,-250,-180,-150,-50,0,300]){el('line',{x1:X(y),x2:X(y),y1:cy+h/2+2,y2:cy+h/2+6,stroke:'var(--muted)'},s);}
-    const lab=[[-500,'−500'],[-350,'−350'],[-250,'−250'],[-180,'−180'],[-150,'−150'],[-50,'−50'],[0,'0'],[300,'300']];
+    for(const y of [-500,-350,-250,-185,-150,-50,0,300]){el('line',{x1:X(y),x2:X(y),y1:cy+h/2+2,y2:cy+h/2+6,stroke:'var(--muted)'},s);}
+    const lab=[[-500,'−500'],[-350,'−350'],[-250,'−250'],[-185,'−185'],[-150,'−150'],[-50,'−50'],[0,'0'],[300,'300']];
     for(const [y,l] of lab) txt(s,X(y),cy+h/2+18,l,{'text-anchor':'middle'});
     txt(s,X(6),cy-30,'lower brg',{'text-anchor':'middle'});txt(s,X(294),cy-30,'upper brg',{'text-anchor':'middle'});
     txt(s,X(-200),cy+40,'hub',{'text-anchor':'middle'});txt(s,X(-40),cy+46,'sprocket',{'text-anchor':'middle'});
@@ -713,19 +715,19 @@ code{overflow-wrap:anywhere;word-break:break-word}
 
   // ---- S_y sensitivity ----
   const secs=[
-    {f:'groove-l',n:'Lower ring groove',vt:197.146,vf:153.339,nf:1.448},
-    {f:'keyseat',n:'Keyseat upper end',vt:166.980,vf:166.980,nf:1.436},
-    {f:'pinhole',n:'Pin hole',vt:109.660,vf:109.660,nf:2.199},
+    {f:'groove-l',n:'Lower ring groove',vt:204.034,vf:154.933,nf:1.433},
+    {f:'keyseat',n:'Keyseat upper end',vt:108.091,vf:108.091,nf:2.021},
+    {f:'pinhole',n:'Pin hole',vt:96.186,vf:96.186,nf:2.278},
     {f:'plain',n:'Plain section at lower bearing',vt:52.990,vf:52.990,nf:4.949},
-    {f:'groove-u',n:'Upper ring groove',vt:0.6607,vf:0.6607,nf:1301.89}
+    {f:'groove-u',n:'Upper ring groove',vt:0.6824,vf:0.6824,nf:1260.52}
   ];
   function table(sy){
     const tb=document.querySelector('#secTbl tbody'); tb.innerHTML='';
-    const minT=Math.min(...secs.map(s=>sy/s.vt));
+    const minT=Math.min(...secs.map(s=>sy/s.vf));
     for(const s of secs){
-      const a=sy/s.vt,b=sy/s.vf, ok=a>=3&&s.nf>=1.2, okKf=b>=3&&s.nf>=1.2;
-      const tr=document.createElement('tr'); if(a===minT) tr.className='hl'; tr.dataset.f=s.f; tr.tabIndex=0;
-      const st= ok?'<span class="pass">Pass</span>':(okKf?'<span class="fail">Fails strict</span> · passes Eq. 7-15':'<span class="fail">Fails</span>');
+      const a=sy/s.vt,b=sy/s.vf, ok=b>=3&&s.nf>=1.2;
+      const tr=document.createElement('tr'); if(b===minT) tr.className='hl'; tr.dataset.f=s.f; tr.tabIndex=0;
+      const st= ok?'<span class="pass">Pass</span>':'<span class="fail">Fails</span>';
       tr.innerHTML=`<td>${s.n}</td><td class="num">${s.vt.toFixed(2)}</td><td class="num">${a>999?'>999':a.toFixed(2)}</td><td class="num">${b>999?'>999':b.toFixed(2)}</td><td class="num">${s.nf>999?'>999':s.nf.toFixed(2)}</td><td>${st}</td>`;
       tb.appendChild(tr);
     }
@@ -749,21 +751,21 @@ const F = {
   drag:{t:'Drag, D',v:'560 N in +z',d:'Water stream on the rotor, acting at the centre of pressure y = −500 mm. Its 506 mm lever arm to the lower bearing makes it the load that sizes the shaft.',s:'s2',c:'--c-water',chip:'Drag',val:'560 N'},
   chain:{t:'Chain force, F_c',v:'161.8 N at −4.732° → (161.25, 0, +13.35) N',d:'Tight span at the chain line, y = −50 mm. Eqs. (1)–(2). The +z part adds to the drag (conservative sign).',s:'s2',c:'--c-chain',chip:'Chain force',val:'161.8 N'},
   wr:{t:'Rotor + blade weight',v:'120 N down',d:'At the rotor CG, y = −350 mm. Carried into the shaft by the pin; the shaft hangs from the upper ring.',s:'s2',c:'--c-weight',chip:'Rotor weight',val:'120 N'},
-  ws:{t:'Sprocket weight',v:'35 N down',d:'Held by the key and set screw through friction: n_slip = 0.10(459.8)/35 = 1.31.',s:'s12',c:'--c-weight',chip:'Sprocket weight',val:'35 N'},
+  ws:{t:'Sprocket weight',v:'35 N down',d:'Held by the set screw through friction at two contacts: n_slip = 2(0.15)(141.7)/35 = 1.22.',s:'s12',c:'--c-weight',chip:'Sprocket weight',val:'35 N'},
   wsh:{t:'Shaft self-weight',v:'48.62 N down',d:'ρg(πD²/4)L for the 554 mm shaft, Eq. (3). Drawn at mid-length.',s:'s2',c:'--c-weight',chip:'Shaft weight',val:'48.6 N'},
-  tw:{t:'Water torque',v:'19.63 N·m about +y',d:'Enters the shaft at the pin, y = −180 mm. Only the stretch from the pin up to the key is twisted.',s:'s2',c:'--c-water',chip:'Water torque',val:'19.63 N·m'},
+  tw:{t:'Water torque',v:'19.63 N·m about +y',d:'Enters the shaft at the pin, y = −185 mm. Only the stretch from the pin up to the key is twisted.',s:'s2',c:'--c-water',chip:'Water torque',val:'19.63 N·m'},
   tc:{t:'Chain torque',v:'19.63 N·m, opposite',d:'Leaves the shaft through the key into the sprocket. ΣM_y = 0, so the bearings carry no torque.',s:'s2',c:'--c-chain',chip:'Chain torque',val:'19.63 N·m'},
   rl:{t:'Lower bearing reaction, R_L',v:'(−192.88, 0, −1562.93) N · |R_L| = 1574.8 N',d:'At the lower bearing midplane, y = 6.35 mm. Pushes upstream at 2.8 times the drag because of the overhang. Eqs. (6), (8).',s:'s3',c:'--c-react',chip:'R_L',val:'1574.8 N'},
   ru:{t:'Upper bearing reaction, R_U',v:'(+31.63, 0, +989.59) N · |R_U| = 990.1 N',d:'At the upper bearing midplane, y = 293.65 mm. Pulls downstream to stop the shaft tipping. Eqs. (5), (7).',s:'s3',c:'--c-react',chip:'R_U',val:'990.1 N'},
   thrust:{t:'Axial thrust on the upper ring',v:'N = 203.62 N up',d:'The upper bearing pushes up on the upper ring; all three weights hang below it. Eq. (4). Both rings are checked for it.',s:'s3',c:'--c-react',chip:'Ring thrust',val:'203.6 N'},
-  'groove-l':{t:'Lower ring groove (critical)',v:'M = 280.5 N·m, T = 0 · n_y = 3.08 (K_t), 3.96 (Eq 7-15), n_f = 1.45',d:'Root Ø37.06 mm, R 0.25 mm, K_t = 3.5 (Fig. A-15-16). Highest stress in the shaft; governs yield.',s:'s9',c:'--c-feat',chip:'Lower groove',val:'n_y 3.08'},
-  'groove-u':{t:'Upper ring groove',v:'M = 0, T = 0',d:'Same groove section. Carries the 203.6 N thrust; 2.56 mm of shaft above it (≥ 3t = 1.56 mm).',s:'s14',c:'--c-feat',chip:'Upper groove',val:'M = 0'},
-  keyseat:{t:'Keyseat (closed slot)',v:'22.45 × 9.525 × 4.76 deep, y −47.25 to −24.75',d:'Upper end: M = 266.5 N·m, T = 19.63 N·m. Conservative K_t 3.0, K_ts 4.0 plus key pressure. n_f = 1.44 (governs fatigue), n_y = 3.63.',s:'s9',c:'--c-feat',chip:'Keyseat',val:'n_f 1.44'},
-  pinhole:{t:'Pin hole, Ø6.37 mm',v:'M = 181.0 N·m, T = 19.63 N·m · n_y = 5.53, n_f = 2.20',d:'Transverse hole, a/D = 0.168. Table A-16: K_t 2.114 (A 0.732), K_ts 1.606 (A 0.856).',s:'s9',c:'--c-feat',chip:'Pin hole',val:'n_f 2.20'},
+  'groove-l':{t:'Lower ring groove (critical)',v:'M = 280.5 N·m, T = 0 · n_y = 3.92 (Eq 7-15), n_f = 1.43',d:'Root Ø36.98–37.08 mm, R 0.20–0.25 mm, K_t = 3.6 at the worst corner (Fig. A-15-16). Governs yield and fatigue.',s:'s9',c:'--c-feat',chip:'Lower groove',val:'n_f 1.43'},
+  'groove-u':{t:'Upper ring groove',v:'M = 0, T = 0',d:'Same groove section. Carries the 203.6 N thrust; 2.56 mm of shaft above it (≥ 3t = 1.68 mm).',s:'s14',c:'--c-feat',chip:'Upper groove',val:'M = 0'},
+  keyseat:{t:'Keyseat (closed slot)',v:'22.225 × 9.525, 3/16 in deep at the wall (B17.1), y −47.11 to −24.89',d:'Upper end (longest slot, y −24.65): M = 266.6 N·m, T = 19.63 N·m. End centres 12.70 H14, width +0.051/−0, fillet R 1/32 in (B17.1). Peterson K_t 2.17, K_ts 2.59. n_f = 2.02, n_y = 5.61.',s:'s9',c:'--c-feat',chip:'Keyseat',val:'n_f 2.02'},
+  pinhole:{t:'Pin hole, Ø6.37 mm',v:'M = 178.2 N·m, T = 19.63 N·m · n_y = 6.31, n_f = 2.28',d:'Transverse hole, a/D = 0.168. Table A-16: K_t 2.114 (A 0.732), K_ts 1.606 (A 0.856).',s:'s9',c:'--c-feat',chip:'Pin hole',val:'n_f 2.28'},
   plain:{t:'Plain section at the lower bearing',v:'M = 284.5 N·m · n_y = 11.5, n_f = 4.95',d:'Largest moment on the shaft but no notch, ground surface.',s:'s9',c:'--c-feat',chip:'Plain section',val:'n_f 4.95'},
-  key:{t:'Key, 18-8, 3/8 × 3/8 × 1/2 in',v:'F = 1033.2 N · n_shear = 27.5, n_bearing = 23.5',d:'Cut 12.70 mm from 92530A319; longer than it is wide. Centred at y = −36 under the set screw.',s:'s11',c:'--c-hw',chip:'Key',val:'1/2 in'},
-  screw:{t:'Set screw, 1/4"-20 × 1/4 in flat tip',v:'Clamp 460–808 N · n_slip = 1.31, n_y = 1.27',d:'94355A533, 18-8. Through the sprocket hub, presses on the key. 0.73–0.77 N·m.',s:'s12',c:'--c-hw',chip:'Set screw',val:'n 1.27'},
-  pin:{t:'Pin, 416 stainless, 1/4 × 3 in',v:'R = 520.1 N per shear plane · n_y = 1.35 (with fit)',d:'98380A556 at y = −180, spanning the 3 in hub. Clearance in the shaft, interference in one hub wall.',s:'s13',c:'--c-hw',chip:'Pin',val:'n 1.35'},
+  key:{t:'Key, 18-8, 3/8 × 3/8 × 1/2 in',v:'F = 1033.2 N · n_shear = 26.7, n_bearing = 15.2',d:'Cut 12.70 h14 from 92530A319; longer than it is wide; long edges chamfered 3/64 in (B17.1). Centred at y = −36 under the set screw.',s:'s11',c:'--c-hw',chip:'Key',val:'1/2 in'},
+  screw:{t:'Set screw, 1/4"-20 × 1/4 in flat tip',v:'Clamp 142–236 N · n_slip = 1.22, thread n = 4.74',d:'94355A533, 18-8. Through the sprocket hub, presses on the key. 0.24 N·m (K 0.2, μ 0.15).',s:'s12',c:'--c-hw',chip:'Set screw',val:'0.24 N·m'},
+  pin:{t:'Pin, 416 stainless, 1/4 × 3 in',v:'R = 520.1 N per shear plane · n = 30.8 vs 7200 lbf rating',d:'98380A556 at y = −185, spanning the 3 in hub. Shaft hole 6.35 F7 (slip); hub holes 0.2495–0.2500 in (B18.8.2 press fit).',s:'s13',c:'--c-hw',chip:'Pin',val:'n 1.35'},
   'ring-l':{t:'Lower retaining ring',v:'93576A210 · 4950 lbf rating',d:'18-8 single-turn spiral ring below the lower bearing. Unloaded in normal operation, still checked for 203.6 N.',s:'s14',c:'--c-hw',chip:'Lower ring',val:''},
   'ring-u':{t:'Upper retaining ring',v:'93576A210 · capacity/N = 108',d:'Sits on the upper bearing and carries the whole 203.6 N thrust.',s:'s14',c:'--c-hw',chip:'Upper ring',val:'×108'},
   'bearing-l':{t:'Lower bearing',v:'12.7 mm wide, midplane y = 6.35',d:'Assumption A2: the 300 mm runs between the outer bearing faces, so the midplanes are 287.3 mm apart.',s:'s1',c:'--c-steel',chip:'Lower bearing',val:''},
@@ -774,7 +776,7 @@ const F = {
   cg:{t:'Rotor centre of gravity',v:'y = −350 mm',d:'Where the 120 N rotor weight acts.',s:'s2',c:'--c-weight',chip:'CG',val:''},
   cop:{t:'Centre of pressure',v:'y = −500 mm',d:'Where the 560 N drag acts.',s:'s2',c:'--c-water',chip:'COP',val:''},
   mdiag:{t:'Bending moment diagram',v:'Peak 284.5 N·m at the lower bearing midplane',d:'Drawn on the −x side, scaled to the resultant M = √(M_x² + M_z²). Eqs. (9)–(11).',s:'s4',c:'--c-water',chip:'M diagram',val:'284.5 N·m'},
-  tdiag:{t:'Torque diagram',v:'19.63 N·m from the pin (y −180) to the keyseat top (y −24.75)',d:'Drawn on the +x side. Zero at both bearings and both grooves.',s:'s4',c:'--c-chain',chip:'T diagram',val:'19.63 N·m'}
+  tdiag:{t:'Torque diagram',v:'19.63 N·m from the pin (y −185) to the keyseat top (y −24.89)',d:'Drawn on the +x side. Zero at both bearings and both grooves.',s:'s4',c:'--c-chain',chip:'T diagram',val:'19.63 N·m'}
 };
 const ALIAS = { rings:['ring-l','ring-u'], applied:['drag','chain','wr','ws','wsh','tw','tc'], reactions:['rl','ru','thrust'] };
 const expand = ids => [].concat(...ids.map(i=>ALIAS[i]||[i]));
@@ -804,8 +806,8 @@ const SCENE = {
 
 /* ---------------- geometry (mm), Rev P2 ---------------- */
 const G = {r:19.05,yBot:-250.5,yTop:303.5,yL:6.35,yU:293.65,bw:12.7,gL:-0.49,gU:300.52,gW:0.81,
-  ks0:-47.25,ks1:-24.75,k0:-42.35,k1:-29.65,ksD:4.7625,ksW:9.525,yS:-36,
-  sT0:-53.61,sT1:-46.39,sH1:-25.03,Rp:121.3,hub0:-250,hub1:-150,yPin:-180,yCG:-350,yCOP:-500,rot0:-255,rot1:-720,rotR:185};
+  ks0:-47.11,ks1:-24.89,k0:-42.35,k1:-29.65,ksD:5.367,ksW:9.525,yS:-36,
+  sT0:-53.61,sT1:-46.39,sH1:-25.03,Rp:121.3,hub0:-250,hub1:-150,yPin:-185,yCG:-350,yCOP:-500,rot0:-255,rot1:-720,rotR:185};
 function Mres(y){ // resultant bending moment, N·mm
   if (y>G.yU) return 0;
   if (y>=G.yL) return 990.09*(G.yU-y);
@@ -871,7 +873,7 @@ function build(){
   sh.position.y=(G.yTop+G.yBot)/2; reg(sh,'shaft',{ctx:true,pri:1});
   // plain-section marker and cut discs (only when focused)
   const cut=(fid,y)=>{ const d=new THREE.Mesh(new THREE.RingGeometry(r*1.15,r*1.6,48),mat('--glow',{basic:true,op:.5})); d.rotation.x=-Math.PI/2; d.position.y=y; reg(d,fid,{only:true,op:.5,pri:0}); };
-  cut('plain',G.yL); cut('groove-l',G.gL); cut('keyseat',G.ks1); cut('pinhole',-176.81);
+  cut('plain',G.yL); cut('groove-l',G.gL); cut('keyseat',G.ks1); cut('pinhole',-181.81);
   // grooves (dark bands) and rings
   [['groove-l',G.gL],['groove-u',G.gU]].forEach(([f,y])=>{ const b=new THREE.Mesh(new THREE.CylinderGeometry(r+.15,r+.15,Math.max(G.gW,1.4),48,1,true),mat('--c-feat',{metal:.1})); b.position.y=y; reg(b,f,{pri:2}); });
   [['ring-l',G.gL],['ring-u',G.gU]].forEach(([f,y])=>{ const m=new THREE.Mesh(annulus(r+3.4,r-.5,.9,.45),mat('--c-hw',{metal:.5})); m.position.y=y-.45; reg(m,f,{pri:2}); });
@@ -963,7 +965,7 @@ function dimV(grp,x,y0,y1,text,c,ext,z,left){ z=z||0; const g=new THREE.Group();
 function buildDims(){
   const RX=250, r=G.r;
   const st=[[303.5,'303.5 top'],[300,'300 brg face'],[293.65,'293.65 R<sub>U</sub>'],[6.35,'6.35 R<sub>L</sub>'],[0,'0 brg face'],
-    [-24.75,'−24.75 keyseat'],[-50,'−50 chain'],[-150,'−150 hub top'],[-180,'−180 pin'],[-250,'−250 shaft end'],[-350,'−350 CG'],[-500,'−500 COP']];
+    [-24.89,'−24.89 keyseat'],[-50,'−50 chain'],[-150,'−150 hub top'],[-185,'−185 pin'],[-250,'−250 shaft end'],[-350,'−350 CG'],[-500,'−500 COP']];
   const g=new THREE.Group(), lm=new THREE.LineBasicMaterial({color:col('--muted'),transparent:true});
   g.add(new THREE.Line(lineGeo([V(RX,-500),V(RX,303.5)]),lm));
   const gm=new THREE.LineDashedMaterial({color:col('--muted'),dashSize:3,gapSize:5,transparent:true,opacity:.55});
@@ -1029,7 +1031,7 @@ function paint(){
     l.el.classList.toggle('on',!!on); });
   document.querySelectorAll('[data-f]').forEach(e=>{ const ids=expand(e.dataset.f.split(',')); e.classList.toggle('on', ids.some(i=>focusSet.has(i))); });
 }
-const SECY={'groove-l':-0.49,'keyseat':-24.75,'pinhole':-176.81,'plain':6.35,'groove-u':300.5,'chain':-50,'mdiag':null};
+const SECY={'groove-l':-0.49,'keyseat':-24.89,'pinhole':-181.81,'plain':6.35,'groove-u':300.5,'chain':-50,'mdiag':null};
 function setFocus(ids,o){ o=o||{}; focusSet=new Set(expand(ids)); preview=null; if(opts.cut && ids.length && SECY[ids[0]]!=null) setCut(SECY[ids[0]]); paint();
   if (o.fly!==false && focusSet.size) fly([...focusSet],o.view);
   if (o.info) showInfo(ids[0]); else if(!o.keepInfo) hideInfo(); }

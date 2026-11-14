@@ -20,7 +20,7 @@ INCH = 25.4
 
 # ---------------- loads (identical to calculate.py) ----------------
 L = dict(rotor_N=120.0, sprocket_N=35.0, drag_N=560.0, chain_N=161.8, chain_deg=-4.732,
-         chain_y=-50.0, COP_y=-500.0, T=19630.0, pin_y=-180.0, bearing_w=12.7,
+         chain_y=-50.0, COP_y=-500.0, T=19630.0, pin_y=-185.0, bearing_w=12.7,
          face=300.0, rho=7850.0, g=9.80665, shaft_bottom=-250.5)
 fx = L['chain_N']*cos(radians(L['chain_deg']))
 fz = -L['chain_N']*sin(radians(L['chain_deg']))
@@ -38,8 +38,13 @@ def bending(y):
 
 # ---------------- Shigley factors ----------------
 REL = 0.814                     # ke, 99 % reliability (Table 6-4)
-KT_MARGIN = 1.06                # design rounds the chart Kt up (3.306 -> 3.5 at the 1.5 in groove)
-def ka(Sut, ground=False): return 1.58*Sut**-.085 if ground else 4.51*Sut**-.265
+KT_DECIMALS = 1                 # chart Kt read to one decimal, as Shigley Ex. 7-2 does (3.58 -> 3.6 at the 1.5 in groove)
+GROOVE_R_IN = 0.008             # drawing callout R 0.008-0.010 in; worst case is the small end
+GROOVE_ROOT = 'nominal'         # root at catalog nominal (Rev P3 callout 1.456-1.460 in for the 1.5 in ring)
+PIN_EXTRA = 0.0                 # P2 added a 12 MPa hub-contact mean stress at the pin hole; dropped (no physical basis)
+KA = {'ground': (1.38, -.067), 'machined': (3.04, -.217)}   # Shigley 11th ed., Table 6-2, Sut in MPa
+def ka(Sut, ground=False):
+    a, b = KA['ground' if ground else 'machined']; return a*Sut**b
 def kb(d): return 1.24*d**-.107 if d <= 51 else 1.51*d**-.157
 Q_MODE = 'groove'   # 'groove': q at ring grooves only (design); 'none': Kf = Kt everywhere; 'all': q at every notch
 def q_bend(Sut, r):
@@ -112,13 +117,12 @@ def evaluate(sh, ring, keyseat='harsh', kt_override=None, pin_d_in=None):
     out = dict(part=sh['part'], steel=sh['steel'], D_in=sh['D_in'], len_in=sh['len_in'],
                price=sh['price_USD'], ring=ring['part'], ring_type=ring['type'], notes=[])
     Sut = P['Sut']; Sy = P['Sy']
-    # groove: specify the shallow end of the catalog tolerance when it is known (as the P2 drawing does)
+    # groove: worst case of the drawing callout (root at catalog nominal, smallest root radius)
     tol = ring['groove_tol_plus_in']
-    root_in = ring['groove_in'] + (tol-0.001 if tol else 0.0)
-    if not tol: out['notes'].append('groove at catalog nominal (tolerance not read)')
-    root = root_in*INCH; t = (D-root)/2; a = ring['width_in']*INCH; r = .0098*INCH
+    root_in = ring['groove_in'] + (tol-0.001 if (tol and GROOVE_ROOT == 'shallow') else 0.0)
+    root = root_in*INCH; t = (D-root)/2; a = ring['width_in']*INCH; r = GROOVE_R_IN*INCH
     at, rt = a/t, r/t
-    Ktc = kt_groove(at, rt); Kt = kt_override or Ktc*KT_MARGIN
+    Ktc = kt_groove(at, rt); Kt = kt_override or round(Ktc, KT_DECIMALS)
     q = q_bend(Sut, r); Kfg = 1+q*(Kt-1)
     yg = -(0.1+a/2)
     length = -L['shaft_bottom'] + L['face'] + 0.1 + a + .002*INCH + 2.562
@@ -138,24 +142,35 @@ def evaluate(sh, ring, keyseat='harsh', kt_override=None, pin_d_in=None):
     S = [sec('groove', root, bending(yg), 0, Kt, 0, Kf=Kfg)]
     # keyseat
     w = key_width(sh['D_in']); Lk = w+.125                       # key longer than wide (class rule)
-    slot = Lk*INCH+9.75; yk = -36+(slot+.05)/2
-    keyF = 2*L['T']/Dmin; eng = (w-.003)*INCH-(w/2+.001)*INCH; Lmin = Lk*INCH-.05
+    keyF = 2*L['T']/Dmin
+    if keyseat == 'harsh':   # P2 geometry, kept for the --check regression
+        slot = Lk*INCH+9.75; yk = -36+(slot+.05)/2
+        eng = (w-.003)*INCH-(w/2+.001)*INCH; Lmin = Lk*INCH-.05
+    else:                    # ASME B17.1 Class 1 keyseat + ISO 286 IT14 lengths (as in calculate.py)
+        it14 = .43 if Lk*INCH <= 18 else .52
+        slot = Lk*INCH+it14+(w+.002)*INCH; yk = -36+slot/2          # end-centre distance H14, width +0.002 in
+        fil, chm = ((1/32, 3/64) if w/2 <= .25 else (1/16, 5/64))  # B17.1 Table 5 fillet, key chamfer (in)
+        eng = (min((w-.003)-(w/2+.015), w/2)-chm)*INCH; Lmin = Lk*INCH-it14
     p_key = keyF/(eng*Lmin); tau_key = keyF/((w-.003)*INCH*Lmin)
-    if keyseat == 'harsh':
+    if keyseat == 'harsh':     # P2 model, kept for the --check regression only
         S.append(sec('keyseat', Dmin, bending(yk), L['T'], 3.0, 4.0, extra=p_key))
+    elif keyseat == 'peterson':  # design: floor R = 0.02d -0.002 in, Pilkey Sec. 5.2 fits, Kf = Kt (q = 1), no key pressure
+        rd = fil*INCH/Dmin; u = .1/rd
+        S.append(sec('keyseat', Dmin, bending(yk), L['T'], round(1.426+.1643*u-.0019*u*u, 2), round(1.953+.1434*u-.0021*u*u, 2)))
     else:   # Shigley Table 7-1 end-mill keyseat, r/d = 0.02, with notch sensitivity
         rk = .02*Dmin
         S.append(sec('keyseat', Dmin, bending(yk), L['T'], 2.14, 3.0, Kf=1+q_bend(Sut,rk)*1.14, Kfs=1+q_shear(Sut,rk)*2.0))
     # pin and pin hole: smallest 416 pin that passes, hub OD = 2D so pin length >= 2D
-    pin_opts = [pin_d_in] if pin_d_in else [3/16, .25, 5/16, .375]
+    # Design: 1/4 in 416 dowel (McMaster 98380A556/560), checked against its 7200 lbf double-shear rating.
+    pin_opts = [pin_d_in] if pin_d_in else [.25]
     for pd in pin_opts:
-        pdm = pd*INCH; hole = (pd+.001)*INCH
+        pdm = pd*INCH
+        hole = (pd+.001)*INCH if keyseat == 'harsh' else 6.378   # P2 hole / ISO 286 F7 upper limit
         pinR = hypot(L['T']/Dmin, L['rotor_N']/2)
-        Mp = pinR*D/2; bend = 32*Mp/(pi*pdm**3); tau = pinR/(pi*pdm**2/4)
-        ny_pin = 760/sqrt((bend+2*85)**2+3*tau**2)
+        ny_pin = 7200*4.448221615/(2*pinR)
         Ab, Ktb = lerp_tab(A16B, hole/Dmin); At_, Ktt = lerp_tab(A16T, hole/Dmin)
         qa = Q_MODE == 'all'
-        ph = sec('pin hole', Dmin, L['drag_N']*(500+L['pin_y']+hole/2), L['T'], Ktb, Ktt, Ab=Ab, At=At_, extra=12.0,
+        ph = sec('pin hole', Dmin, L['drag_N']*(500+L['pin_y']+hole/2), L['T'], Ktb, Ktt, Ab=Ab, At=At_, extra=PIN_EXTRA,
                  Kf=1+q_bend(Sut, hole/2)*(Ktb-1) if qa else None, Kfs=1+q_shear(Sut, hole/2)*(Ktt-1) if qa else None)
         if ny_pin >= 1.2: break
     S.append(ph)
@@ -225,6 +240,10 @@ if __name__ == '__main__':
         shafts, rings = load()
         sh = next(s for s in shafts if s['part']=='4138N14'); rg = next(r for r in rings if r['part']=='93576A210')
         props = lambda _s: dict(Sut=703.0, Sy=598.0, src='P2 proposal')
+        GROOVE_R_IN, GROOVE_ROOT = 0.0098, 'shallow'   # P2 drawing groove
+        PIN_EXTRA = 12.0
+        KA.update(ground=(1.58, -.085), machined=(4.51, -.265))   # P2 used the 10th-edition surface factors
+        L['pin_y'] = -180.0
         o = evaluate(sh, rg, kt_override=3.5, pin_d_in=.25)
         ref = {'groove': (1.3309, 3.0333, 4.1576), 'keyseat': (1.2404, 3.5947, 3.5947),
                'pin hole': (1.8998, 5.4742, 5.4742), 'plain at bearing': (4.1309, 11.3305, 11.3305)}
@@ -232,9 +251,9 @@ if __name__ == '__main__':
             nf, nys, ny7 = ref[s['name']]
             print(f"{s['name']:17} nf {s['nf']:.4f} (calc {nf})  ny strict {s['ny_strict']:.4f} ({nys})  ny 7-15 {s['ny_715']:.4f} ({ny7})")
             assert abs(s['nf']-nf) < 2e-3 and abs(s['ny_strict']-nys) < 5e-3 and abs(s['ny_715']-ny7) < 5e-3
-        print(f"chart Kt at this groove: {o['Kt_chart']:.3f}  x {KT_MARGIN} = {o['Kt_chart']*KT_MARGIN:.3f} (design uses 3.5)")
+        print(f"chart Kt at this groove: {o['Kt_chart']:.3f} (P2 design used 3.5)")
         print('regression OK'); sys.exit()
-    model = 'table71' if '--table71' in sys.argv else 'harsh'
+    model = 'table71' if '--table71' in sys.argv else ('harsh' if '--harsh' in sys.argv else 'peterson')
     if '--marks-sut' in sys.argv: SUT_MODE = 'marks'
     if '--kf-eq-kt' in sys.argv: Q_MODE = 'none'
     if '--q-all' in sys.argv: Q_MODE, model = 'all', 'table71'

@@ -20,7 +20,10 @@ python3 solver.py --table71   # same with Shigley Table 7-1 keyseat (r/d = 0.02,
 ## Rules applied
 
 - **Cost** = full price of the shortest stock long enough for the shaft, + $100 if the shaft is not stainless, + 2 rings, pin, set screw and key (prorated per item).
-- **Groove root** uses the shallow end of the catalog tolerance where the part page gives one, as the P2 drawing does. Otherwise it uses the catalog nominal.
-- **Groove radius** is 0.0098 in. The groove K_t is the chart value × 1.06, the same rounding that turns 3.31 into 3.5 at the 1.5 in groove.
-- **Properties.** Only 1045 HB 197 has a proposed set (Marks 703/598, valid for 16–50 mm bars). Other steels get S_ut = 3.4 HB (Eq. 2-36), and the solver reports the S_y they would need.
+- **Groove root** is the catalog nominal for every ring, the deep end of the Rev P3 callout (1.456–1.460 in for the 1.5 in ring).
+- **Groove radius** is 0.008 in, the small end of the R 0.008–0.010 in callout. The groove K_t is the chart value read to one decimal, as in Shigley Example 7-2 (3.58 → 3.6 at the 1.5 in groove). `--check` still reproduces the P2 groove (shallow root, R 0.0098 in).
+- **Yield** passes on Shigley Eq. 7-15 (K_f/K_fs). The K_t elastic peak (`nyKt`) is printed for information only.
+- **Keyseat** (default model `peterson`): ASME B17.1 Class 1 keyseat with the Table 5 floor fillet (1/32 in for H/2 up to 1/4 in), Peterson's end-milled keyseat K_t/K_ts fits (Pilkey §5.2) with K_f = K_t, no key-pressure term. Key length 1/2 in h14, slot end centres H14 (ISO 286 IT14); key bearing height less the B17.1 key chamfer. `--harsh` keeps the old P2 keyseat model for `--check`.
+- **Pin**: 1/4 in 416 dowel (98380A556, or 98380A560 for hubs over 3 in), checked against McMaster's 7200 lbf double-shear breaking strength; shaft hole 6.35 F7, pin at y = −185 mm.
+- **Properties.** S_y from the Piazza-approved list; S_ut = 3.4 HB (Eq. 2-36), with HRC converted by ASTM E140.
 - **Exclusions.** Keyed, D-profile and nitrided shafts are excluded; the reason is printed for each.

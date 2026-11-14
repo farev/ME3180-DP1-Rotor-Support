@@ -20,9 +20,9 @@ rows=[('<tr><td>Shaft top end</td>','groove-u'),('<tr><td>Upper bearing midplane
 ('<tr><td>Rotor CG (120 N)</td>','wr'),('<tr><td>Centre of pressure (560 N drag, +z)</td>','drag'),
 ('<tr><td>Upper, y = 293.65</td>','ru'),('<tr class="hl"><td>Lower, y = 6.35</td>','rl'),
 ('<tr><td>Lower bearing midplane</td><td class="num">6.35</td>','plain'),('<tr class="hl"><td>Lower ring groove</td><td class="num">−0.49</td>','groove-l'),
-('<tr><td>Keyseat upper end</td><td class="num">−24.75</td>','keyseat'),('<tr><td>Pin hole, upper edge</td>','pinhole'),
+('<tr><td>Keyseat upper end</td><td class="num">−24.89</td>','keyseat'),('<tr><td>Pin hole, upper edge</td>','pinhole'),
 ('<tr><td>Upper ring groove</td><td class="num">+300.5</td>','groove-u'),
-('<tr><td>Overall length</td>','shaft'),('<tr><td>Stock OD</td>','shaft'),('<tr><td>Pin hole</td><td>Ø6.363','pinhole'),
+('<tr><td>Overall length</td>','shaft'),('<tr><td>Stock OD</td>','shaft'),('<tr><td>Pin hole</td><td>Ø6.35 F7','pinhole'),
 ('<tr><td>Keyseat</td><td>Centre 214.50','keyseat'),('<tr><td>Lower groove</td>','groove-l'),('<tr><td>Upper groove</td>','groove-u'),
 ('<tr><td>1566 HRC25 precision rotary shaft, Ø1.500 × 24 in</td>','shaft'),('<tr><td>18-8 single-turn spiral ring, 1.500 in</td>','rings'),
 ('<tr><td>416 dowel pin, 1/4 × 3 in</td>','pin'),('<tr><td>18-8 flat-tip set screw','screw'),('<tr><td>18-8 key stock, 3/8 in square, cut 1/2 in</td>','key')]
@@ -41,12 +41,12 @@ main=once(main,'The upper groove sees no bending or torque.','The '+ref('groove-
 main=once(main,'<span class="tag d">D1</span><b>Shaft: McMaster 1346K534</b>','<span class="tag d">D1</span>'+ref('shaft','Shaft: McMaster 1346K534'))
 main=once(main,'<span class="tag d">D3</span><b>Rings: McMaster 93576A210</b>','<span class="tag d">D3</span>'+ref('rings','Rings: McMaster 93576A210'))
 main=once(main,'<b>18-8 stainless square key, 3/8 × 3/8 in, cut 1/2 in long</b>',ref('key','18-8 stainless square key, 3/8 × 3/8 in, cut 1/2 in long'))
-main=once(main,'<span class="tag d">D10</span><b>Closed keyseat</b>','<span class="tag d">D10</span>'+ref('keyseat','Closed keyseat'))
+main=once(main,'<span class="tag d">D10</span><b>Closed keyseat, ASME B17.1 Class 1</b>','<span class="tag d">D10</span><b>'+ref('keyseat','Closed keyseat')+', ASME B17.1 Class 1</b>')
 main=once(main,'<span class="tag d">D11</span><b>McMaster 94355A533</b>','<span class="tag d">D11</span>'+ref('screw','McMaster 94355A533'))
 main=once(main,'<span class="tag d">D12</span><b>McMaster 98380A556</b>','<span class="tag d">D12</span>'+ref('pin','McMaster 98380A556'))
 main=once(main,'<span class="tag d">D3</span><b>Two McMaster 93576A210</b>','<span class="tag d">D3</span>'+ref('rings','Two McMaster 93576A210'))
-main=once(main,'<h3>Lower ring groove (governs yield)</h3>','<h3>'+ref('groove-l','Lower ring groove')+' (governs yield)</h3>')
-main=once(main,'<h3>Keyseat upper end (governs fatigue)</h3>','<h3>'+ref('keyseat','Keyseat upper end')+' (governs fatigue)</h3>')
+main=once(main,'<h3>Lower ring groove (governs yield and fatigue)</h3>','<h3>'+ref('groove-l','Lower ring groove')+' (governs yield and fatigue)</h3>')
+main=once(main,'<h3>Keyseat upper end</h3>','<h3>'+ref('keyseat','Keyseat upper end')+'</h3>')
 main=once(main,'<h3>Pin hole (Shigley Table A-16, solid bar)</h3>','<h3>'+ref('pinhole','Pin hole')+' (Shigley Table A-16, solid bar)</h3>')
 main=once(main,'<h3>z direction (drag and chain)</h3>','<h3>z direction ('+ref('drag','drag')+' and '+ref('chain','chain')+')</h3>')
 main=once(main,'<h3>x direction (chain only)</h3>','<h3>x direction ('+ref('chain','chain')+' only)</h3>')
@@ -59,7 +59,7 @@ oldjs=once(oldjs,"{n:'Keyseat upper end',","{f:'keyseat',n:'Keyseat upper end',"
 oldjs=once(oldjs,"{n:'Pin hole',","{f:'pinhole',n:'Pin hole',")
 oldjs=once(oldjs,"{n:'Plain section at lower bearing',","{f:'plain',n:'Plain section at lower bearing',")
 oldjs=once(oldjs,"{n:'Upper ring groove',","{f:'groove-u',n:'Upper ring groove',")
-oldjs=once(oldjs,"const tr=document.createElement('tr'); if(a===minT) tr.className='hl';","const tr=document.createElement('tr'); if(a===minT) tr.className='hl'; tr.dataset.f=s.f; tr.tabIndex=0;")
+oldjs=once(oldjs,"const tr=document.createElement('tr'); if(b===minT) tr.className='hl';","const tr=document.createElement('tr'); if(b===minT) tr.className='hl'; tr.dataset.f=s.f; tr.tabIndex=0;")
 
 out=(head+'<style>'+css+'\n'+(D/'addon.css').read_text()+'</style>\n'
  +'<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>\n'
